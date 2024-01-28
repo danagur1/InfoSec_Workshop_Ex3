@@ -1,4 +1,4 @@
-import ipaddress
+import socket, struct
 
 def show_rules():
     return
@@ -6,8 +6,8 @@ def show_rules():
 def parse_ip(ip_add):
     if ip_add=="any":
         return "10.1.1.1", "255.0.0.0", "8"
-    ip, prefix_mask = ip_add.split("/")
-    prefix_size = str(ipaddress.IPv4Network(ip_add).net_mask)
+    ip, prefix_size = ip_add.split("/")
+    prefix_mask = str(socket.inet_ntoa(struct.pack(">L", (1<<32) - (1<<32>>prefix_size))))
     return ip, prefix_mask, prefix_size
 
 def read_rule(rule):
