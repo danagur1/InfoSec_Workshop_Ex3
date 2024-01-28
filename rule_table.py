@@ -33,11 +33,15 @@ def read_rule(rule):
 
 def load_rules(rules_file_path):
     with open(rules_file_path) as rules_file:
+        """
+        with open("/sys/class/fw/rules/rules") as rules_table_driver:
+            rule = rules_file.readline().split()
+            while not rule:
+                rules_table_driver.write(read_rule(rule))
+                rule = rules_file.readline().split()"""
         rule = rules_file.readline().split()
         while not rule:
-            with open("/sys/class/fw/rules/rules") as rules_table_driver:
-                #rules_table_driver.write(read_rule(rule))
-                print(read_rule(rule))
-                rule = rules_file.readline().split()
+            print(read_rule(rule))
+            rule = rules_file.readline().split()
 
 load_rules("log example.txt")
