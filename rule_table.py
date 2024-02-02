@@ -1,5 +1,4 @@
 import socket, struct
-from typing import Protocol
 
 def show_rules():
     return
@@ -11,7 +10,7 @@ def parse_ip(ip_add):
     prefix_mask = socket.inet_ntoa(struct.pack(">L", (1<<32) - (1<<32>>int(prefix_size))))
     return ip, prefix_mask, prefix_size
 
-def protocol_number(protocol){
+def protocol_number(protocol):
     protocol_num = 255
     if protocol=="ICMP":
         protocol_num = 1
@@ -21,8 +20,8 @@ def protocol_number(protocol){
         protocol_num = 17
     if protocol=="ANY":
         protocol_num = 143
-    return str(protocol_number)
-}
+    return str(protocol_num)
+
 
 def read_rule(rule):
     if rule[1] == "in":
