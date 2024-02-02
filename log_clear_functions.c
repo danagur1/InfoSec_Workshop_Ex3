@@ -1,1 +1,0 @@
-#include devices_fucntions.h

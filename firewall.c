@@ -1,8 +1,8 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include rules_functions.h
-#include log_show_functions.h
 #include log_clear_functions.h
+#include log_show_functions.h
 #include hooking_functions.h
 #include fw.h
 
