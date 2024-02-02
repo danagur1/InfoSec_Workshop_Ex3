@@ -2,6 +2,7 @@
 #include <linux/kernel.h>
 #include <linux/netfilter.h>
 #include <linux/netfilter_ipv4.h>
+#include "fw.h"
 
 static struct nf_hook_ops forward_nh_ops;
 static struct nf_hook_ops input_nh_ops;
