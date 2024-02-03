@@ -1,0 +1,1 @@
+cmd_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.ko := ld -r -m elf_i386 -T ./scripts/module-common.lds --build-id  -o /home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.ko /home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.o /home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.mod.o ;  true
