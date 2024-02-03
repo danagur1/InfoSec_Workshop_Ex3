@@ -142,6 +142,7 @@ int check_and_update_idx(int *buf_index, int element_size){
 
 ssize_t modify(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)	//sysfs store implementation
 {
+	printk(KERN_INFO "in modify function\n");
 	int rule_table_index = 0;
 	int buf_index = 0;
 	while (buf[buf_index]!='\0')

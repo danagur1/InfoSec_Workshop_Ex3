@@ -1,6 +1,6 @@
 import socket
 import struct
-import ipaddress
+import re
 
 RULES_DEVICE_FILEPATH = "/sys/class/fw/rules/rules"
 
@@ -23,10 +23,10 @@ def is_ip(check_ip):
 
 
 def parse_ip(ip_add):
-    if not is_ip(ip_add):
-        return False, False, False
     if ip_add == "any":
         return "10.1.1.1", "255.0.0.0", "8"
+    if not is_ip(ip_add):
+        return False, False, False
     ip, prefix_size = ip_add.split("/")
     prefix_mask = socket.inet_ntoa(struct.pack(">L", (1 << 32) - (1 << 32 >> int(prefix_size))))
     return ip, prefix_mask, prefix_size
@@ -87,8 +87,8 @@ def get_port_code(port):
         return str(1023)
     elif port == "any":
         return str(0)
-    elif is_int(port) and 1 <= port <= 1023:
-        return str(port)
+    elif is_int(port) and 1 <= int(port) and int(port) <= 1023:
+        return port
     else:
         return False  # error code
 
@@ -122,18 +122,18 @@ def reverse_ack(ack_code):
         return "any"
 
 def get_action_code(action):
-    if action=="ACCEPT":
+    if action=="accept":
         return str(1)
-    elif action=="DROP":
+    elif action=="drop":
         return str(0)
     else:
         return False
     
 def reverse_action(action_code):
     if action_code=="1":
-        return "ACCEPT"
+        return "accept"
     elif action_code=="0":
-        return "DROP"
+        return "drop"
 
 def read_rule(rule):
     direction = get_direction_code(rule[1])
@@ -144,6 +144,7 @@ def read_rule(rule):
     dst_port = get_port_code(rule[6])
     ack = get_ack_code(rule[7])
     action = get_action_code(rule[8])
+    #print("src_ip: "+str(src_ip)+" dst_ip: "+str(dst_ip)+" src_port: "+str(src_port)+" dst_port: "+str(dst_port)+" ack: "+str(ack)+" action: "+str(action))
     if src_ip and dst_ip and src_port and dst_port and ack and action:
         return ' '.join([rule[0], direction, src_ip, src_prefix_mask, src_prefix_size, dst_ip, dst_prefix_mask,
                          dst_prefix_size, src_port, dst_port, protocol, ack, action])
@@ -167,14 +168,18 @@ def write_rule(rule):
 def load(rules_file_path):
     with open(rules_file_path, "r") as rules_file:
         with open(RULES_DEVICE_FILEPATH, "w") as rules_table_driver:
-            rule = rules_file.readline().split()
-            print("handling rule:"+str(rule))
-            while rule:
+            rule = rules_file.readline()
+            while True:
+                if rule=='':
+                    break
+                else:
+                    rule= rule.split()
                 parsed_rule = read_rule(rule)
                 if not parsed_rule:
                     return False
-                rules_table_driver.write(parsed_rule)
-                rule = rules_file.readline().split()
+                print(parsed_rule)
+                #rules_table_driver.write(parsed_rule)
+                rule = rules_file.readline()
     return True
     """
     FOR TESTING:
