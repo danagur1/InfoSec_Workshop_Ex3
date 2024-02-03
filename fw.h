@@ -95,7 +95,4 @@ typedef struct {
 	unsigned int   	count;        	// counts this line's hits
 } log_row_t;
 
-rule_t rule_table[MAX_RULES];
-struct klist log_list;
-
 #endif // _FW_H_
