@@ -73,6 +73,3 @@ void rules_remove_dev(void)
 	class_destroy(fw);
 	unregister_chrdev(major_number, "rules");
 }
-
-module_init(sysfs_example_init);
-module_exit(sysfs_example_exit);
