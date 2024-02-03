@@ -56,28 +56,28 @@ def reverse_direction(direction_code):
 
 
 def get_protocol_code(protocol):
-    protocol_num = 255
+    protocol_num = 0 #255
     if protocol == "ICMP":
-        protocol_num = 1
+        protocol_num = 1 #1
     elif protocol == "TCP":
-        protocol_num = 6
+        protocol_num = 2 #6
     elif protocol == "UDP":
-        protocol_num = 17
+        protocol_num = 3 #17
     elif protocol == "ANY":
-        protocol_num = 143
+        protocol_num = 4 #143
     return str(protocol_num)
 
 
 def reverse_protocol(protocol_code):
     if protocol_code == str(1):
         return "ICMP"
-    elif protocol_code == str(6):
+    elif protocol_code == str(2):
         return "TCP"
-    elif protocol_code == str(17):
+    elif protocol_code == str(3):
         return "UDP"
-    elif protocol_code == str(143):
+    elif protocol_code == str(4):
         return "ANY"
-    elif protocol_code == str(255):
+    elif protocol_code == str(0):
         return "OTHER"
 
 
@@ -120,6 +120,19 @@ def reverse_ack(ack_code):
     elif ack_code == str(3):
         return "any"
 
+def get_action_code(action):
+    if action=="ACCEPT":
+        return str(1)
+    elif action=="DROP":
+        return str(0)
+    else:
+        return False
+    
+def reverse_action(action_code):
+    if action_code=="1":
+        return "ACCEPT"
+    elif action_code=="0":
+        return "DROP"
 
 def read_rule(rule):
     direction = get_direction_code(rule[1])
@@ -129,9 +142,10 @@ def read_rule(rule):
     src_port = get_port_code(rule[5])
     dst_port = get_port_code(rule[6])
     ack = get_ack_code(rule[7])
-    if src_ip and dst_ip and src_port and dst_port and ack:
+    action = get_action_code(rule[8])
+    if src_ip and dst_ip and src_port and dst_port and ack and action:
         return ' '.join([rule[0], direction, src_ip, src_prefix_mask, src_prefix_size, dst_ip, dst_prefix_mask,
-                         dst_prefix_size, src_port, dst_port, protocol, ack, rule[8]])
+                         dst_prefix_size, src_port, dst_port, protocol, ack, action])
     else:
         return False
 
@@ -144,8 +158,9 @@ def write_rule(rule):
     src_port = reverse_port(rule[5])
     dst_port = reverse_port(rule[6])
     ack = reverse_ack(rule[7])
+    action = reverse_action(rule[8])
     return ' '.join([rule[0], direction, src_ip, src_prefix_mask, src_prefix_size, dst_ip, dst_prefix_mask,
-                         dst_prefix_size, src_port, dst_port, protocol, ack, rule[8]])
+                         dst_prefix_size, src_port, dst_port, protocol, ack, action])
 
 
 def load(rules_file_path):
