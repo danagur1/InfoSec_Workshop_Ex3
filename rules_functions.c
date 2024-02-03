@@ -49,8 +49,8 @@ static int parse_ip(const char *src, __be32 *dst){
 	while (src[size]!=' '){
 		size++;
 	}
-	if (in4_pton(src, size, dst_u8, '.', src[size])==1){
-		dst = (__be32)dst_u8;
+	if (in4_pton(src, size, &dst_u8, '.', NULL)==1){
+		*dst = (__be32)dst_u8;
 		return -1;
 	}
 	else return size;
