@@ -35,7 +35,15 @@ static int parse_rule_name(const char *src, char *dst){
 	return size+1; //return the length of the parsed element 
 }
 
-static int parse_123(const char *src, int *dst){
+static int parse_direction(const char *src, direction_t *dst){
+	*dst = src[0]-'0';
+	if ((0<=*dst)&&(*dst<=3)){
+		return 1; //return the length of the parsed element 
+	}
+	return -1; //error code
+}
+
+static int parse_ack(const char *src, ack_t *dst){
 	*dst = src[0]-'0';
 	if ((0<=*dst)&&(*dst<=3)){
 		return 1; //return the length of the parsed element 
@@ -57,23 +65,28 @@ static int parse_ip(const char *src, __be32 *dst){
 }
 
 static int parse_perfix_size(const char *src, __u8 *dst){
-	int src_int;
+	unsigned long src_long;
 	if (src[1] == ' '){
-		src[1] = '\0'
-		if (kstrtoul(src, 10, src_int)!=0){
+		char perfix[2];
+		perfix[0] = src[1];
+		perfix[1] ='\0';
+		if (kstrtoul(perfix, 10, &src_long)!=0){
 			return -1;
 		}
-		*dst = (__u8)src_int
+		*dst = (__u8)src_long;
 		return 1;
 	}
 	else if (src[2] == ' ')
 	{
-		src[2] = '\0'
-		if (kstrtoul(src, 10, src_int)!=0){
+		char perfix[3];
+		perfix[0] = src[1];
+		perfix[1] = src[2];
+		perfix[2] ='\0';
+		if (kstrtoul(perfix, 10, &src_long)!=0){
 			return -1;
 		}
-		*dst = (__u8)src_int
-		return 2
+		*dst = (__u8)src_long;
+		return 2;
 	}
 	else{
 		return -1;
@@ -106,11 +119,11 @@ static int parse_protocol(const char *src, __u8 *dst){
 
 static int parse_action(const char *src, __u8 *dst){
 	if (src[0]=='0'){
-		dst=NF_DROP
+		*dst=NF_DROP;
 	}
 	else if (src[0]=='1')
 	{
-		dst=NF_ACCEPT
+		*dst=NF_ACCEPT;
 	}
 	else{
 		return -1;
@@ -133,40 +146,40 @@ ssize_t modify(struct device *dev, struct device_attribute *attr, const char *bu
 	int buf_index = 0;
 	while (buf[buf_index]!='\0')
 	{
-		buf_index += parse_rule_name(buf[buf_index], rule_table[rule_table_index].rule_name);
-		if(check_and_update_idx(&buf_index, parse_123(buf[buf_index], rule_table[rule_table_index].direction))==1){
+		buf_index += parse_rule_name(buf+buf_index, rule_table[rule_table_index].rule_name);
+		if(check_and_update_idx(&buf_index, parse_direction(buf+buf_index, &rule_table[rule_table_index].direction))==1){
 			return 1;
 		}
-		if(check_and_update_idx(&buf_index, parse_ip(buf[buf_index], rule_table[rule_table_index].src_ip))==1){
+		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &rule_table[rule_table_index].src_ip))==1){
 			return 1;
 		}
-		if(check_and_update_idx(&buf_index, parse_ip(buf[buf_index], rule_table[rule_table_index].src_prefix_mask))==1){
+		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &rule_table[rule_table_index].src_prefix_mask))==1){
 			return 1;
 		}
-		if(check_and_update_idx(&buf_index, parse_perfix_size(buf[buf_index], rule_table[rule_table_index].src_prefix_size))==1){
+		if(check_and_update_idx(&buf_index, parse_perfix_size(buf+buf_index, &rule_table[rule_table_index].src_prefix_size))==1){
 			return 1;
 		}
-		if(check_and_update_idx(&buf_index, parse_ip(buf[buf_index], rule_table[rule_table_index].dst_ip))==1){
+		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &rule_table[rule_table_index].dst_ip))==1){
 			return 1;
 		}
-		if(check_and_update_idx(&buf_index, parse_ip(buf[buf_index], rule_table[rule_table_index].dst_prefix_mask))==1){
+		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &rule_table[rule_table_index].dst_prefix_mask))==1){
 			return 1;
 		}
-		if(check_and_update_idx(&buf_index, parse_perfix_size(buf[buf_index], rule_table[rule_table_index].dst_prefix_size))==1){
+		if(check_and_update_idx(&buf_index, parse_perfix_size(buf+buf_index, &rule_table[rule_table_index].dst_prefix_size))==1){
 			return 1;
 		}
-		if(check_and_update_idx(&buf_index, parse_protocol(buf[buf_index], rule_table[rule_table_index].protocol))==1){
+		if(check_and_update_idx(&buf_index, parse_protocol(buf+buf_index, &rule_table[rule_table_index].protocol))==1){
 			return 1;
 		}
-		if(check_and_update_idx(&buf_index, parse_123(buf[buf_index], rule_table[rule_table_index].ack))==1){
+		if(check_and_update_idx(&buf_index, parse_ack(buf+buf_index, &rule_table[rule_table_index].ack))==1){
 			return 1;
 		}
-		if(check_and_update_idx(&buf_index, parse_action(buf[buf_index], rule_table[rule_table_index].action))==1){
+		if(check_and_update_idx(&buf_index, parse_action(buf+buf_index, &rule_table[rule_table_index].action))==1){
 			return 1;
 		}
 		rule_table_index++;
-		return 0;
-	}		
+	}
+	return 0;
 }
 
 static DEVICE_ATTR(rules, S_IWUSR | S_IRUGO , display, modify);
