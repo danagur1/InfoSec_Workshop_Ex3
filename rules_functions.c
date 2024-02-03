@@ -6,7 +6,6 @@
 
 #include "fw.h"
 #include "rules_functions.h"
-#include "rules_functions_test.h"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Dana Gur");
