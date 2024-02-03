@@ -16,8 +16,10 @@ def is_int(check_int):
 def is_ip(check_ip):
     try:
         ipaddress.ip_address(check_ip)
+        print(str(check_ip)+" is an IP")
         return True
     except ValueError:
+        print(str(check_ip)+" is not an IP")
         return False
 
 
@@ -167,7 +169,8 @@ def load(rules_file_path):
     with open(rules_file_path, "r") as rules_file:
         with open(RULES_DEVICE_FILEPATH, "w") as rules_table_driver:
             rule = rules_file.readline().split()
-            while not rule:
+            print("handling rule:"+str(rule))
+            while rule:
                 parsed_rule = read_rule(rule)
                 if not parsed_rule:
                     return False
