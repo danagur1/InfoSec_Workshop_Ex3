@@ -26,6 +26,6 @@ int register_hook(void){
 	return nf_register_net_hook(&init_net, &forward_nh_ops);
 }
 
-static int unregister_hook(void){
+void unregister_hook(void){
     nf_unregister_net_hook(&init_net, &forward_nh_ops);
 }
