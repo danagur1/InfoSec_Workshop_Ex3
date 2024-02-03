@@ -1,0 +1,6 @@
+make -C /lib/modules/4.15.0-142-generic/build M=/home/fw/Desktop/hw3/Infosec_Workshop_Ex3 modules
+make[1]: Entering directory '/usr/src/linux-headers-4.15.0-142-generic'
+make[2]: Circular /home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.o <- /home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.o dependency dropped.
+  Building modules, stage 2.
+  MODPOST 1 modules
+make[1]: Leaving directory '/usr/src/linux-headers-4.15.0-142-generic'
