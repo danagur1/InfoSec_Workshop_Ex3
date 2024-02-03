@@ -28,7 +28,7 @@ ssize_t display(struct device *dev, struct device_attribute *attr, char *buf)	//
 
 static int parse_rule_name(const char *src, char *dst){
 	int size = 0;
-	while (buf[size]!=' '){
+	while (src[size]!=' '){
 		size++;
 	}
 	strncpy(dst, src, size);
@@ -36,7 +36,7 @@ static int parse_rule_name(const char *src, char *dst){
 }
 
 static int parse_123(const char *src, int *dst){
-	*dst = src[0]-'0'
+	*dst = src[0]-'0';
 	if ((0<=*dst)&&(*dst<=3)){
 		return 1; //return the length of the parsed element 
 	}
