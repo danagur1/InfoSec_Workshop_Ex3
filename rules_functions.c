@@ -2,7 +2,7 @@
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/device.h>
-#include <linux/in.h>
+#include <linux/inet.h>
 
 #include "fw.h"
 #include "rules_functions.h"
@@ -45,10 +45,12 @@ static int parse_123(const char *src, int *dst){
 
 static int parse_ip(const char *src, __be32 *dst){
 	int size = 0;
+	u8 dst_u8;
 	while (src[size]!=' '){
 		size++;
 	}
-	if (in4_pton(src, size, dst, '.', src[size])==1){
+	if (in4_pton(src, size, dst_u8, '.', src[size])==1){
+		dst = (__be32)dst_u8;
 		return -1;
 	}
 	else return size;
