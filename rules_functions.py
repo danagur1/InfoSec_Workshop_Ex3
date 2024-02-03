@@ -14,12 +14,11 @@ def is_int(check_int):
 
 
 def is_ip(check_ip):
-    try:
-        ipaddress.ip_address(check_ip)
-        print(str(check_ip)+" is an IP")
+    # Regular expression to match IP address with mask- from: https://stackoverflow.com/questions/30590193/regex-to-match-ipv4-with-mask 
+    ip_pattern = r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\/(3[0-2]|[1-2]?\d)$"
+    if re.match(ip_pattern, check_ip):
         return True
-    except ValueError:
-        print(str(check_ip)+" is not an IP")
+    else:
         return False
 
 
