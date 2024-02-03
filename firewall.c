@@ -26,7 +26,3 @@ static void __exit my_module_exit_function(void) {
 }
 module_init(my_module_init_function);
 module_exit(my_module_exit_function);
-
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Dana Gur");
-MODULE_DESCRIPTION("Basic kernel module firewall")
