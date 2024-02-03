@@ -5,8 +5,6 @@
 #include "fw.h"
 
 static struct nf_hook_ops forward_nh_ops;
-static struct nf_hook_ops input_nh_ops;
-static struct nf_hook_ops output_nh_ops;
 
 unsigned int drop_hookfn(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
 	printk(KERN_INFO "*** Packet Dropped ***\n");
