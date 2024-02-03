@@ -1,8 +1,9 @@
-cmd_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.o := gcc -Wp,-MD,/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/.firewall.o.d  -nostdinc -isystem /usr/lib/gcc/i686-linux-gnu/5/include  -I./arch/x86/include -I./arch/x86/include/generated  -I./include -I./arch/x86/include/uapi -I./arch/x86/include/generated/uapi -I./include/uapi -I./include/generated/uapi -include ./include/linux/kconfig.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -fshort-wchar -Werror-implicit-function-declaration -Werror=return-type -Wno-format-security -std=gnu89 -fno-PIE -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -m32 -msoft-float -mregparm=3 -freg-struct-return -fno-pic -mpreferred-stack-boundary=2 -march=i686 -mtune=generic -Wa,-mtune=generic32 -ffreestanding -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -DCONFIG_AS_CFI_SECTIONS=1 -DCONFIG_AS_SSSE3=1 -DCONFIG_AS_CRC32=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -DCONFIG_AS_AVX512=1 -DCONFIG_AS_SHA1_NI=1 -DCONFIG_AS_SHA256_NI=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mindirect-branch=thunk-extern -mindirect-branch-register -fno-jump-tables -fno-delete-null-pointer-checks -O2 --param=allow-store-data-races=0 -DCC_HAVE_ASM_GOTO -Wframe-larger-than=1024 -fstack-protector-strong -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-var-tracking-assignments -pg -mfentry -DCC_USING_FENTRY -Wdeclaration-after-statement -Wno-pointer-sign -Wno-array-bounds -Wno-maybe-uninitialized -fno-strict-overflow -fno-merge-all-constants -fmerge-constants -fno-stack-check -fconserve-stack -Werror=implicit-int -Werror=strict-prototypes -Werror=date-time -Werror=incompatible-pointer-types -Werror=designated-init  -DMODULE  -DKBUILD_BASENAME='"firewall"'  -DKBUILD_MODNAME='"firewall"' -c -o /home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.o /home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.c
+cmd_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/rules_functions.mod.o := gcc -Wp,-MD,/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/.rules_functions.mod.o.d  -nostdinc -isystem /usr/lib/gcc/i686-linux-gnu/5/include  -I./arch/x86/include -I./arch/x86/include/generated  -I./include -I./arch/x86/include/uapi -I./arch/x86/include/generated/uapi -I./include/uapi -I./include/generated/uapi -include ./include/linux/kconfig.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -fshort-wchar -Werror-implicit-function-declaration -Werror=return-type -Wno-format-security -std=gnu89 -fno-PIE -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -m32 -msoft-float -mregparm=3 -freg-struct-return -fno-pic -mpreferred-stack-boundary=2 -march=i686 -mtune=generic -Wa,-mtune=generic32 -ffreestanding -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -DCONFIG_AS_CFI_SECTIONS=1 -DCONFIG_AS_SSSE3=1 -DCONFIG_AS_CRC32=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -DCONFIG_AS_AVX512=1 -DCONFIG_AS_SHA1_NI=1 -DCONFIG_AS_SHA256_NI=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mindirect-branch=thunk-extern -mindirect-branch-register -fno-jump-tables -fno-delete-null-pointer-checks -O2 --param=allow-store-data-races=0 -DCC_HAVE_ASM_GOTO -Wframe-larger-than=1024 -fstack-protector-strong -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-var-tracking-assignments -pg -mfentry -DCC_USING_FENTRY -Wdeclaration-after-statement -Wno-pointer-sign -Wno-array-bounds -Wno-maybe-uninitialized -fno-strict-overflow -fno-merge-all-constants -fmerge-constants -fno-stack-check -fconserve-stack -Werror=implicit-int -Werror=strict-prototypes -Werror=date-time -Werror=incompatible-pointer-types -Werror=designated-init  -DKBUILD_BASENAME='"rules_functions.mod"'  -DKBUILD_MODNAME='"rules_functions"' -DMODULE  -c -o /home/fw/Desktop/hw3/Infosec_Workshop_Ex3/rules_functions.mod.o /home/fw/Desktop/hw3/Infosec_Workshop_Ex3/rules_functions.mod.c
 
-source_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.o := /home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.c
+source_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/rules_functions.mod.o := /home/fw/Desktop/hw3/Infosec_Workshop_Ex3/rules_functions.mod.c
 
-deps_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.o := \
+deps_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/rules_functions.mod.o := \
+    $(wildcard include/config/retpoline.h) \
   include/linux/compiler_types.h \
     $(wildcard include/config/have/arch/compiler/h.h) \
     $(wildcard include/config/enable/must/check.h) \
@@ -10,7 +11,6 @@ deps_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.o := \
   include/linux/compiler-gcc.h \
     $(wildcard include/config/arch/supports/optimized/inlining.h) \
     $(wildcard include/config/optimize/inlining.h) \
-    $(wildcard include/config/retpoline.h) \
     $(wildcard include/config/arm64.h) \
     $(wildcard include/config/gcov/kernel.h) \
     $(wildcard include/config/arch/use/builtin/bswap.h) \
@@ -659,8 +659,9 @@ deps_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.o := \
     $(wildcard include/config/modules/use/elf/rel.h) \
     $(wildcard include/config/modules/use/elf/rela.h) \
   arch/x86/include/asm/orc_types.h \
-  /home/fw/Desktop/hw3/Infosec_Workshop_Ex3/rules_functions.h \
+  include/linux/vermagic.h \
+  include/generated/utsrelease.h \
 
-/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.o: $(deps_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.o)
+/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/rules_functions.mod.o: $(deps_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/rules_functions.mod.o)
 
-$(deps_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.o):
+$(deps_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/rules_functions.mod.o):

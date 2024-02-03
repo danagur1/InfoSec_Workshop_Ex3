@@ -3,6 +3,7 @@ cmd_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.mod.o := gcc -Wp,-MD,/hom
 source_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.mod.o := /home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.mod.c
 
 deps_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.mod.o := \
+    $(wildcard include/config/module/unload.h) \
     $(wildcard include/config/retpoline.h) \
   include/linux/compiler_types.h \
     $(wildcard include/config/have/arch/compiler/h.h) \
@@ -28,7 +29,6 @@ deps_/home/fw/Desktop/hw3/Infosec_Workshop_Ex3/firewall.mod.o := \
     $(wildcard include/config/tracing.h) \
     $(wildcard include/config/event/tracing.h) \
     $(wildcard include/config/ftrace/mcount/record.h) \
-    $(wildcard include/config/module/unload.h) \
     $(wildcard include/config/constructors.h) \
     $(wildcard include/config/strict/module/rwx.h) \
   include/linux/list.h \

@@ -15,7 +15,7 @@ static int __init my_module_init_function(void) {
 	printk(KERN_INFO "Succesful call for init\n");
 	//rule_t rule_table[MAX_RULES];
 	//struct klist log_list;
-	return 0;//rules_create_dev();
+	return rules_create_dev();
 	//return rules_create_dev(rule_table);/*register_hook() && log_clear_create_dev() && log_show_create_dev() && rules_create_dev();*/
 }
 
