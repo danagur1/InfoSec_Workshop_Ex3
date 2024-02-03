@@ -4,6 +4,10 @@
 #include <linux/device.h>
 #include "fw.h"
 
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Dana Gur");
+MODULE_DESCRIPTION("Stateless firewall");
+
 static int major_number;
 static struct class* fw = NULL;
 static struct device* rules = NULL;

@@ -4,6 +4,10 @@
 #include <linux/netfilter_ipv4.h>
 #include "fw.h"
 
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Dana Gur");
+MODULE_DESCRIPTION("Stateless firewall");
+
 static struct nf_hook_ops forward_nh_ops;
 
 unsigned int drop_hookfn(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
