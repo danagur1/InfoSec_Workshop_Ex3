@@ -12,7 +12,9 @@ MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
 
 static int __init my_module_init_function(void) {
-	return rules_create_dev()/*register_hook() && log_clear_create_dev() && log_show_create_dev() && rules_create_dev();*/
+	rule_t rule_table[MAX_RULES];
+	struct klist log_list;
+	return rules_create_dev(rule_table)/*register_hook() && log_clear_create_dev() && log_show_create_dev() && rules_create_dev();*/
 }
 
 static void __exit my_module_exit_function(void) {
@@ -25,3 +27,6 @@ static void __exit my_module_exit_function(void) {
 module_init(my_module_init_function);
 module_exit(my_module_exit_function);
 
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Dana Gur");
+MODULE_DESCRIPTION("Basic kernel module firewall")
