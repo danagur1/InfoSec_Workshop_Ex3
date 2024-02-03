@@ -29,7 +29,7 @@ ssize_t modify(struct device *dev, struct device_attribute *attr, const char *bu
 
 static DEVICE_ATTR(rules, S_IWUSR | S_IRUGO , display, modify);
 
-int rules_create_dev(void)
+int rules_create_dev(rule_t rule_table[MAX_RULES])
 {
 	//create char device
 	major_number = register_chrdev(0, "rules", &fops);\
