@@ -21,44 +21,44 @@ int check_direction(struct sk_buff *skb, rule_t rule){
 
 int check_ip(struct sk_buff *skb, rule_t rule){
 	if (skb->protocol == htons(ETH_P_IP)){
-		return (ip_hdr(skb)->saddr & src_prefix_mask == curr_rule.src_ip & src_prefix_mask) && (ip_hdr(skb)->daddr & dst_prefix_mask == curr_rule.dst_ip & dst_prefix_mask)
+		if (ip_hdr(skb)->protocol!=IPPROTO_ICMP)&&(rule.protocol==PROT_ICMP){
+		return 0;
+		}
+		return ((ip_hdr(skb)->saddr & rule.src_prefix_mask) == (rule.src_ip & rule.src_prefix_mask)) && ((ip_hdr(skb)->daddr & rule.dst_prefix_mask) == (rule.dst_ip & rule.dst_prefix_mask));
 	}
 }
 
 int check_port(struct sk_buff *skb, rule_t rule){
-	struct udphdr *udp_header;
-
     // packet is TCP
-    if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_TCP)&&(rule->protocol==PROT_TCP)) {
-        return (ntohs(tcp_hdr(skb)->source)==rule->src_port)&&(ntohs(tcp_hdr(skb)->dest)==rule->dst_port);
+    if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_TCP)&&(rule.protocol==PROT_TCP)) {
+        return (ntohs(tcp_hdr(skb)->source)==rule.src_port)&&(ntohs(tcp_hdr(skb)->dest)==rule.dst_port);
     }
 	// packet is UDP
-    if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_UDP)&&(rule->protocol==PROT_UDP)) {
-        return (ntohs(udp_hdr(skb)->source)==rule->src_port)&&(ntohs(udp_hdr(skb)->dest)==rule->dst_port);
+    if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_UDP)&&(rule.protocol==PROT_UDP)) {
+        return (ntohs(udp_hdr(skb)->source)==rule.src_port)&&(ntohs(udp_hdr(skb)->dest)==rule.dst_port);
     }
-	// packet is ICMP
-    if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_ICMP)&&(rule->protocol==PROT_ICMP)) {
-        return (ntohs(icmp_hdr(skb)->source)==rule->src_port)&&(ntohs(icmp_hdr(skb)->dest)==rule->dst_port);
-    }
+    return 1;
 }
 
 int check_ack(struct sk_buff *skb, rule_t rule){
 	if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_TCP)) {
-        return ((tcp_hdr(skb)->source)&&(rule->ack==ACK_YES))||((!tcp_hdr(skb)->source)&&(rule->ack==ACK_NO))||(ACK_ANY);
+        return ((tcp_hdr(skb)->source)&&(rule.ack==ACK_YES))||((!tcp_hdr(skb)->source)&&(rule.ack==ACK_NO))||(ACK_ANY);
     }
+	return 1;
 }
 
 unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
-	while (int rule_table_idx = 0; rule_table_idx<rule_table_size; rule_table_idx++){
+	int rule_table_idx;
+	for (rule_table_idx = 0; rule_table_idx<rule_table_size; rule_table_idx++){
 		rule_t curr_rule= rule_table[rule_table_idx];
-		if (check_direction(skb, curr_rule)&&check_ip(skb, curr_rule)&&check_port(skb,curr_rule)&&check_ack(skb, cur)){
-			if (curr_rule->action==NF_DROP){
+		if (check_direction(skb, curr_rule)&&check_ip(skb, curr_rule)&&check_port(skb,curr_rule)&&check_ack(skb, curr_rule)){
+			if (curr_rule.action==NF_DROP){
 				printk(KERN_INFO "Action taken is Drop\n");
 			}
-			if (curr_rule->action==NF_ACCEPT){
+			if (curr_rule.action==NF_ACCEPT){
 				printk(KERN_INFO "Action taken is Accept\n");
 			}
-			return curr_rule->action;
+			return curr_rule.action;
 		}
 	}
 	printk(KERN_INFO "Action taken is Drop\n");
