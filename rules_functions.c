@@ -242,7 +242,7 @@ printk(KERN_INFO "after dst prefix_size and now buf_index=%d and has-%.10s near 
 
 static DEVICE_ATTR(rules, S_IWUSR | S_IRUGO , display, modify);
 
-int rules_create_dev(rule_t *user_rule_table, int rule_table_size)
+int rules_create_dev(rule_t *user_rule_table, int user_rule_table_size)
 {
 	printk(KERN_INFO "in rules_create_dev function\n");
 	rule_table = user_rule_table;

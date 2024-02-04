@@ -25,8 +25,9 @@ static int __init my_module_init_function(void) {
 }
 
 static void __exit my_module_exit_function(void) {
-	kfree(my_rule_table);
+	kfree(first_rule_table);
 	rules_remove_dev();
+	unregister_hook();
 	/*
 	unregister_hook();
 	log_clear_remove_dev();
