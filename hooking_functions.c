@@ -18,15 +18,17 @@ static int *rule_table_size;
 int check_direction(struct sk_buff *skb, rule_t rule){
 	struct net_device *dev = skb->dev;
 	if (dev) {
+printk(KERN_INFO "in check_direction: dev->name=%s\n", dev->name);
         if (rule.direction==DIRECTION_IN) {
-            return strcmp(dev->name, "eth2") == 0;
+            return strcmp(dev->name, "enp0s9") == 0;
         } else if (rule.direction==DIRECTION_OUT) {
-            return strcmp(dev->name, "eth2") == 0;
+            return strcmp(dev->name, "enp0s8") == 0;
         } else {
+printk(KERN_INFO "in check_direction: no dev\n");
             return 1;
     }
-	return 0;
 }
+	return 0;
 }
 
 int check_ip(struct sk_buff *skb, rule_t rule){
@@ -64,8 +66,8 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 	int rule_table_idx;
 	printk(KERN_INFO "in hook function. rule_table_size=%d\n", *rule_table_size);
 	for (rule_table_idx = 0; rule_table_idx<*rule_table_size; rule_table_idx++){
-		printk(KERN_INFO "in loop for=%d\n", rule_table_idx);
 		rule_t curr_rule= rule_table[rule_table_idx];
+		printk(KERN_INFO "in loop for=%d\n", rule_table_idx);
 		printk(KERN_INFO "in hook function. check_direction=%d, check_ip=%d, check_port=%d, check_ack=%d\n", check_direction(skb, curr_rule), check_ip(skb, curr_rule), check_port(skb,curr_rule), check_ack(skb, curr_rule));
 		if (check_direction(skb, curr_rule)&&check_ip(skb, curr_rule)&&check_port(skb,curr_rule)&&check_ack(skb, curr_rule)){
 			if (curr_rule.action==NF_DROP){

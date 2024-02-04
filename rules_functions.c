@@ -63,11 +63,11 @@ static int parse_ack(const char *src, ack_t *dst){
 
 static int parse_ip(const char *src, __be32 *dst){
 	int size = 0;
+	struct in_addr addr;
 	printk(KERN_INFO "in parse_ip function\n");
 	while (src[size]!=' '){
 		size++;
 	}
-	struct in_addr addr;
 	if (in4_pton(src, size, (u8 *)&addr, -1, NULL)!=1){
 		return -1;
 	}
