@@ -236,9 +236,7 @@ printk(KERN_INFO "after dst prefix_size and now buf_index=%d and has-%.10s near 
 		printk(KERN_INFO "ended the loop and not buf_index=%d and has %.10s near it and before it %.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		rule_table_index++;
 	}
-	if (rule_table_index<MAX_RULES-1){
-		rule_table[rule_table_index+1]=NULL;
-	}
+	rule_table_size = rule_table_index;
 	return count;
 }
 
