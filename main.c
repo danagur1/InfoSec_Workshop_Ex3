@@ -13,14 +13,20 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
 
-rule_t *first_rule_table;
-int rule_table_size=0;
+static rule_t *first_rule_table;
+static int first_rule_table_size=0;
 
 static int __init my_module_init_function(void) {
+	int rv1;
+	int rv2;
 	first_rule_table= (rule_t*)kmalloc(sizeof(rule_t)*MAX_RULES, GFP_KERNEL);
 	printk(KERN_INFO "Succesful call for init\n");
+	rv1 = rules_create_dev(first_rule_table, first_rule_table_size);
+	printk(KERN_INFO "After rules_create_dev\n");
+	rv2 = register_hook(first_rule_table, first_rule_table_size);
+	printk(KERN_INFO "After register_hook\n");
 	//struct klist log_list;
-	return rules_create_dev(first_rule_table, rule_table_size) && register_hook(first_rule_table, rule_table_size);
+	return rv1 && rv2;
 	//return rules_create_dev(rule_table);/*register_hook() && log_clear_create_dev() && log_show_create_dev() && rules_create_dev();*/
 }
 

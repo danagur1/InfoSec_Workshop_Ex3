@@ -15,8 +15,8 @@ static int major_number;
 static struct class* fw = NULL;
 static struct device* rules = NULL;
 
-rule_t *rule_table;
-int rule_table_size=0;
+static rule_t *rule_table;
+static int rule_table_size=0;
 
 static struct file_operations fops = {
 	.owner = THIS_MODULE

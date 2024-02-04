@@ -11,16 +11,16 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
 
-static struct nf_hook_ops forward_nh_ops;
+static struct nf_hook_ops by_table_nh_ops;
 static rule_t *rule_table;
-int rule_table_size;
+static int rule_table_size;
 
 int check_direction(struct sk_buff *skb, rule_t rule){
 	return (((rule.direction==DIRECTION_IN)&&(skb->pkt_type==PACKET_OUTGOING)) || ((rule.direction==DIRECTION_OUT)&&(skb->pkt_type==PACKET_HOST))) || (rule.direction==3);
 }
 
 int check_ip(struct sk_buff *skb, rule_t rule){
-	if (ip_hdr(skb)->protocol!=IPPROTO_ICMP)&&(rule.protocol==PROT_ICMP){
+	if ((ip_hdr(skb)->protocol!=IPPROTO_ICMP)&&(rule.protocol==PROT_ICMP)){
 		return 0;
 	}
 	return ((ip_hdr(skb)->saddr & rule.src_prefix_mask) == (rule.src_ip & rule.src_prefix_mask)) && ((ip_hdr(skb)->daddr & rule.dst_prefix_mask) == (rule.dst_ip & rule.dst_prefix_mask));
@@ -50,8 +50,11 @@ int check_ack(struct sk_buff *skb, rule_t rule){
 
 unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
 	int rule_table_idx;
+	printk(KERN_INFO "in hook function. rule_table_size=%d\n", rule_table_size);
 	for (rule_table_idx = 0; rule_table_idx<rule_table_size; rule_table_idx++){
+		printk(KERN_INFO "in loop for=%d\n", rule_table_idx);
 		rule_t curr_rule= rule_table[rule_table_idx];
+		printk(KERN_INFO "in hook function. check_direction=%d, check_ip=%d, check_port=%d, check_ack=%d\n", check_direction(skb, curr_rule), check_ip(skb, curr_rule), check_port(skb,curr_rule), check_ack(skb, curr_rule));
 		if (check_direction(skb, curr_rule)&&check_ip(skb, curr_rule)&&check_port(skb,curr_rule)&&check_ack(skb, curr_rule)){
 			if (curr_rule.action==NF_DROP){
 				printk(KERN_INFO "Action taken is Drop\n");
@@ -67,15 +70,16 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 }
 
 int register_hook(rule_t *input_rule_table, int input_rule_table_size){
+	printk(KERN_INFO "In register_hook\n");
 	rule_table = input_rule_table;
 	rule_table_size = input_rule_table_size;
-	forward_nh_ops.hook = &hookfn_by_rule_table;
-	forward_nh_ops.pf = PF_INET;
-	forward_nh_ops.hooknum = NF_INET_FORWARD;
-	forward_nh_ops.priority = NF_IP_PRI_FIRST;
-	return nf_register_net_hook(&init_net, &forward_nh_ops);
+	by_table_nh_ops.hook = &hookfn_by_rule_table;
+	by_table_nh_ops.pf = PF_INET;
+	by_table_nh_ops.hooknum = NF_INET_FORWARD;
+	by_table_nh_ops.priority = NF_IP_PRI_FIRST;
+	return nf_register_net_hook(&init_net, &by_table_nh_ops);
 }
 
 void unregister_hook(void){
-    nf_unregister_net_hook(&init_net, &forward_nh_ops);
+    nf_unregister_net_hook(&init_net, &by_table_nh_ops);
 }
