@@ -13,7 +13,7 @@ MODULE_DESCRIPTION("Stateless firewall");
 
 static struct nf_hook_ops by_table_nh_ops;
 static rule_t *rule_table;
-static int rule_table_size;
+static int *rule_table_size;
 
 int check_direction(struct sk_buff *skb, rule_t rule){
 	return (((rule.direction==DIRECTION_IN)&&(skb->pkt_type==PACKET_OUTGOING)) || ((rule.direction==DIRECTION_OUT)&&(skb->pkt_type==PACKET_HOST))) || (rule.direction==3);
@@ -50,8 +50,8 @@ int check_ack(struct sk_buff *skb, rule_t rule){
 
 unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
 	int rule_table_idx;
-	printk(KERN_INFO "in hook function. rule_table_size=%d\n", rule_table_size);
-	for (rule_table_idx = 0; rule_table_idx<rule_table_size; rule_table_idx++){
+	printk(KERN_INFO "in hook function. rule_table_size=%d\n", *rule_table_size);
+	for (rule_table_idx = 0; rule_table_idx<*rule_table_size; rule_table_idx++){
 		printk(KERN_INFO "in loop for=%d\n", rule_table_idx);
 		rule_t curr_rule= rule_table[rule_table_idx];
 		printk(KERN_INFO "in hook function. check_direction=%d, check_ip=%d, check_port=%d, check_ack=%d\n", check_direction(skb, curr_rule), check_ip(skb, curr_rule), check_port(skb,curr_rule), check_ack(skb, curr_rule));
@@ -69,7 +69,7 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 	return NF_DROP;
 }
 
-int register_hook(rule_t *input_rule_table, int input_rule_table_size){
+int register_hook(rule_t *input_rule_table, int *input_rule_table_size){
 	printk(KERN_INFO "In register_hook\n");
 	rule_table = input_rule_table;
 	rule_table_size = input_rule_table_size;

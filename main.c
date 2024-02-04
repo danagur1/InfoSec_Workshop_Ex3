@@ -14,7 +14,7 @@ MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
 
 static rule_t *first_rule_table;
-static int first_rule_table_size=0;
+static int *first_rule_table_size=0;
 
 static int __init my_module_init_function(void) {
 	int rv1;
