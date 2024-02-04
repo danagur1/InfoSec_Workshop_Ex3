@@ -16,6 +16,7 @@ static struct class* fw = NULL;
 static struct device* rules = NULL;
 
 rule_t *rule_table;
+int rule_table_size=0;
 
 static struct file_operations fops = {
 	.owner = THIS_MODULE
@@ -243,10 +244,11 @@ printk(KERN_INFO "after dst prefix_size and now buf_index=%d and has-%.10s near 
 
 static DEVICE_ATTR(rules, S_IWUSR | S_IRUGO , display, modify);
 
-int rules_create_dev(rule_t *user_rule_table)
+int rules_create_dev(rule_t *user_rule_table, int rule_table_size)
 {
 	printk(KERN_INFO "in rules_create_dev function\n");
 	rule_table = user_rule_table;
+	rule_table_size = user_rule_table_size;
 	//create char device
 	major_number = register_chrdev(0, "rules", &fops);\
 	if (major_number < 0)
