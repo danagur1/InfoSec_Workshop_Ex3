@@ -20,28 +20,29 @@ int check_direction(struct sk_buff *skb, rule_t rule){
 }
 
 int check_ip(struct sk_buff *skb, rule_t rule){
-	if (skb->protocol == htons(ETH_P_IP)){
-		if (ip_hdr(skb)->protocol!=IPPROTO_ICMP)&&(rule.protocol==PROT_ICMP){
+	if (ip_hdr(skb)->protocol!=IPPROTO_ICMP)&&(rule.protocol==PROT_ICMP){
 		return 0;
-		}
-		return ((ip_hdr(skb)->saddr & rule.src_prefix_mask) == (rule.src_ip & rule.src_prefix_mask)) && ((ip_hdr(skb)->daddr & rule.dst_prefix_mask) == (rule.dst_ip & rule.dst_prefix_mask));
 	}
+	return ((ip_hdr(skb)->saddr & rule.src_prefix_mask) == (rule.src_ip & rule.src_prefix_mask)) && ((ip_hdr(skb)->daddr & rule.dst_prefix_mask) == (rule.dst_ip & rule.dst_prefix_mask));
 }
 
 int check_port(struct sk_buff *skb, rule_t rule){
     // packet is TCP
-    if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_TCP)&&(rule.protocol==PROT_TCP)) {
-        return (ntohs(tcp_hdr(skb)->source)==rule.src_port)&&(ntohs(tcp_hdr(skb)->dest)==rule.dst_port);
-    }
-	// packet is UDP
-    if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_UDP)&&(rule.protocol==PROT_UDP)) {
-        return (ntohs(udp_hdr(skb)->source)==rule.src_port)&&(ntohs(udp_hdr(skb)->dest)==rule.dst_port);
-    }
+	if (rule.protocol==PROT_TCP){
+		return (skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_TCP)&&
+		(ntohs(tcp_hdr(skb)->source)==rule.src_port)&&(ntohs(tcp_hdr(skb)->dest)==rule.dst_port);
+	}
+	// packet is TCP
+	if (rule.protocol==PROT_UDP){
+		return (skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_UDP)&&
+		(ntohs(udp_hdr(skb)->source)==rule.src_port)&&(ntohs(udp_hdr(skb)->dest)==rule.dst_port);
+	}
     return 1;
 }
 
 int check_ack(struct sk_buff *skb, rule_t rule){
-	if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_TCP)) {
+	if (rule.protocol==PROT_TCP) { 
+		// check_port already checked that the packet is tcp
         return ((tcp_hdr(skb)->source)&&(rule.ack==ACK_YES))||((!tcp_hdr(skb)->source)&&(rule.ack==ACK_NO))||(ACK_ANY);
     }
 	return 1;
