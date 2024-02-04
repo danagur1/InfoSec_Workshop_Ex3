@@ -9,6 +9,7 @@ MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
 
 static struct nf_hook_ops forward_nh_ops;
+static rule_t *rule_table;
 
 unsigned int drop_hookfn(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
 	printk(KERN_INFO "*** Packet Dropped ***\n");
@@ -20,7 +21,8 @@ unsigned int accept_hookfn(void *priv, struct sk_buff *skb, const struct nf_hook
 	return NF_ACCEPT;
 }
 
-int register_hook(void){
+int register_hook(rule_t *input_rule_table){
+	rule_table = input_rule_table;
 	forward_nh_ops.hook = &drop_hookfn;
 	forward_nh_ops.pf = PF_INET;
 	forward_nh_ops.hooknum = NF_INET_FORWARD;
