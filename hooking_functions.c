@@ -20,7 +20,9 @@ int check_direction(struct sk_buff *skb, rule_t rule){
 }
 
 int check_ip(struct sk_buff *skb, rule_t rule){
-	return (skb->saddr & src_prefix_mask == curr_rule.src_ip & src_prefix_mask) && (skb->daddr & dst_prefix_mask == curr_rule.dst_ip & dst_prefix_mask)
+	if (skb->protocol == htons(ETH_P_IP)){
+		return (ip_hdr(skb)->saddr & src_prefix_mask == curr_rule.src_ip & src_prefix_mask) && (ip_hdr(skb)->daddr & dst_prefix_mask == curr_rule.dst_ip & dst_prefix_mask)
+	}
 }
 
 int check_port(struct sk_buff *skb, rule_t rule){
