@@ -16,7 +16,17 @@ static rule_t *rule_table;
 static int *rule_table_size;
 
 int check_direction(struct sk_buff *skb, rule_t rule){
-	return (((rule.direction==DIRECTION_IN)&&(skb->pkt_type==PACKET_OUTGOING)) || ((rule.direction==DIRECTION_OUT)&&(skb->pkt_type==PACKET_HOST))) || (rule.direction==3);
+	struct net_device *dev = skb->dev;
+	if (dev) {
+        if (rule.direction==DIRECTION_IN) {
+            return strcmp(dev->name, "eth2") == 0;
+        } else if (rule.direction==DIRECTION_OUT) {
+            return strcmp(dev->name, "eth2") == 0;
+        } else {
+            return 1;
+    }
+	return 0;
+}
 }
 
 int check_ip(struct sk_buff *skb, rule_t rule){
