@@ -1,6 +1,6 @@
 obj-m += firewall.o
 
-firewall-objs := main.o rules_functions.o
+firewall-objs := main.o rules_functions.o hooking_functions.o
 
 
 all:
