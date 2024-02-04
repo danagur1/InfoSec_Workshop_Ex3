@@ -16,7 +16,11 @@ static struct class* fw = NULL;
 static struct device* rules = NULL;
 
 static rule_t *rule_table;
+<<<<<<< HEAD
 static int *rule_table_size=0;
+=======
+static int *rule_table_size;
+>>>>>>> a736b98f3a2ba172ad3e23855f12f070b2edb991
 
 static struct file_operations fops = {
 	.owner = THIS_MODULE
@@ -67,11 +71,17 @@ static int parse_ip(const char *src, __be32 *dst){
 	while (src[size]!=' '){
 		size++;
 	}
+<<<<<<< HEAD
 	if (in4_pton(src, size, (u8 *)dst, -1, NULL)!=1){
 	//printk(KERN_INFO "could not convert. src= %.9s\n", src);
+=======
+	struct in_addr addr;
+	if (in4_pton(src, size, (u8 *)&addr, -1, NULL)!=1){
+>>>>>>> a736b98f3a2ba172ad3e23855f12f070b2edb991
 		return -1;
 	}
-	*dst = htonl(*dst);
+	*dst = addr.s_addr;
+	printk(KERN_INFO "converted ip. src= %.9s\n, *dst=%u", src, *dst);
 	return size;
 }
 
@@ -236,8 +246,14 @@ ssize_t modify(struct device *dev, struct device_attribute *attr, const char *bu
 		//printk(KERN_INFO "ended the loop and not buf_index=%d and has %.10s near it and before it %.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		rule_table_index++;
 	}
+<<<<<<< HEAD
 	printk(KERN_INFO "ended rules_functions")
 	*rule_table_size = rule_table_index;
+=======
+	printk(KERN_INFO "*finished loop");
+	*rule_table_size = rule_table_index;
+	printk(KERN_INFO "*rule_table_size=%d\n", *rule_table_size);
+>>>>>>> a736b98f3a2ba172ad3e23855f12f070b2edb991
 	return count;
 }
 

@@ -2,6 +2,7 @@
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/gfp.h>
+#include <linux/klist.h>
 #include "rules_functions.h"
 #include "hooking_functions.h"
 //#include "log_clear_functions.h"
@@ -15,16 +16,19 @@ MODULE_DESCRIPTION("Stateless firewall");
 
 static rule_t *first_rule_table;
 static int *first_rule_table_size=0;
+struct klist_head log_list;
 
 static int __init my_module_init_function(void) {
 	int rv1;
 	int rv2;
+	int rv3;
 	int r;
+	klist_init(log_list);
 	first_rule_table= (rule_t*)kmalloc(sizeof(rule_t)*MAX_RULES, GFP_KERNEL);
 	printk(KERN_INFO "Succesful call for init\n");
-	rv1 = rules_create_dev(first_rule_table, first_rule_table_size);
-	printk(KERN_INFO "After rules_create_dev\n");
-	rv2 = register_hook(first_rule_table, first_rule_table_size);
+	rv1 = rules_create_dev(first_rule_table, &first_rule_table_size);
+	printk(KERN_INFO "After rules_create_dev\n. now first_rule_table_size=%d", first_rule_table_size);
+	rv2 = register_hook(first_rule_table, &first_rule_table_size);
 	printk(KERN_INFO "After register_hook\n");
 	//struct klist log_list;
 	r = rv1 && rv2;
