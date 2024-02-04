@@ -73,10 +73,13 @@ int register_hook(rule_t *input_rule_table, int *input_rule_table_size){
 	printk(KERN_INFO "In register_hook\n");
 	rule_table = input_rule_table;
 	rule_table_size = input_rule_table_size;
+	printk(KERN_INFO "In register_hook2\n");
 	by_table_nh_ops.hook = &hookfn_by_rule_table;
 	by_table_nh_ops.pf = PF_INET;
+	printk(KERN_INFO "In register_hook3\n");
 	by_table_nh_ops.hooknum = NF_INET_FORWARD;
 	by_table_nh_ops.priority = NF_IP_PRI_FIRST;
+	printk(KERN_INFO "In register_hook4\n");
 	return nf_register_net_hook(&init_net, &by_table_nh_ops);
 }
 

@@ -19,6 +19,7 @@ static int *first_rule_table_size=0;
 static int __init my_module_init_function(void) {
 	int rv1;
 	int rv2;
+	int r;
 	first_rule_table= (rule_t*)kmalloc(sizeof(rule_t)*MAX_RULES, GFP_KERNEL);
 	printk(KERN_INFO "Succesful call for init\n");
 	rv1 = rules_create_dev(first_rule_table, first_rule_table_size);
@@ -26,7 +27,9 @@ static int __init my_module_init_function(void) {
 	rv2 = register_hook(first_rule_table, first_rule_table_size);
 	printk(KERN_INFO "After register_hook\n");
 	//struct klist log_list;
-	return rv1 && rv2;
+	r = rv1 && rv2;
+	printk(KERN_INFO "After computing r. r=%d\n", r);
+	return r;
 	//return rules_create_dev(rule_table);/*register_hook() && log_clear_create_dev() && log_show_create_dev() && rules_create_dev();*/
 }
 
