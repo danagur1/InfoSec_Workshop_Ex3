@@ -21,9 +21,9 @@ static int __init my_module_init_function(void) {
 	int rv2;
 	first_rule_table= (rule_t*)kmalloc(sizeof(rule_t)*MAX_RULES, GFP_KERNEL);
 	printk(KERN_INFO "Succesful call for init\n");
-	rv1 = rules_create_dev(first_rule_table, first_rule_table_size);
-	printk(KERN_INFO "After rules_create_dev\n");
-	rv2 = register_hook(first_rule_table, first_rule_table_size);
+	rv1 = rules_create_dev(first_rule_table, &first_rule_table_size);
+	printk(KERN_INFO "After rules_create_dev\n. now first_rule_table_size=%d", first_rule_table_size);
+	rv2 = register_hook(first_rule_table, &first_rule_table_size);
 	printk(KERN_INFO "After register_hook\n");
 	//struct klist log_list;
 	return rv1 && rv2;
