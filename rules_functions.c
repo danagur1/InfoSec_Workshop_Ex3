@@ -27,12 +27,17 @@ ssize_t display(struct device *dev, struct device_attribute *attr, char *buf)	//
 }
 
 static int parse_rule_name(const char *src, char *dst){
-	printk(KERN_INFO "in parse_rule_name function\n");
 	int size = 0;
+	printk(KERN_INFO "in parse_rule_name function\n");
 	while (src[size]!=' '){
 		size++;
+		if (size>20){
+			return -1;
+		}
 	}
 	strncpy(dst, src, size);
+	dst[size] = '\0';
+	printk(KERN_INFO "name is: %s, size is %d\n", dst, size);
 	return size; //return the length of the parsed element 
 }
 
@@ -56,8 +61,8 @@ static int parse_ack(const char *src, ack_t *dst){
 }
 
 static int parse_ip(const char *src, __be32 *dst){
-	printk(KERN_INFO "in parse_ip function\n");
 	int size = 0;
+	printk(KERN_INFO "in parse_ip function\n");
 	while (src[size]!=' '){
 		size++;
 	}
@@ -70,8 +75,8 @@ static int parse_ip(const char *src, __be32 *dst){
 }
 
 static int parse_perfix_size(const char *src, __u8 *dst){
-	printk(KERN_INFO "in parse_perfix_size function\n");
 	unsigned long src_long;
+	printk(KERN_INFO "in parse_perfix_size function\n");
 	if (src[1] == ' '){
 		char perfix[2];
 		perfix[0] = src[0];
@@ -80,6 +85,7 @@ static int parse_perfix_size(const char *src, __u8 *dst){
 			return -1;
 		}
 		*dst = (__u8)src_long;
+		printk(KERN_INFO "parse_perfix_size is %d\n", *dst);
 		return 1;
 	}
 	else if (src[2] == ' ')
@@ -92,6 +98,7 @@ static int parse_perfix_size(const char *src, __u8 *dst){
 			return -1;
 		}
 		*dst = (__u8)src_long;
+		printk(KERN_INFO "parse_perfix_size is %d\n", *dst);
 		return 2;
 	}
 	else{
@@ -134,6 +141,7 @@ static int parse_action(const char *src, __u8 *dst){
 		*dst=NF_ACCEPT;
 	}
 	else{
+		printk(KERN_INFO "failed to parse action because src[0]=%c\n", src[0]);
 		return -1;
 	}
 	return 1;
@@ -141,18 +149,25 @@ static int parse_action(const char *src, __u8 *dst){
 }
 
 static int parse_port(const char *src, __be16 *dst){
-	unsigned long src_long;
+	unsigned long src_int;
 	int size = 0;
 	char *short_src;
 	while (src[size]!=' '){
 		size++;
 	}
-	printk(KERN_INFO "src to copy[1]: %.1s\n", src);
-	strncpy(short_src, src, size);
-	if (kstrtoul(src, 10, &src_long) != 0){
+	short_src = (char*)kmalloc(size*sizeof(char), GFP_KERNEL);
+	if (!short_src){
 		return -1;
 	}
-	*dst = htons((__be16)src_long);
+	strncpy(short_src, src, size);
+	short_src[size]='\0';
+	printk(KERN_INFO "after copy. size: %d,short_src: %s\n", size, short_src);
+	if ((kstrtoul(short_src, 10, &src_int) != 0)||((src_int<0)||(src_int>1023))){
+		kfree(short_src);
+		return -1;
+	}
+	kfree(short_src);
+	*dst = htons((__be16)src_int);
 	return size;
 }
 
@@ -171,38 +186,6 @@ ssize_t modify(struct device *dev, struct device_attribute *attr, const char *bu
 	int rule_table_index = 0;
 	int buf_index = 0;
         printk(KERN_INFO "in modify function with %d\n", count);
-	/*buf_index += parse_rule_name(buf+buf_index, rule_table[rule_table_index].rule_name)+1;
-	printk(KERN_INFO "before parse_direction function\n");
-	if(check_and_update_idx(&buf_index, parse_direction(buf+buf_index, &rule_table[rule_table_index].direction))==-1){
-			return -1;
-		}
-	if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &rule_table[rule_table_index].src_ip))==-1){
-			return -1;
-		}
-if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &rule_table[rule_table_index].src_prefix_mask))==-1){
-			return -1;
-		}
-if(check_and_update_idx(&buf_index, parse_perfix_size(buf+buf_index, &rule_table[rule_table_index].src_prefix_size))==-1){
-			return -1;
-		}
-if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &rule_table[rule_table_index].dst_ip))==-1){
-			return -1;
-		}
-		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &rule_table[rule_table_index].dst_prefix_mask))==-1){
-			return -1;
-		}
-		if(check_and_update_idx(&buf_index, parse_perfix_size(buf+buf_index, &rule_table[rule_table_index].dst_prefix_size))==-1){
-			return -1;
-		}
-if(check_and_update_idx(&buf_index, parse_protocol(buf+buf_index, &rule_table[rule_table_index].protocol))==-1){
-			return -1;
-		}
-if(check_and_update_idx(&buf_index, parse_ack(buf+buf_index, &rule_table[rule_table_index].ack))==-1){
-			return -1;
-		}
-if(check_and_update_idx(&buf_index, parse_action(buf+buf_index, &rule_table[rule_table_index].action))==-1){
-			return -1;
-		}*/
 	while (buf_index<count)
 	{
 	printk(KERN_INFO "continue because buf_index=%d\n, count=%d\n", buf_index, count);
@@ -216,18 +199,23 @@ if(check_and_update_idx(&buf_index, parse_action(buf+buf_index, &rule_table[rule
 		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &rule_table[rule_table_index].src_prefix_mask))==-1){
 			return -1;
 		}
+//printk(KERN_INFO "before src_prefix_size and now buf_index=%d and has-%.10s near it and before it-%.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		if(check_and_update_idx(&buf_index, parse_perfix_size(buf+buf_index, &rule_table[rule_table_index].src_prefix_size))==-1){
 			return -1;
 		}
+//printk(KERN_INFO "before dst_ip and now buf_index=%d and has-%.10s near it and before it-%.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &rule_table[rule_table_index].dst_ip))==-1){
 			return -1;
 		}
+		//printk(KERN_INFO "before dst_prefix_mask and now buf_index=%d and has-%.10s near it and before it-%.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &rule_table[rule_table_index].dst_prefix_mask))==-1){
 			return -1;
 		}
+		printk(KERN_INFO "before dst prefix_size and now buf_index=%d and has-%.10s near it and before it-%.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		if(check_and_update_idx(&buf_index, parse_perfix_size(buf+buf_index, &rule_table[rule_table_index].dst_prefix_size))==-1){
 			return -1;
 		}
+printk(KERN_INFO "after dst prefix_size and now buf_index=%d and has-%.10s near it and before it-%.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		if(check_and_update_idx(&buf_index, parse_protocol(buf+buf_index, &rule_table[rule_table_index].protocol))==-1){
 			return -1;
 		}
@@ -243,6 +231,8 @@ if(check_and_update_idx(&buf_index, parse_action(buf+buf_index, &rule_table[rule
 		if(check_and_update_idx(&buf_index, parse_action(buf+buf_index, &rule_table[rule_table_index].action))==-1){
 			return -1;
 		}
+		buf_index--;
+		printk(KERN_INFO "ended the loop and not buf_index=%d and has %.10s near it and before it %.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		rule_table_index++;
 	}
 	return count;

@@ -147,7 +147,7 @@ def read_rule(rule):
     #print("src_ip: "+str(src_ip)+" dst_ip: "+str(dst_ip)+" src_port: "+str(src_port)+" dst_port: "+str(dst_port)+" ack: "+str(ack)+" action: "+str(action))
     if src_ip and dst_ip and src_port and dst_port and ack and action:
         return ' '.join([rule[0], direction, src_ip, src_prefix_mask, src_prefix_size, dst_ip, dst_prefix_mask,
-                         dst_prefix_size, src_port, dst_port, protocol, ack, action])
+                         dst_prefix_size, protocol, src_port, dst_port, ack, action])
     else:
         return False
 
@@ -162,7 +162,7 @@ def write_rule(rule):
     ack = reverse_ack(rule[7])
     action = reverse_action(rule[8])
     return ' '.join([rule[0], direction, src_ip, src_prefix_mask, src_prefix_size, dst_ip, dst_prefix_mask,
-                         dst_prefix_size, src_port, dst_port, protocol, ack, action])
+                         dst_prefix_size, protocol, src_port, dst_port, ack, action])
 
 
 def load(rules_file_path):
@@ -178,7 +178,7 @@ def load(rules_file_path):
                 if not parsed_rule:
                     return False
                 print(parsed_rule)
-                #rules_table_driver.write(parsed_rule)
+                rules_table_driver.write(parsed_rule)
                 rule = rules_file.readline()
     return True
     """
