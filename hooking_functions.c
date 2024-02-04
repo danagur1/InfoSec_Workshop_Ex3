@@ -16,17 +16,7 @@ static rule_t *rule_table;
 static int *rule_table_size;
 
 int check_direction(struct sk_buff *skb, rule_t rule){
-	struct net_device *dev = skb->dev;
-	if (dev) {
-        if (rule.direction==DIRECTION_IN) {
-            return strcmp(dev->name, "eth2") == 0;
-        } else if (rule.direction==DIRECTION_OUT) {
-            return strcmp(dev->name, "eth2") == 0;
-        } else {
-            return 1;
-    }
-	return 0;
-}
+	return (((rule.direction==DIRECTION_IN)&&(skb->pkt_type==PACKET_OUTGOING)) || ((rule.direction==DIRECTION_OUT)&&(skb->pkt_type==PACKET_HOST))) || (rule.direction==3);
 }
 
 int check_ip(struct sk_buff *skb, rule_t rule){
@@ -85,13 +75,10 @@ int register_hook(rule_t *input_rule_table, int *input_rule_table_size){
 	printk(KERN_INFO "In register_hook\n");
 	rule_table = input_rule_table;
 	rule_table_size = input_rule_table_size;
-	printk(KERN_INFO "In register_hook2\n");
 	by_table_nh_ops.hook = &hookfn_by_rule_table;
 	by_table_nh_ops.pf = PF_INET;
-	printk(KERN_INFO "In register_hook3\n");
 	by_table_nh_ops.hooknum = NF_INET_FORWARD;
 	by_table_nh_ops.priority = NF_IP_PRI_FIRST;
-	printk(KERN_INFO "In register_hook4\n");
 	return nf_register_net_hook(&init_net, &by_table_nh_ops);
 }
 
