@@ -78,8 +78,14 @@ long get_time(void){
 
 void exist_log_check(log_row_t *log){
 	log_row_t *log_exist;
+	/*if (log==NULL){
+		printk(KERN_INFO "Here! with log=NULL\n");
+	}
+	else{
+		printk(KERN_INFO "Here! log->action=%u\n", log->action);
+	}*/
 	find_identical_log(log, compare_logs);
-	/*if (log_exist==NULL){
+	if (log_exist==NULL){
 		printk(KERN_INFO "Before add_to_log_list\n");
 		add_to_log_list(log);
 	}
@@ -87,21 +93,27 @@ void exist_log_check(log_row_t *log){
 		printk(KERN_INFO "Before updating log\n");
 		log_exist->count = log_exist->count+1;
 		log_exist->timestamp = log->timestamp;
-	}*/
+	}
 }
 
 void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reason){
 	log_row_t log;
 	reason_t reason = rule_table_idx;
-	unsigned char action = rule->action;
+	unsigned char action;
 	//handle special cases wnen no rule matching the action:
 	if (special_reason==1){
 		reason = REASON_ILLEGAL_VALUE;
 		action = NF_DROP;
+		printk(KERN_INFO "Just put action to NF_DROP- 1 %u\n", NF_DROP);
 	}
 	else if (special_reason==2){
 		reason = REASON_NO_MATCHING_RULE;
 		action = NF_DROP;
+		printk(KERN_INFO "Just put action to NF_DROP- 2 %u\n", NF_DROP);
+	}
+	else {
+		action = rule->action;
+		printk(KERN_INFO "Just put action- 3");
 	}
 	//Log different cases- by protocols:
 	if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_TCP)){
