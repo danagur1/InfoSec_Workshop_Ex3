@@ -88,10 +88,10 @@ void exist_log_check(log_row_t *log){
 	}
 }
 
-void log(rule_t rule, struct sk_buff *skb, int rule_table_idx, int special_reason){
+void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reason){
 	log_row_t log;
 	reason_t reason = rule_table_idx;
-	unsigned char action = rule.action;
+	unsigned char action = rule->action;
 	//handle special cases wnen no rule matching the action:
 	if (special_reason==1){
 		reason = REASON_ILLEGAL_VALUE;
@@ -142,7 +142,7 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 			if (curr_rule.action==NF_ACCEPT){
 				printk(KERN_INFO "Action taken is Accept\n");
 			}
-			log(curr_rule, skb, rule_table_idx, 0);
+			log(&curr_rule, skb, rule_table_idx, 0);
 			return curr_rule.action;
 		}
 	}
