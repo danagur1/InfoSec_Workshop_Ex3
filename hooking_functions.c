@@ -78,14 +78,16 @@ long get_time(void){
 
 void exist_log_check(log_row_t *log){
 	log_row_t *log_exist;
-	log_exist = find_identical_log(log, compare_logs);
-	if (log_exist==NULL){
+	find_identical_log(log, compare_logs);
+	/*if (log_exist==NULL){
+		printk(KERN_INFO "Before add_to_log_list\n");
 		add_to_log_list(log);
 	}
 	else{
+		printk(KERN_INFO "Before updating log\n");
 		log_exist->count = log_exist->count+1;
 		log_exist->timestamp = log->timestamp;
-	}
+	}*/
 }
 
 void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reason){
@@ -120,7 +122,7 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 		return;
 	}
 	printk(KERN_INFO "Before exist_log_check\n");
-	//exist_log_check(&log);
+	exist_log_check(&log);
 }
 
 unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
