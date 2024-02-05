@@ -8,7 +8,7 @@ struct log_list_node {
 };
 
 static struct klist log_list;
-
+/*
 // Define callback functions
 static void log_klist_release(struct klist_node *n) {
     struct log_list_node *entry = container_of(n, struct log_list_node, node);
@@ -26,7 +26,7 @@ static struct klist_node_ops log_klist_ops = {
 
 void init_log_list(void) {
     klist_init(&log_list, &log_klist_ops);
-}
+}*/
 /*
 void init_log_list(void) {
     klist_init(&log_list);
