@@ -8,7 +8,7 @@
 };*/
 
 static struct klist log_list;
-klist_init(&log_list, NULL, NULL);
+
 /*
 // Define callback functions
 static void log_klist_release(struct klist_node *n) {
@@ -32,6 +32,9 @@ void init_log_list(void) {
 void init_log_list(void) {
     klist_init(&log_list);
 }*/
+void init_log_list(void){
+    klist_init(&log_list, NULL, NULL);
+}
 
 int add_to_log_list(log_row_t *log) {
     struct klist_node *node = kmalloc(sizeof(struct klist_node), GFP_KERNEL);
