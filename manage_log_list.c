@@ -9,9 +9,28 @@ struct log_list_node {
 
 static struct klist log_list;
 
+// Define callback functions
+static void log_klist_release(struct klist_node *n) {
+    struct log_list_node *entry = container_of(n, struct log_list_node, node);
+    kfree(entry);
+}
+
+static void log_klist_get(struct klist_node *n) {
+    // No special handling required in this example
+}
+
+static struct klist_node_ops log_klist_ops = {
+    .release = log_klist_release,
+    .get = log_klist_get,
+};
+
+void init_log_list(void) {
+    klist_init(&log_list, &log_klist_ops);
+}
+/*
 void init_log_list(void) {
     klist_init(&log_list);
-}
+}*/
 
 int add_to_log_list(log_row_t *log) {
     struct log_list_node *new_node = kmalloc(sizeof(struct log_list_node), GFP_KERNEL);
