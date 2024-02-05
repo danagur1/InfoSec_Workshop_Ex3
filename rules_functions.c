@@ -264,7 +264,7 @@ int rules_create_dev(rule_t *user_rule_table, int *user_rule_table_size)
 	}
 	
 	//create sysfs device
-	rules = device_create(fw, NULL, MKDEV(major_number, 0), NULL, "rules");	
+	rules = device_create(fw, NULL, MKDEV(major_number, MINOR_RULES), NULL, "rules");	
 	if (IS_ERR(rules))
 	{
 		class_destroy(fw);
@@ -275,7 +275,7 @@ int rules_create_dev(rule_t *user_rule_table, int *user_rule_table_size)
 	//create sysfs file attributes	
 	if (device_create_file(rules, (const struct device_attribute *)&dev_attr_rules.attr))
 	{
-		device_destroy(fw, MKDEV(major_number, 0));
+		device_destroy(fw, MKDEV(major_number, MINOR_RULES));
 		class_destroy(fw);
 		unregister_chrdev(major_number, "rules");
 		return -1;
@@ -287,7 +287,7 @@ int rules_create_dev(rule_t *user_rule_table, int *user_rule_table_size)
 void rules_remove_dev(void)
 {
 	device_remove_file(rules, (const struct device_attribute *)&dev_attr_rules.attr);
-	device_destroy(fw, MKDEV(major_number, 0));
+	device_destroy(fw, MKDEV(major_number, MINOR_RULES));
 	class_destroy(fw);
 	unregister_chrdev(major_number, "rules");
 	printk(KERN_INFO "Succesful call for remove\n");
