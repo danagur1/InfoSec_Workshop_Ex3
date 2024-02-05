@@ -102,7 +102,7 @@ reason_t find_special_reason(int reason_code){
 	}
 }
 
-log_row_t log_by_protocol(__u8 protocol, struct sk_buff *skb, , reason_t reason, unsigned char action){
+log_row_t log_by_protocol(__u8 protocol, struct sk_buff *skb, reason_t reason, unsigned char action){
 	if ((protocol==IPPROTO_TCP)&&(skb->protocol == htons(ETH_P_IP))){
 		return (log_row_t){get_time(), PROT_TCP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source,
 		tcp_hdr(skb)->dest, reason, 0};
