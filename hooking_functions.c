@@ -76,11 +76,11 @@ long get_time(void){
     return (unsigned long)current_time.tv_sec;
 }
 
-void exist_log_check(log_row_t log){
+void exist_log_check(log_row_t *log){
 	log_row_t *log_exist;
 	log_exist = find_identical_log(log, compare_logs);
 	if (log_exist==NULL){
-		add_to_log_list(&log);
+		add_to_log_list(log);
 	}
 	else{
 		log_exist->count = log_exist->count+1;
@@ -91,27 +91,27 @@ void exist_log_check(log_row_t log){
 void log(rule_t rule, struct sk_buff *skb, int rule_table_idx, int special_reason){
 	log_row_t log;
 	if (special_reason==1){
-		log = {get_time(), rule.protocol, NF_DROP, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, 0,
+		log = (log_row_t){get_time(), rule.protocol, NF_DROP, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, 0,
 		0, REASON_ILLEGAL_VALUE, 0};
 	}
-	if (special_reason==2){
-		log = {get_time(), rule.protocol, NF_DROP, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, 0,
+	else if (special_reason==2){
+		log = (log_row_t){get_time(), rule.protocol, NF_DROP, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, 0,
 		0, REASON_NO_MATCHING_RULE, 0};
 	}
-	if (skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_TCP){
-		log = {get_time(), rule.protocol, rule.action, (skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source,
+	else if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_TCP)){
+		log = (log_row_t){get_time(), rule.protocol, rule.action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source,
 		tcp_hdr(skb)->dest, rule_table_idx, 0};
 	}
-	else if (skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_UPD)
+	else if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_UDP))
 	{
-		log = {get_time(), rule.protocol, rule.action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, udp_hdr(skb)->source,
+		log = (log_row_t){get_time(), rule.protocol, rule.action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, udp_hdr(skb)->source,
 		udp_hdr(skb)->dest, rule_table_idx, 0};
 	}
 	else{
-		log = {get_time(), rule.protocol, NF_DROP, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, 0,
+		log = (log_row_t){get_time(), rule.protocol, NF_DROP, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, 0,
 		0, REASON_ILLEGAL_VALUE, 0};
 	}
-	exist_log_check(log)
+	exist_log_check(&log);
 }
 
 unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
