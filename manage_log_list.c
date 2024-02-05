@@ -7,7 +7,7 @@ struct log_list_node {
     struct klist_node node;
 };
 
-static struct klist_head log_list;
+static struct klist log_list;
 
 void init_log_list(void) {
     klist_init(&log_list);
@@ -18,7 +18,7 @@ int add_to_log_list(log_row_t *log) {
     if (!new_node)
         return -1;
     new_node->log = log;
-    klist_add_tail(&new_node->node, &log_list);
+    klist_add_tail(&new_node->node, &log_list.k_head);
     return 0;
 }
 
