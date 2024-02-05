@@ -91,13 +91,13 @@ void exist_log_check(log_row_t *log){
 }
 
 reason_t find_special_reason(int reason_code){
-	if (special_reason==1){
+	if (reason_code==1){
 		return REASON_ILLEGAL_VALUE;
 	}
-	else if (special_reason==2){
+	else if (reason_code==2){
 		return REASON_NO_MATCHING_RULE;
 	}
-	else if (special_reason==3){
+	else if (reason_code==3){
 		return REASON_FW_INACTIVE;
 	}
 }
