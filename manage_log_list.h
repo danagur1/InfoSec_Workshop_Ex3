@@ -1,8 +1,6 @@
 #ifndef LOG_STRUCT_H
 #define LOG_STRUCT_H
 
-extern struct klist_head log_list;
-
 void init_log_list(void);
 
 int add_to_log_list(log_row_t *log);
