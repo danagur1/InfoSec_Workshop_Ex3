@@ -119,7 +119,8 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 	else{
 		return;
 	}
-	exist_log_check(&log);
+	printk(KERN_INFO "Before exist_log_check\n");
+	//exist_log_check(&log);
 }
 
 unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
@@ -153,7 +154,7 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 
 int register_hook(rule_t *input_rule_table, int *input_rule_table_size){
 	printk(KERN_INFO "In register_hook\n");
-	init_log_list();
+	//init_log_list();
 	rule_table = input_rule_table;
 	rule_table_size = input_rule_table_size;
 	by_table_nh_ops.hook = &hookfn_by_rule_table;
