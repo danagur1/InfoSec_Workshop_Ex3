@@ -8,7 +8,6 @@
 //#include "log_show_functions.h"
 //#include "fw.h"
 
-
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
@@ -25,7 +24,6 @@ static int __init my_module_init_function(void) {
 	printk(KERN_INFO "After rules_create_dev\n. now first_rule_table_size=%d", first_rule_table_size);
 	rv2 = register_hook(first_rule_table, &first_rule_table_size);
 	printk(KERN_INFO "After register_hook\n");
-	//struct klist log_list;
 	return rv1 && rv2;
 	//return rules_create_dev(rule_table);/*register_hook() && log_clear_create_dev() && log_show_create_dev() && rules_create_dev();*/
 }
