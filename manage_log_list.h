@@ -3,6 +3,8 @@
 
 extern struct klist_head log_list;
 
+void init_log_list(void);
+
 int add_to_log_list(log_row_t *log);
 
 void remove_all_from_log_list(void);

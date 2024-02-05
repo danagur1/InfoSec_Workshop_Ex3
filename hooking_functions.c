@@ -147,12 +147,13 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 		}
 	}
 	printk(KERN_INFO "Action taken is Drop\n");
-	log(NULL, skb, 0, 2)
+	log(NULL, skb, 0, 2);
 	return NF_DROP;
 }
 
 int register_hook(rule_t *input_rule_table, int *input_rule_table_size){
 	printk(KERN_INFO "In register_hook\n");
+	init_log_list();
 	rule_table = input_rule_table;
 	rule_table_size = input_rule_table_size;
 	by_table_nh_ops.hook = &hookfn_by_rule_table;

@@ -9,7 +9,7 @@ struct log_list_node {
 
 struct klist_head log_list;
 
-void init_log_list() {
+void init_log_list(void) {
     klist_init(&log_list);
 }
 
