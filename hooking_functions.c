@@ -71,15 +71,9 @@ static int compare_logs(log_row_t *log1, log_row_t *log2){
 
 
 long get_time(void){
-	time_t currentTime;
-    struct tm *localTime;
-    long dateTime;
-    currentTime = time(NULL);
-    localTime = localtime(&currentTime);
-    dateTime = ((localTime->tm_year + 1900) * 10000000000L) + ((localTime->tm_mon + 1) * 100000000L) + 
-               (localTime->tm_mday * 1000000L) + (localTime->tm_hour * 10000L) + (localTime->tm_min * 100L) + 
-               localTime->tm_sec;
-	return dateTime;
+	struct timespec64 current_time;
+    ktime_get_real_ts64(&current_time);
+    return (unsigned long)current_time.tv_sec;
 }
 
 void exist_log_check(log_row_t log){
@@ -94,24 +88,28 @@ void exist_log_check(log_row_t log){
 	}
 }
 
-void log(rule_t rule, struct sk_buff *skb, int rule_table_idx, int invalid){
+void log(rule_t rule, struct sk_buff *skb, int rule_table_idx, int special_reason){
 	log_row_t log;
-	if (invalid){
+	if (special_reason==1){
 		log = {get_time(), rule.protocol, NF_DROP, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, 0,
-		0, REASON_ILLEGAL_VALUE, 0}
+		0, REASON_ILLEGAL_VALUE, 0};
+	}
+	if (special_reason==2){
+		log = {get_time(), rule.protocol, NF_DROP, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, 0,
+		0, REASON_NO_MATCHING_RULE, 0};
 	}
 	if (skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_TCP){
 		log = {get_time(), rule.protocol, rule.action, (skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source,
-		tcp_hdr(skb)->dest, rule_table_idx, 0}
+		tcp_hdr(skb)->dest, rule_table_idx, 0};
 	}
 	else if (skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_UPD)
 	{
 		log = {get_time(), rule.protocol, rule.action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, udp_hdr(skb)->source,
-		udp_hdr(skb)->dest, rule_table_idx, 0}
+		udp_hdr(skb)->dest, rule_table_idx, 0};
 	}
 	else{
 		log = {get_time(), rule.protocol, NF_DROP, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, 0,
-		0, REASON_ILLEGAL_VALUE, 0}
+		0, REASON_ILLEGAL_VALUE, 0};
 	}
 	exist_log_check(log)
 }
@@ -126,7 +124,7 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 		printk(KERN_INFO "in hook function. check_direction=%d, check_ip=%d, check_port=%d, check_ack=%d\n", check_direction(skb, curr_rule), check_ip(skb, curr_rule), check_port(skb,curr_rule), check_ack(skb, curr_rule));
 		check_direction_result = check_direction(skb, curr_rule);
 		if (check_direction_result==-1){
-			log(curr_rule, skb, rule_table_idx, 1);
+			log(curr_rule, skb, 0, 1);
 			return NF_DROP;
 		}
 		if (check_direction_result&&check_ip(skb, curr_rule)&&check_port(skb,curr_rule)&&check_ack(skb, curr_rule)){
@@ -136,12 +134,12 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 			if (curr_rule.action==NF_ACCEPT){
 				printk(KERN_INFO "Action taken is Accept\n");
 			}
-			log(curr_rule, curr_rule.action, skb, rule_table_idx, 0);
+			log(curr_rule, skb, rule_table_idx, 0);
 			return curr_rule.action;
 		}
 	}
 	printk(KERN_INFO "Action taken is Drop\n");
-	log(curr_rule, NF_DROP)
+	log(curr_rule, skb, 0, 2)
 	return NF_DROP;
 }
 
