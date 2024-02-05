@@ -84,7 +84,7 @@ void exist_log_check(log_row_t *log){
 	else{
 		printk(KERN_INFO "Here! log->action=%u\n", log->action);
 	}*/
-	find_identical_log(log, compare_logs);
+	log_exist = find_identical_log(log, compare_logs);
 	if (log_exist==NULL){
 		printk(KERN_INFO "Before add_to_log_list\n");
 		add_to_log_list(log);
