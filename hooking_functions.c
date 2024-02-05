@@ -90,26 +90,34 @@ void exist_log_check(log_row_t *log){
 
 void log(rule_t rule, struct sk_buff *skb, int rule_table_idx, int special_reason){
 	log_row_t log;
+	reason_t reason = rule_table_idx;
+	unsigned char action = rule.action;
+	//handle special cases wnen no rule matching the action:
 	if (special_reason==1){
-		log = (log_row_t){get_time(), rule.protocol, NF_DROP, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, 0,
-		0, REASON_ILLEGAL_VALUE, 0};
+		reason = REASON_ILLEGAL_VALUE;
+		action = NF_DROP;
 	}
 	else if (special_reason==2){
-		log = (log_row_t){get_time(), rule.protocol, NF_DROP, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, 0,
-		0, REASON_NO_MATCHING_RULE, 0};
+		reason = REASON_NO_MATCHING_RULE;
+		action = NF_DROP;
 	}
-	else if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_TCP)){
-		log = (log_row_t){get_time(), rule.protocol, rule.action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source,
-		tcp_hdr(skb)->dest, rule_table_idx, 0};
+	//Log different cases- by protocols:
+	if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_TCP)){
+		log = (log_row_t){get_time(), PROT_TCP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source,
+		tcp_hdr(skb)->dest, reason, 0};
 	}
 	else if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_UDP))
 	{
-		log = (log_row_t){get_time(), rule.protocol, rule.action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, udp_hdr(skb)->source,
-		udp_hdr(skb)->dest, rule_table_idx, 0};
+		log = (log_row_t){get_time(), PROT_UDP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, udp_hdr(skb)->source,
+		udp_hdr(skb)->dest, reason, 0};
+	}
+	else if (ip_hdr(skb)->protocol==IPPROTO_ICMP)
+	{
+		log = (log_row_t){get_time(), PROT_ICMP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, udp_hdr(skb)->source,
+		udp_hdr(skb)->dest, reason, 0};
 	}
 	else{
-		log = (log_row_t){get_time(), rule.protocol, NF_DROP, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, 0,
-		0, REASON_ILLEGAL_VALUE, 0};
+		return;
 	}
 	exist_log_check(&log);
 }
@@ -124,7 +132,7 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 		printk(KERN_INFO "in hook function. check_direction=%d, check_ip=%d, check_port=%d, check_ack=%d\n", check_direction(skb, curr_rule), check_ip(skb, curr_rule), check_port(skb,curr_rule), check_ack(skb, curr_rule));
 		check_direction_result = check_direction(skb, curr_rule);
 		if (check_direction_result==-1){
-			log(curr_rule, skb, 0, 1);
+			log(NULL, skb, 0, 1);
 			return NF_DROP;
 		}
 		if (check_direction_result&&check_ip(skb, curr_rule)&&check_port(skb,curr_rule)&&check_ack(skb, curr_rule)){
@@ -139,7 +147,7 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 		}
 	}
 	printk(KERN_INFO "Action taken is Drop\n");
-	log(curr_rule, skb, 0, 2)
+	log(NULL, skb, 0, 2)
 	return NF_DROP;
 }
 
