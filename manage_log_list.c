@@ -32,15 +32,16 @@ void init_log_list(void) {
     klist_init(&log_list);
 }*/
 
-int add_to_log_list(log_row_t *log) {
-    struct log_list_node *new_node = kmalloc(sizeof(struct log_list_node), GFP_KERNEL);
-    if (!new_node)
+int insert_log(struct log_row_t *log) {
+    struct klist_node *node = kmalloc(sizeof(struct klist_node), GFP_KERNEL);
+    if (!node) {
         return -1;
-    new_node->log = log;
-    klist_add_tail(&new_node->node, &log_list.k_head);
+    }
+    klist_add_tail(node, &log_list);
+    node->n_klist = log;
     return 0;
 }
-
+/*
 void remove_all_from_log_list(void) {
     struct log_list_node *entry;
     struct klist_node *kn;
@@ -76,3 +77,4 @@ log_row_t *find_identical_log(log_row_t *log, int (*compare_logs)(log_row_t *log
     }
     return NULL; 
 }
+*/
