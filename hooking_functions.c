@@ -102,7 +102,7 @@ reason_t find_special_reason(int reason_code){
 	}
 }
 
-log_row_t log_by_protocol(__u8 protocol, reason_t reason, struct sk_buff *skb){
+log_row_t log_by_protocol(__u8 protocol, struct sk_buff *skb, , reason_t reason, unsigned char action){
 	if ((protocol==IPPROTO_TCP)&&(skb->protocol == htons(ETH_P_IP))){
 		return (log_row_t){get_time(), PROT_TCP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source,
 		tcp_hdr(skb)->dest, reason, 0};
@@ -135,7 +135,7 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 		action = rule->action;
 		printk(KERN_INFO "Just put action- 3");
 	}
-	log = log_by_protocol(ip_hdr(skb)->protocol, reason, skb)
+	log = log_by_protocol(ip_hdr(skb)->protocol, skb, reason, action)
 	if (log==NULL){
 		return;
 	}
