@@ -114,7 +114,7 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 	else if (special_reason==3){
 		reason = REASON_FW_INACTIVE;
 		action = NF_DROP;
-		printk(KERN_INFO "set reason as REASON_FW_INACTIVE", NF_DROP);
+		printk(KERN_INFO "set reason as REASON_FW_INACTIVE");
 	}
 	else {
 		action = rule->action;
@@ -166,10 +166,13 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 			return curr_rule.action;
 		}
 	}
-	if (rule_table_size==0){
+	printk(KERN_INFO "No rule found. rule_table_size=%d\n", *rule_table_size);
+	if (*rule_table_size==0){
+		printk(KERN_INFO "No rules in table\n");
 		log(NULL, skb, 0, 3);
 	}
 	else{
+		printk(KERN_INFO "No rule matched\n");
 		log(NULL, skb, 0, 2);
 	}
 	printk(KERN_INFO "Action taken is Drop\n");
