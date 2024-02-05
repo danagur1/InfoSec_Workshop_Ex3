@@ -111,6 +111,11 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 		action = NF_DROP;
 		printk(KERN_INFO "Just put action to NF_DROP- 2 %u\n", NF_DROP);
 	}
+	else if (special_reason==3){
+		reason = REASON_FW_INACTIVE;
+		action = NF_DROP;
+		printk(KERN_INFO "set reason as REASON_FW_INACTIVE", NF_DROP);
+	}
 	else {
 		action = rule->action;
 		printk(KERN_INFO "Just put action- 3");
@@ -161,8 +166,13 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 			return curr_rule.action;
 		}
 	}
+	if (rule_table_size==0){
+		log(NULL, skb, 0, 3);
+	}
+	else{
+		log(NULL, skb, 0, 2);
+	}
 	printk(KERN_INFO "Action taken is Drop\n");
-	log(NULL, skb, 0, 2);
 	return NF_DROP;
 }
 
