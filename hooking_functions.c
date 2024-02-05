@@ -19,16 +19,16 @@ static int *rule_table_size;
 int check_direction(struct sk_buff *skb, rule_t rule){
 	struct net_device *dev = skb->dev;
 	if (dev) {
-printk(KERN_INFO "in check_direction: dev->name=%s\n", dev->name);
+		printk(KERN_INFO "in check_direction: dev->name=%s\n", dev->name);
         if (rule.direction==DIRECTION_IN) {
             return strcmp(dev->name, "enp0s9") == 0;
         } else if (rule.direction==DIRECTION_OUT) {
             return strcmp(dev->name, "enp0s8") == 0;
         } else {
-printk(KERN_INFO "in check_direction: no dev\n");
+			printk(KERN_INFO "in check_direction: no dev\n");
             return -1;
-    }
-}
+    	}
+	}
 	return 0;
 }
 
@@ -78,12 +78,6 @@ long get_time(void){
 
 void exist_log_check(log_row_t *log){
 	log_row_t *log_exist;
-	/*if (log==NULL){
-		printk(KERN_INFO "Here! with log=NULL\n");
-	}
-	else{
-		printk(KERN_INFO "Here! log->action=%u\n", log->action);
-	}*/
 	log_exist = find_identical_log(log, compare_logs);
 	if (log_exist==NULL){
 		printk(KERN_INFO "Before add_to_log_list\n");
@@ -96,46 +90,53 @@ void exist_log_check(log_row_t *log){
 	}
 }
 
+reason_t find_special_reason(int reason_code){
+	if (special_reason==1){
+		return REASON_ILLEGAL_VALUE;
+	}
+	else if (special_reason==2){
+		return REASON_NO_MATCHING_RULE;
+	}
+	else if (special_reason==3){
+		return REASON_FW_INACTIVE;
+	}
+}
+
+log_row_t log_by_protocol(__u8 protocol, reason_t reason, sk_buff skb){
+	if ((protocol==IPPROTO_TCP)&&(skb->protocol == htons(ETH_P_IP))){
+		return (log_row_t){get_time(), PROT_TCP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source,
+		tcp_hdr(skb)->dest, reason, 0};
+	}
+	if ((protocol==IPPROTO_UDP)&&(skb->protocol == htons(ETH_P_IP))){
+		return (log_row_t){get_time(), PROT_UDP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, udp_hdr(skb)->source,
+		udp_hdr(skb)->dest, reason, 0};
+	}
+	if (protocol==IPPROTO_ICMP){
+		return (log_row_t){get_time(), PROT_ICMP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, udp_hdr(skb)->source,
+		udp_hdr(skb)->dest, reason, 0};
+	}
+	return NULL;
+}
+
 void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reason){
 	log_row_t log;
 	reason_t reason = rule_table_idx;
 	unsigned char action;
+	if (strcmp(dev->name, "lo")){
+		//no log in case of loopback
+		return;
+	}
 	//handle special cases wnen no rule matching the action:
-	if (special_reason==1){
-		reason = REASON_ILLEGAL_VALUE;
+	if (special_reason>0){
+		reason = find_special_reason(special_reason)
 		action = NF_DROP;
-		printk(KERN_INFO "Just put action to NF_DROP- 1 %u\n", NF_DROP);
-	}
-	else if (special_reason==2){
-		reason = REASON_NO_MATCHING_RULE;
-		action = NF_DROP;
-		printk(KERN_INFO "Just put action to NF_DROP- 2 %u\n", NF_DROP);
-	}
-	else if (special_reason==3){
-		reason = REASON_FW_INACTIVE;
-		action = NF_DROP;
-		printk(KERN_INFO "set reason as REASON_FW_INACTIVE");
 	}
 	else {
 		action = rule->action;
 		printk(KERN_INFO "Just put action- 3");
 	}
-	//Log different cases- by protocols:
-	if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_TCP)){
-		log = (log_row_t){get_time(), PROT_TCP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source,
-		tcp_hdr(skb)->dest, reason, 0};
-	}
-	else if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_UDP))
-	{
-		log = (log_row_t){get_time(), PROT_UDP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, udp_hdr(skb)->source,
-		udp_hdr(skb)->dest, reason, 0};
-	}
-	else if (ip_hdr(skb)->protocol==IPPROTO_ICMP)
-	{
-		log = (log_row_t){get_time(), PROT_ICMP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, udp_hdr(skb)->source,
-		udp_hdr(skb)->dest, reason, 0};
-	}
-	else{
+	log = log_by_protocol(ip_hdr(skb)->protocol, reason, skb)
+	if (log==NULL){
 		return;
 	}
 	printk(KERN_INFO "Before exist_log_check\n");
