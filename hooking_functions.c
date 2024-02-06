@@ -126,6 +126,7 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 	log_row_t log;
 	reason_t reason = rule_table_idx;
 	unsigned char action;
+	struct net_device *dev = skb->dev;
 	int no_log = 0;
 	if (strcmp(dev->name, "lo")){
 		//no log in case of loopback
