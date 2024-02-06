@@ -16,6 +16,11 @@ static struct nf_hook_ops by_table_nh_ops;
 static rule_t *rule_table;
 static int *rule_table_size;
 
+/*
+Checking functions- compare information from the packet and rules. 
+return 1 in case of match, 0 in case of no match, -1 in case of illegal value
+*/
+
 int check_direction(struct sk_buff *skb, rule_t rule){
 	struct net_device *dev = skb->dev;
 	if (dev) {
@@ -34,10 +39,10 @@ int check_direction(struct sk_buff *skb, rule_t rule){
 
 int check_ip(struct sk_buff *skb, rule_t rule){
 	if ((ip_hdr(skb)->protocol!=IPPROTO_ICMP)&&(rule.protocol==PROT_ICMP)){
-printk(KERN_INFO "check_ip return 0 because of icmp");
+		//printk(KERN_INFO "check_ip return 0 because of icmp");
 		return 0;
 	}
-printk(KERN_INFO "1:%u, 2:%u, 3:%u", ip_hdr(skb)->saddr, rule.src_prefix_mask, rule.src_ip);
+	//printk(KERN_INFO "1:%u, 2:%u, 3:%u", ip_hdr(skb)->saddr, rule.src_prefix_mask, rule.src_ip);
 	return ((ip_hdr(skb)->saddr & rule.src_prefix_mask) == (rule.src_ip & rule.src_prefix_mask)) && ((ip_hdr(skb)->daddr & rule.dst_prefix_mask) == (rule.dst_ip & rule.dst_prefix_mask));
 }
 
@@ -63,7 +68,12 @@ int check_ack(struct sk_buff *skb, rule_t rule){
 	return 1;
 }
 
+/*
+Logging functions
+*/
+
 static int compare_logs(log_row_t *log1, log_row_t *log2){
+	//compare log rows by all parameters except count
     return (log1->timestamp==log2->timestamp)&&(log1->protocol==log2->protocol)&&(log1->action==log2->action)&&
     (log1->src_ip==log2->src_ip)&&(log1->dst_ip==log2->dst_ip)&&(log1->src_port==log2->src_port)&&
     (log1->dst_port==log2->dst_port)&&(log1->reason==log2->reason);
@@ -71,6 +81,7 @@ static int compare_logs(log_row_t *log1, log_row_t *log2){
 
 
 long get_time(void){
+	//returns the current time in seconds
 	struct timespec64 current_time;
     ktime_get_real_ts64(&current_time);
     return (unsigned long)current_time.tv_sec;
@@ -91,14 +102,14 @@ void exist_log_check(log_row_t *log){
 }
 
 reason_t find_special_reason(int reason_code){
-	if (reason_code==1){
-		return REASON_ILLEGAL_VALUE;
+	if (reason_code==3){
+		return REASON_FW_INACTIVE;
 	}
 	else if (reason_code==2){
 		return REASON_NO_MATCHING_RULE;
 	}
 	else {
-		return REASON_FW_INACTIVE;
+		return REASON_ILLEGAL_VALUE;
 	}
 }
 
@@ -139,15 +150,19 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 	}
 	else {
 		action = rule->action;
-		printk(KERN_INFO "Just put action- 3");
+		//printk(KERN_INFO "Just put action- 3");
 	}
 	log = log_by_protocol(ip_hdr(skb)->protocol, skb, reason, action, &no_log);
 	if (no_log){
 		return;
 	}
-	printk(KERN_INFO "Before exist_log_check\n");
+	//printk(KERN_INFO "Before exist_log_check\n");
 	exist_log_check(&log);
 }
+
+/*
+The hook function of the firewall:
+*/
 
 unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
 	int rule_table_idx;
@@ -155,31 +170,31 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 	printk(KERN_INFO "in hook function. rule_table_size=%d\n", *rule_table_size);
 	for (rule_table_idx = 0; rule_table_idx<*rule_table_size; rule_table_idx++){
 		rule_t curr_rule= rule_table[rule_table_idx];
-		printk(KERN_INFO "in loop for=%d\n", rule_table_idx);
-		printk(KERN_INFO "in hook function. check_direction=%d, check_ip=%d, check_port=%d, check_ack=%d\n", check_direction(skb, curr_rule), check_ip(skb, curr_rule), check_port(skb,curr_rule), check_ack(skb, curr_rule));
+		//printk(KERN_INFO "in loop for=%d\n", rule_table_idx);
+		//printk(KERN_INFO "in hook function. check_direction=%d, check_ip=%d, check_port=%d, check_ack=%d\n", check_direction(skb, curr_rule), check_ip(skb, curr_rule), check_port(skb,curr_rule), check_ack(skb, curr_rule));
 		check_direction_result = check_direction(skb, curr_rule);
 		if (check_direction_result==-1){
 			log(NULL, skb, 0, 1);
 			return NF_DROP;
 		}
 		if (check_direction_result&&check_ip(skb, curr_rule)&&check_port(skb,curr_rule)&&check_ack(skb, curr_rule)){
-			if (curr_rule.action==NF_DROP){
+			/*if (curr_rule.action==NF_DROP){
 				printk(KERN_INFO "Action taken is Drop\n");
 			}
 			if (curr_rule.action==NF_ACCEPT){
 				printk(KERN_INFO "Action taken is Accept\n");
-			}
+			}*/
 			log(&curr_rule, skb, rule_table_idx, 0);
 			return curr_rule.action;
 		}
 	}
-	printk(KERN_INFO "No rule found. rule_table_size=%d\n", *rule_table_size);
+	//printk(KERN_INFO "No rule found. rule_table_size=%d\n", *rule_table_size);
 	if (*rule_table_size==0){
-		printk(KERN_INFO "No rules in table\n");
+		//printk(KERN_INFO "No rules in table\n");
 		log(NULL, skb, 0, 3);
 	}
 	else{
-		printk(KERN_INFO "No rule matched\n");
+		//printk(KERN_INFO "No rule matched\n");
 		log(NULL, skb, 0, 2);
 	}
 	printk(KERN_INFO "Action taken is Drop\n");
