@@ -142,7 +142,7 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 		printk(KERN_INFO "Just put action- 3");
 	}
 	log = log_by_protocol(ip_hdr(skb)->protocol, skb, reason, action, &no_log);
-	if (log_error){
+	if (no_log){
 		return;
 	}
 	printk(KERN_INFO "Before exist_log_check\n");
