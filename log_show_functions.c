@@ -2,6 +2,7 @@
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/device.h>
+
 #include "fw.h"
 
 MODULE_LICENSE("GPL");
@@ -18,12 +19,12 @@ static struct file_operations fops = {
 	.owner = THIS_MODULE
 };
 
-static ssize_t display(struct device *dev, struct device_attribute *attr, char *buf)	//sysfs show implementation
+ssize_t display(struct device *dev, struct device_attribute *attr, char *buf)	//sysfs show implementation
 {
 	return scnprintf(buf, PAGE_SIZE, "%u\n", sysfs_int);
 }
 
-static ssize_t modify(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)	//sysfs store implementation
+ssize_t modify(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)	//sysfs store implementation
 {
 	int temp;
 	if (sscanf(buf, "%u", &temp) == 1)
@@ -72,7 +73,7 @@ int log_show_create_dev(void)
 void log_show_remove_dev(void)
 {
 	device_remove_file(sysfs_device, (const struct device_attribute *)&dev_attr_sysfs_att.attr);
-	device_destroy(sysfs_class, MKDEV(major_number, 0));
+	device_destroy(sysfs_class, MKDEV(major_number, MINOR_LOG));
 	class_destroy(sysfs_class);
 	unregister_chrdev(major_number, "Sysfs_Device");
 }
