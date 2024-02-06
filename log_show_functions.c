@@ -49,7 +49,7 @@ int log_show_create_dev(void)
 	}
 	
 	//create sysfs device
-	sysfs_device = device_create(sysfs_class, NULL, MKDEV(major_number, MINOR_RULES), NULL, "sysfs_class" "_" "sysfs_Device");	
+	sysfs_device = device_create(sysfs_class, NULL, MKDEV(major_number, MINOR_LOG), NULL, "sysfs_class" "_" "sysfs_Device");	
 	if (IS_ERR(sysfs_device))
 	{
 		class_destroy(sysfs_class);
@@ -60,7 +60,7 @@ int log_show_create_dev(void)
 	//create sysfs file attributes	
 	if (device_create_file(sysfs_device, (const struct device_attribute *)&dev_attr_sysfs_att.attr))
 	{
-		device_destroy(sysfs_class, MKDEV(major_number, MINOR_RULES));
+		device_destroy(sysfs_class, MKDEV(major_number, MINOR_LOG));
 		class_destroy(sysfs_class);
 		unregister_chrdev(major_number, "Sysfs_Device");
 		return -1;
