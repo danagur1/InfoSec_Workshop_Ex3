@@ -134,7 +134,7 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 	}
 	//handle special cases wnen no rule matching the action:
 	if (special_reason>0){
-		reason = find_special_reason(special_reason)
+		reason = find_special_reason(special_reason);
 		action = NF_DROP;
 	}
 	else {
