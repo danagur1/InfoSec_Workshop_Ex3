@@ -97,7 +97,7 @@ reason_t find_special_reason(int reason_code){
 	else if (reason_code==2){
 		return REASON_NO_MATCHING_RULE;
 	}
-	else if (reason_code==3){
+	else {
 		return REASON_FW_INACTIVE;
 	}
 }
