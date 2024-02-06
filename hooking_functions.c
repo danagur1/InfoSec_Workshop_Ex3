@@ -102,7 +102,7 @@ reason_t find_special_reason(int reason_code){
 	}
 }
 
-log_row_t *log_by_protocol(__u8 protocol, struct sk_buff *skb, reason_t reason, unsigned char action){
+log_row_t log_by_protocol(__u8 protocol, struct sk_buff *skb, reason_t reason, unsigned char action, int no_log){
 	log_row_t log;
 	if ((protocol==IPPROTO_TCP)&&(skb->protocol == htons(ETH_P_IP))){
 		log = (log_row_t){get_time(), PROT_TCP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source,
@@ -117,15 +117,16 @@ log_row_t *log_by_protocol(__u8 protocol, struct sk_buff *skb, reason_t reason, 
 		udp_hdr(skb)->dest, reason, 0};
 	}
 	else{
-		return NULL
+		no_log = 1;
 	}
-	return &log;
+	return log;
 }
 
 void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reason){
-	log_row_t *log;
+	log_row_t log;
 	reason_t reason = rule_table_idx;
 	unsigned char action;
+	int no_log = 0;
 	if (strcmp(dev->name, "lo")){
 		//no log in case of loopback
 		return;
@@ -139,12 +140,12 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 		action = rule->action;
 		printk(KERN_INFO "Just put action- 3");
 	}
-	log = log_by_protocol(ip_hdr(skb)->protocol, skb, reason, action)
-	if (log==NULL){
+	log = log_by_protocol(ip_hdr(skb)->protocol, skb, reason, action, no_log)
+	if (log_error){
 		return;
 	}
 	printk(KERN_INFO "Before exist_log_check\n");
-	exist_log_check(log);
+	exist_log_check(&log);
 }
 
 unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
