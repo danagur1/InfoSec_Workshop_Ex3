@@ -76,6 +76,3 @@ void log_show_remove_dev(void)
 	class_destroy(sysfs_class);
 	unregister_chrdev(major_number, "Sysfs_Device");
 }
-
-module_init(sysfs_example_init);
-module_exit(sysfs_example_exit);
