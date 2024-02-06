@@ -177,6 +177,7 @@ static int parse_port(const char *src, __be16 *dst){
 	return size;
 }
 
+//Update the current index in buf by the size of element read
 int check_and_update_idx(int *buf_index, int element_size){
 	printk(KERN_INFO "in check_and_update_idx function\n");
 	if (element_size==-1){
@@ -187,7 +188,8 @@ int check_and_update_idx(int *buf_index, int element_size){
 	return 0;
 }
 
-ssize_t modify(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)	//sysfs store implementation
+//sysfs store implementation- parse all the rule componenets from driver
+ssize_t modify(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
 	int rule_table_index = 0;
 	int buf_index = 0;
@@ -255,7 +257,7 @@ int rules_create_dev(rule_t *user_rule_table, int *user_rule_table_size)
 	printk(KERN_INFO "in rules_create_dev function\n");
 	rule_table = user_rule_table;
 	rule_table_size = user_rule_table_size;
-	
+
 	//create char device
 	major_number = register_chrdev(0, DEVICE_NAME_RULES, &fops);\
 	if (major_number < 0)
