@@ -18,12 +18,12 @@ static struct file_operations fops = {
 	.owner = THIS_MODULE
 };
 
-ssize_t display(struct device *dev, struct device_attribute *attr, char *buf)	//sysfs show implementation
+static ssize_t display(struct device *dev, struct device_attribute *attr, char *buf)	//sysfs show implementation
 {
 	return scnprintf(buf, PAGE_SIZE, "%u\n", sysfs_int);
 }
 
-ssize_t modify(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)	//sysfs store implementation
+static ssize_t modify(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)	//sysfs store implementation
 {
 	int temp;
 	if (sscanf(buf, "%u", &temp) == 1)
