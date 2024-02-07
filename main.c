@@ -16,8 +16,6 @@ static rule_t *first_rule_table;
 static int first_rule_table_size=0;
 
 static int __init my_module_init_function(void) {
-	int rv1;
-	int rv2;
 	first_rule_table= (rule_t*)kmalloc(sizeof(rule_t)*MAX_RULES, GFP_KERNEL);
 	if (rules_create_dev(first_rule_table, &first_rule_table_size)<0){
 		return -1;

@@ -9,7 +9,7 @@ MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
 
 static int major_number;
-static struct class* sysfs_class = NULL;
+static struct class* fw = NULL;
 static struct device* sysfs_device = NULL;
 
 static unsigned int sysfs_int = 0;
@@ -41,18 +41,18 @@ int log_show_create_dev(void)
 		return -1;
 		
 	//create sysfs class
-	sysfs_class = class_create(THIS_MODULE, CLASS_NAME);
-	if (IS_ERR(sysfs_class))
+	fw = class_create(THIS_MODULE, CLASS_NAME);
+	if (IS_ERR(fw))
 	{
 		unregister_chrdev(major_number, "Sysfs_Device");
 		return -1;
 	}
 	
 	//create sysfs device
-	sysfs_device = device_create(sysfs_class, NULL, MKDEV(major_number, MINOR_LOG), NULL, "sysfs_class" "_" "sysfs_Device");	
+	sysfs_device = device_create(fw, NULL, MKDEV(major_number, MINOR_LOG), NULL, "fw" "_" "sysfs_Device");	
 	if (IS_ERR(sysfs_device))
 	{
-		class_destroy(sysfs_class);
+		class_destroy(fw);
 		unregister_chrdev(major_number, "Sysfs_Device");
 		return -1;
 	}
@@ -60,8 +60,8 @@ int log_show_create_dev(void)
 	//create sysfs file attributes	
 	if (device_create_file(sysfs_device, (const struct device_attribute *)&dev_attr_sysfs_att.attr))
 	{
-		device_destroy(sysfs_class, MKDEV(major_number, MINOR_LOG));
-		class_destroy(sysfs_class);
+		device_destroy(fw, MKDEV(major_number, MINOR_LOG));
+		class_destroy(fw);
 		unregister_chrdev(major_number, "Sysfs_Device");
 		return -1;
 	}
@@ -72,7 +72,7 @@ int log_show_create_dev(void)
 void log_show_remove_dev(void)
 {
 	device_remove_file(sysfs_device, (const struct device_attribute *)&dev_attr_sysfs_att.attr);
-	device_destroy(sysfs_class, MKDEV(major_number, MINOR_LOG));
-	class_destroy(sysfs_class);
+	device_destroy(fw, MKDEV(major_number, MINOR_LOG));
+	class_destroy(fw);
 	unregister_chrdev(major_number, "Sysfs_Device");
 }
