@@ -193,7 +193,7 @@ def show():
         rule = rules_file.readline()
         print(rule)
         while True:
-            if rule=='':
+            if rule=='\n':
                 break
             rule = rule.split()
             print(write_rule(rule))
