@@ -33,26 +33,19 @@ static ssize_t modify(struct device *dev, struct device_attribute *attr, const c
 
 static DEVICE_ATTR(sysfs_att, S_IWUSR | S_IRUGO , display, modify);
 
-int log_show_create_dev(void)
+int log_show_create_dev(struct class *devices_class)
 {
 	//create char device
 	major_number = register_chrdev(0, "Sysfs_Device", &fops);\
 	if (major_number < 0)
 		return -1;
 		
-	//create sysfs class
-	sysfs_class = class_create(THIS_MODULE, "fww");
-	if (IS_ERR(sysfs_class))
-	{
-		unregister_chrdev(major_number, "Sysfs_Device");
-		return -1;
-	}
 	
 	//create sysfs device
-	sysfs_device = device_create(sysfs_class, NULL, MKDEV(major_number, MINOR_LOG), NULL, "fww" "_" "sysfs_Device");	
+	sysfs_device = device_create(devices_class, NULL, MKDEV(major_number, MINOR_LOG), NULL, "fww" "_" "sysfs_Device");	
 	if (IS_ERR(sysfs_device))
 	{
-		class_destroy(sysfs_class);
+		class_destroy(devices_class);
 		unregister_chrdev(major_number, "Sysfs_Device");
 		return -1;
 	}
@@ -60,8 +53,8 @@ int log_show_create_dev(void)
 	//create sysfs file attributes	
 	if (device_create_file(sysfs_device, (const struct device_attribute *)&dev_attr_sysfs_att.attr))
 	{
-		device_destroy(sysfs_class, MKDEV(major_number, MINOR_LOG));
-		class_destroy(sysfs_class);
+		device_destroy(devices_class, MKDEV(major_number, MINOR_LOG));
+		class_destroy(devices_class);
 		unregister_chrdev(major_number, "Sysfs_Device");
 		return -1;
 	}
@@ -72,7 +65,7 @@ int log_show_create_dev(void)
 void log_show_remove_dev(void)
 {
 	device_remove_file(sysfs_device, (const struct device_attribute *)&dev_attr_sysfs_att.attr);
-	device_destroy(sysfs_class, MKDEV(major_number, MINOR_LOG));
-	class_destroy(sysfs_class);
+	device_destroy(devices_class, MKDEV(major_number, MINOR_LOG));
+	class_destroy(devices_class);
 	unregister_chrdev(major_number, "Sysfs_Device");
 }

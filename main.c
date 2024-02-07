@@ -13,14 +13,16 @@ MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
 
 static rule_t *first_rule_table;
-static int first_rule_table_size=0;
 
 static int __init my_module_init_function(void) {
+	int first_rule_table_size=0;
+	struct *devices_class;
 	first_rule_table= (rule_t*)kmalloc(sizeof(rule_t)*MAX_RULES, GFP_KERNEL);
-	if (rules_create_dev(first_rule_table, &first_rule_table_size)<0){
+	devices_class = rules_create_dev(first_rule_table, &first_rule_table_size);
+	if (devices_class==NULL){
 		return -1;
 	}
-	if (log_show_create_dev()<0){
+	if (log_show_create_dev(devices_class)<0){
 		return -1;
 	}
 	if (register_hook(first_rule_table, &first_rule_table_size)<0){
