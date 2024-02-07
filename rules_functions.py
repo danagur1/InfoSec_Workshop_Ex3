@@ -191,7 +191,7 @@ def load(rules_file_path):
 
 def show():
     with open(RULES_DEVICE_FILEPATH, "r") as rules_file:
-        rule = rules_file.readline().split()
+        rule = rules_file.readline().replace("\n", " ").split()
         while not rule:
             print(write_rule(rule))
     return True
