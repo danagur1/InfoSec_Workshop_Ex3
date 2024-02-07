@@ -178,7 +178,7 @@ def load(rules_file_path):
                 if not parsed_rule:
                     return False
                 print(parsed_rule)
-                rules_table_driver.write(parsed_rule)
+                rules_table_driver.write(parsed_rule+"\n") # added line terminator to identify end of rule
                 rule = rules_file.readline()
     return True
     """

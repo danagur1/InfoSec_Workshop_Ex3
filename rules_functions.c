@@ -266,7 +266,6 @@ printk(KERN_INFO "after dst prefix_size and now buf_index=%d and has-%.10s near 
 		if(check_and_update_idx(&buf_index, parse_action(buf+buf_index, &curr_rule.action))==-1){
 			return -1;
 		}
-		buf_index--;
 		printk(KERN_INFO "ended the loop and not buf_index=%d and has %.10s near it and before it %.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		rule_table_index++;
 	}
