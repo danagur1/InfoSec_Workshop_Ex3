@@ -29,7 +29,7 @@ static struct file_operations fops = {
 Display related functions: store the input without parsing and parse it in user-mode program
 */
 
-static void free_input_buf(){
+static void free_input_buf(void){
 	if (not_parsed_input!=NULL){
 		free(not_parsed_input);
 	}
