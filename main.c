@@ -19,13 +19,16 @@ static int __init my_module_init_function(void) {
 	int rv1;
 	int rv2;
 	first_rule_table= (rule_t*)kmalloc(sizeof(rule_t)*MAX_RULES, GFP_KERNEL);
-	printk(KERN_INFO "Succesful call for init\n");
-	rv1 = rules_create_dev(first_rule_table, &first_rule_table_size) && log_show_create_dev();
-	printk(KERN_INFO "After rules_create_dev\n. now first_rule_table_size=%d", first_rule_table_size);
-	rv2 = register_hook(first_rule_table, &first_rule_table_size);
-	printk(KERN_INFO "After register_hook\n");
-	return rv1 && rv2;
-	//return rules_create_dev(rule_table);/*register_hook() && log_clear_create_dev() && log_show_create_dev() && rules_create_dev();*/
+	if (rules_create_dev(first_rule_table, &first_rule_table_size)<0){
+		return -1;
+	}
+	if (log_show_create_dev()<0){
+		return -1;
+	}
+	if (register_hook(first_rule_table, &first_rule_table_size)<0){
+		return -1;
+	}
+	return 0; //all the functions 
 }
 
 static void __exit my_module_exit_function(void) {
