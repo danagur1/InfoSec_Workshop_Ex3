@@ -33,7 +33,7 @@ def parse_ip(ip_add):
 
 
 def reverse_parse_ip(ip, prefix_size):
-    return "/".join(ip, prefix_size)
+    return "/".join([ip, prefix_size])
 
 
 def get_direction_code(direction):
