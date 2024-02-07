@@ -154,13 +154,13 @@ def read_rule(rule):
 
 def write_rule(rule):
     direction = reverse_direction(rule[1])
-    src_ip_with_perfix = reverse_parse_ip(rule[2])
-    dst_ip_with_perfix = reverse_parse_ip(rule[3])
-    protocol = reverse_protocol(rule[4])
-    src_port = reverse_port(rule[5])
-    dst_port = reverse_port(rule[6])
-    ack = reverse_ack(rule[7])
-    action = reverse_action(rule[8])
+    src_ip_with_perfix = reverse_parse_ip(rule[2], rule[4])
+    dst_ip_with_perfix = reverse_parse_ip(rule[5], rule[7])
+    protocol = reverse_protocol(rule[8])
+    src_port = reverse_port(rule[9])
+    dst_port = reverse_port(rule[10])
+    ack = reverse_ack(rule[11])
+    action = reverse_action(rule[12])
     return ' '.join([rule[0], direction, src_ip_with_perfix, dst_ip_with_perfix, protocol, src_port, dst_port, ack, action])
 
 
