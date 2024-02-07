@@ -22,7 +22,7 @@ static struct file_operations fops = {
 	.owner = THIS_MODULE
 };
 
-static static ssize_t display(struct device *dev, struct device_attribute *attr, char *buf)	//sysfs show implementation
+static ssize_t display(struct device *dev, struct device_attribute *attr, char *buf)	//sysfs show implementation
 {
 	return 0; 
 }
