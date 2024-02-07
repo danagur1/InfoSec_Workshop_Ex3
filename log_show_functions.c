@@ -10,7 +10,7 @@ MODULE_DESCRIPTION("Stateless firewall");
 
 static int major_number;
 static struct class* fw_class = NULL;
-static struct device* sysfs_device = NULL;
+static struct device* log_device = NULL;
 
 static unsigned int sysfs_int = 0;
 
@@ -37,22 +37,22 @@ int log_show_create_dev(struct class *devices_class)
 {
 	fw_class = devices_class;
 	//create char device
-	major_number = register_chrdev(0, "Sysfs_Device", &fops);\
+	major_number = register_chrdev(0, "log", &fops);\
 	if (major_number < 0)
 		return -1;
 		
 	
 	//create sysfs device
-	sysfs_device = device_create(fw_class, NULL, MKDEV(major_number, MINOR_LOG), NULL, "sysfs_Device");	
-	if (IS_ERR(sysfs_device))
+	log_device = device_create(fw_class, NULL, MKDEV(major_number, MINOR_LOG), NULL, "log");	
+	if (IS_ERR(log_device))
 	{
 		class_destroy(fw_class);
-		unregister_chrdev(major_number, "Sysfs_Device");
+		unregister_chrdev(major_number, "log");
 		return -1;
 	}
 	
 	//create sysfs file attributes	
-	if (device_create_file(sysfs_device, (const struct device_attribute *)&dev_attr_sysfs_att.attr))
+	if (device_create_file(log_device, (const struct device_attribute *)&dev_attr_sysfs_att.attr))
 	{
 		device_destroy(fw_class, MKDEV(major_number, MINOR_LOG));
 		class_destroy(fw_class);
