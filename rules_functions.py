@@ -99,7 +99,7 @@ def reverse_port(port_code):
     elif port_code == str(0):
         return "any"
     else:
-        return int(port_code)
+        return port_code
 
 
 def get_ack_code(ack):
