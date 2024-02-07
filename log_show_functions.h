@@ -1,4 +1,2 @@
-#include <linux/device.h>
-
-int log_show_create_dev(struct class *devices_class);
-void log_show_remove_dev(void);
+int log_clear_create_dev(void);
+void log_clear_remove_dev(void);

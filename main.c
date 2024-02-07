@@ -4,8 +4,8 @@
 #include <linux/gfp.h>
 #include "rules_functions.h"
 #include "hooking_functions.h"
-//#include "log_clear_functions.h"
-#include "log_show_functions.h"
+//#include "log_show_functions.h"
+#include "log_clear_functions.h"
 //#include "fw.h"
 
 MODULE_LICENSE("GPL");
@@ -22,7 +22,7 @@ static int __init my_module_init_function(void) {
 	if (devices_class==NULL){
 		return -1;
 	}
-	if (log_show_create_dev(devices_class)<0){
+	if (log_clear_create_dev(devices_class)<0){
 		return -1;
 	}
 	if (register_hook(first_rule_table, &first_rule_table_size)<0){
@@ -35,7 +35,7 @@ static void __exit my_module_exit_function(void) {
 	kfree(first_rule_table);
 	rules_remove_dev();
 	unregister_hook();
-	log_show_remove_dev();
+	log_clear_remove_dev();
 	/*
 	unregister_hook();
 	log_clear_remove_dev();
