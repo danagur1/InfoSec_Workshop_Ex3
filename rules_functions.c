@@ -35,7 +35,7 @@ static void free_input_buf(void){
 	}
 }
 
-int void store_not_parsed_input(char *buf, size_t count){]
+static int store_not_parsed_input(char *buf, size_t count){]
 	free_input_buf();
 	not_parsed_input = (char*)kmalloc(count*sizeof(char))
 	if (not_parsed_input==NULL){
