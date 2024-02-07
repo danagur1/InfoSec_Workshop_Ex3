@@ -56,7 +56,7 @@ int log_show_create_dev(struct class *devices_class)
 	{
 		device_destroy(fw_class, MKDEV(major_number, MINOR_LOG));
 		class_destroy(fw_class);
-		unregister_chrdev(major_number, "Sysfs_Device");
+		unregister_chrdev(major_number, "log");
 		return -1;
 	}
 	
@@ -65,8 +65,8 @@ int log_show_create_dev(struct class *devices_class)
 
 void log_show_remove_dev(void)
 {
-	device_remove_file(sysfs_device, (const struct device_attribute *)&dev_attr_sysfs_att.attr);
+	device_remove_file(log_device, (const struct device_attribute *)&dev_attr_sysfs_att.attr);
 	device_destroy(fw_class, MKDEV(major_number, MINOR_LOG));
 	class_destroy(fw_class);
-	unregister_chrdev(major_number, "Sysfs_Device");
+	unregister_chrdev(major_number, "log");
 }
