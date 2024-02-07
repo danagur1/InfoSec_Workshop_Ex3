@@ -19,7 +19,8 @@ static struct file_operations fops = {
 
 static ssize_t modify(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)	//sysfs store implementation
 {
-	remove_all_from_log_list();		
+	remove_all_from_log_list();
+	return 1;		
 }
 
 static DEVICE_ATTR(sysfs_att, S_IWUSR | S_IRUGO , NULL, modify);
