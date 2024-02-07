@@ -154,15 +154,14 @@ def read_rule(rule):
 
 def write_rule(rule):
     direction = reverse_direction(rule[1])
-    src_ip, src_prefix_mask, src_prefix_size = reverse_parse_ip(rule[2])
-    dst_ip, dst_prefix_mask, dst_prefix_size = reverse_parse_ip(rule[3])
+    src_ip_with_perfix = reverse_parse_ip(rule[2])
+    dst_ip_with_perfix = reverse_parse_ip(rule[3])
     protocol = reverse_protocol(rule[4])
     src_port = reverse_port(rule[5])
     dst_port = reverse_port(rule[6])
     ack = reverse_ack(rule[7])
     action = reverse_action(rule[8])
-    return ' '.join([rule[0], direction, src_ip, src_prefix_mask, src_prefix_size, dst_ip, dst_prefix_mask,
-                         dst_prefix_size, protocol, src_port, dst_port, ack, action])
+    return ' '.join([rule[0], direction, src_ip_with_perfix, dst_ip_with_perfix, protocol, src_port, dst_port, ack, action])
 
 
 def load(rules_file_path):
@@ -191,11 +190,14 @@ def load(rules_file_path):
 
 def show():
     with open(RULES_DEVICE_FILEPATH, "r") as rules_file:
-        rule = rules_file.readline().replace("\n", " ").split()
+        rule = rules_file.readline()
         print(rule)
-        while rule:
+        while True:
+            if rule=='':
+                break
+            rule = rule.split()
             print(write_rule(rule))
-            rule = rules_file.readline().replace("\n", " ").split()
+            rule = rules_file.readline().split()
     return True
 
 
