@@ -12,7 +12,7 @@ MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
 
 static int major_number;
-static struct class* fw = NULL;
+static struct class* fw_class = NULL;
 static struct device* rules = NULL;
 
 static rule_t *rule_table;
@@ -265,17 +265,17 @@ struct class *rules_create_dev(rule_t *user_rule_table, int *user_rule_table_siz
 		
 	//create sysfs class
 	fw = class_create(THIS_MODULE, CLASS_NAME);
-	if (IS_ERR(fw))
+	if (IS_ERR(fw_class))
 	{
 		unregister_chrdev(major_number, DEVICE_NAME_RULES);
 		return NULL;
 	}
 	
 	//create sysfs device
-	rules = device_create(fw, NULL, MKDEV(major_number, MINOR_RULES), NULL, DEVICE_NAME_RULES);	
+	rules = device_create(fw_class, NULL, MKDEV(major_number, MINOR_RULES), NULL, DEVICE_NAME_RULES);	
 	if (IS_ERR(rules))
 	{
-		class_destroy(fw);
+		class_destroy(fw_class);
 		unregister_chrdev(major_number, DEVICE_NAME_RULES);
 		return NULL;
 	}
@@ -283,19 +283,19 @@ struct class *rules_create_dev(rule_t *user_rule_table, int *user_rule_table_siz
 	//create sysfs file attributes	
 	if (device_create_file(rules, (const struct device_attribute *)&dev_attr_rules.attr))
 	{
-		device_destroy(fw, MKDEV(major_number, MINOR_RULES));
-		class_destroy(fw);
+		device_destroy(fw_class, MKDEV(major_number, MINOR_RULES));
+		class_destroy(fw_class);
 		unregister_chrdev(major_number, DEVICE_NAME_RULES);
 		return NULL;
 	}
 	printk(KERN_INFO "Succesful call for create\n");
-	return fw;
+	return fw_class;
 }
 
 void rules_remove_dev(void)
 {
 	device_remove_file(rules, (const struct device_attribute *)&dev_attr_rules.attr);
-	device_destroy(fw, MKDEV(major_number, MINOR_RULES));
+	device_destroy(fw_class, MKDEV(major_number, MINOR_RULES));
 	unregister_chrdev(major_number, DEVICE_NAME_RULES);
 	printk(KERN_INFO "Succesful call for remove\n");
 }
