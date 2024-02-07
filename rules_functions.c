@@ -31,7 +31,7 @@ Display related functions: store the input without parsing and parse it in user-
 
 static void free_input_buf(void){
 	if (not_parsed_input!=NULL){
-		free(not_parsed_input);
+		kfree(not_parsed_input);
 	}
 }
 
