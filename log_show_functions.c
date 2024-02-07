@@ -41,7 +41,7 @@ int log_show_create_dev(void)
 		return -1;
 		
 	//create sysfs class
-	sysfs_class = class_create(THIS_MODULE, "Sysfs_class");
+	sysfs_class = class_create(THIS_MODULE, CLASS_NAME);
 	if (IS_ERR(sysfs_class))
 	{
 		unregister_chrdev(major_number, "Sysfs_Device");
