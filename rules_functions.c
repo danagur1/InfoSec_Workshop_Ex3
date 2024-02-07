@@ -264,7 +264,7 @@ struct class *rules_create_dev(rule_t *user_rule_table, int *user_rule_table_siz
 		return NULL;
 		
 	//create sysfs class
-	fw = class_create(THIS_MODULE, CLASS_NAME);
+	fw_class = class_create(THIS_MODULE, CLASS_NAME);
 	if (IS_ERR(fw_class))
 	{
 		unregister_chrdev(major_number, DEVICE_NAME_RULES);
