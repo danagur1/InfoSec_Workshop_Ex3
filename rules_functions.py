@@ -33,7 +33,10 @@ def parse_ip(ip_add):
 
 
 def reverse_parse_ip(ip, prefix_size):
-    return "/".join([ip, prefix_size])
+    result = "/".join([ip, prefix_size])
+    if result==r"10.0.0.1/8": # this is the meaning of any ip
+        return any
+    return result
 
 
 def get_direction_code(direction):
@@ -191,7 +194,6 @@ def load(rules_file_path):
 def show():
     with open(RULES_DEVICE_FILEPATH, "r") as rules_file:
         rule = rules_file.readline()
-        print(rule)
         while True:
             if rule=='\n':
                 break
