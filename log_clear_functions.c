@@ -23,7 +23,7 @@ static ssize_t modify(struct device *dev, struct device_attribute *attr, const c
 	return 1;		
 }
 
-static DEVICE_ATTR(sysfs_att, S_IWUSR | S_IRUGO , NULL, modify);
+static DEVICE_ATTR(reset, S_IWUSR | S_IRUGO , NULL, modify);
 
 int log_clear_create_dev(struct class *devices_class)
 {
