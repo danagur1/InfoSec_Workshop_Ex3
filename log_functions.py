@@ -7,7 +7,7 @@ def show():
 
 
 def clear():
-    with open(LOG_CLEAR_FILEPATH, "r") as log_clear_file:
+    with open(LOG_CLEAR_FILEPATH, "w") as log_clear_file:
         log_clear_file.write("0")
         return True
     return False
