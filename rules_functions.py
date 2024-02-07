@@ -197,7 +197,7 @@ def show():
                 break
             rule = rule.split()
             print(write_rule(rule))
-            rule = rules_file.readline().split()
+            rule = rules_file.readline()
     return True
 
 
