@@ -18,14 +18,38 @@ static struct device* rules = NULL;
 static rule_t *rule_table;
 static int *rule_table_size;
 
+static char *not_parsed_input = NULL;
+
 static struct file_operations fops = {
 	.owner = THIS_MODULE
 };
 
+
+/*
+Display related functions: store the input without parsing and parse it in user-mode program
+*/
+
+static void free_input_buf(){
+	if (not_parsed_input!=NULL){
+		free(not_parsed_input);
+	}
+}
+
+int void store_not_parsed_input(char *buf, size_t count){]
+	free_input_buf();
+	not_parsed_input = (char*)kmalloc(count*sizeof(char))
+	if (not_parsed_input==NULL){
+		return -1;
+	}
+	strncpy(not_parsed_input, buf, count);
+	return 0;
+}
+
 static ssize_t display(struct device *dev, struct device_attribute *attr, char *buf)	//sysfs show implementation
 {
-	return 0; 
+	return sprintf(buf, "%s\n", not_parsed_input);
 }
+
 
 /*
 Parse rule values from written to the driver:
@@ -177,6 +201,7 @@ static int parse_port(const char *src, __be16 *dst){
 	return size;
 }
 
+
 //Update the current index in buf by the size of element read
 int check_and_update_idx(int *buf_index, int element_size){
 	printk(KERN_INFO "in check_and_update_idx function\n");
@@ -187,6 +212,7 @@ int check_and_update_idx(int *buf_index, int element_size){
 	*buf_index += element_size+1;
 	return 0;
 }
+
 
 //sysfs store implementation- parse all the rule componenets from driver
 ssize_t modify(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -247,8 +273,16 @@ printk(KERN_INFO "after dst prefix_size and now buf_index=%d and has-%.10s near 
 	printk(KERN_INFO "*finished loop");
 	*rule_table_size = rule_table_index;
 	printk(KERN_INFO "*rule_table_size=%d\n", *rule_table_size);
+	if (store_not_parsed_input(buf, count)==-1){
+		return -1;
+	}
 	return count;
 }
+
+
+/*
+Create and destroy the device related functions:
+*/
 
 static DEVICE_ATTR(rules, S_IWUSR | S_IRUGO , display, modify);
 
@@ -297,5 +331,6 @@ void rules_remove_dev(void)
 	device_remove_file(rules, (const struct device_attribute *)&dev_attr_rules.attr);
 	device_destroy(fw_class, MKDEV(major_number, MINOR_RULES));
 	unregister_chrdev(major_number, DEVICE_NAME_RULES);
+	free_input_buf();
 	printk(KERN_INFO "Succesful call for remove\n");
 }
