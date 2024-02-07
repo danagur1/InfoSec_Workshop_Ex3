@@ -296,7 +296,6 @@ void rules_remove_dev(void)
 {
 	device_remove_file(rules, (const struct device_attribute *)&dev_attr_rules.attr);
 	device_destroy(fw, MKDEV(major_number, MINOR_RULES));
-	class_destroy(fw);
 	unregister_chrdev(major_number, DEVICE_NAME_RULES);
 	printk(KERN_INFO "Succesful call for remove\n");
 }

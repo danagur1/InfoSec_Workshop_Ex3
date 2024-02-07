@@ -3,6 +3,7 @@
 #include <linux/fs.h>
 #include <linux/device.h>
 #include "fw.h"
+#include "manage_log_list.h"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Dana Gur");
@@ -12,26 +13,16 @@ static int major_number;
 static struct class* fw_class = NULL;
 static struct device* sysfs_device = NULL;
 
-static unsigned int sysfs_int = 0;
-
 static struct file_operations fops = {
 	.owner = THIS_MODULE
 };
 
-static ssize_t display(struct device *dev, struct device_attribute *attr, char *buf)	//sysfs show implementation
-{
-	return scnprintf(buf, PAGE_SIZE, "%u\n", sysfs_int);
-}
-
 static ssize_t modify(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)	//sysfs store implementation
 {
-	int temp;
-	if (sscanf(buf, "%u", &temp) == 1)
-		sysfs_int = temp;
-	return count;	
+	remove_all_from_log_list();		
 }
 
-static DEVICE_ATTR(sysfs_att, S_IWUSR | S_IRUGO , display, modify);
+static DEVICE_ATTR(sysfs_att, S_IWUSR | S_IRUGO , NULL, modify);
 
 int log_clear_create_dev(struct class *devices_class)
 {

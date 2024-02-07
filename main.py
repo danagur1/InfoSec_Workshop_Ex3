@@ -14,12 +14,12 @@ def load_rules(rules_file_path):
 
 
 def log_show():
-    if not rules_functions.load():
+    if not log_functions.load():
         print("ERROR: failed to show log")
 
 
 def log_clear():
-    if not rules_functions.clear():
+    if not log_functions.clear():
         print("ERROR: failed to clear log")
 
 

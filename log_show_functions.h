@@ -1,2 +1,2 @@
-int log_log_create_dev(void);
-void log_log_remove_dev(void);
+int log_show_create_dev(void);
+void log_show_remove_dev(void);
