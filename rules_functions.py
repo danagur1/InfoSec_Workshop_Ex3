@@ -64,7 +64,7 @@ def get_protocol_code(protocol):
         protocol_num = 2 #6
     elif protocol == "UDP":
         protocol_num = 3 #17
-    elif protocol == "ANY":
+    elif protocol == "any":
         protocol_num = 4 #143
     return str(protocol_num)
 
@@ -77,7 +77,7 @@ def reverse_protocol(protocol_code):
     elif protocol_code == str(3):
         return "UDP"
     elif protocol_code == str(4):
-        return "ANY"
+        return "any"
     elif protocol_code == str(0):
         return "OTHER"
 
