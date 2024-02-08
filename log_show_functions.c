@@ -9,8 +9,6 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
 
-
-static int str_len;							// Length of 'test_String'
 char* buffer_index;							// The moving index of the original buffer
 static int major_number;					// Major of the char device
 static struct class* devices_class = NULL;	// The device's class
