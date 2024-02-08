@@ -29,26 +29,26 @@ int log_clear_create_dev(struct class *devices_class)
 {
 	fw_class = devices_class;
 	//create char device
-	major_number = register_chrdev(0, DEVICE_NAME_LOG, &fops);\
+	major_number = register_chrdev(0, DEVICE_NAME_CLEAR_LOG, &fops);\
 	if (major_number < 0)
 		return -1;
 		
 	
 	//create sysfs device
-	sysfs_device = device_create(fw_class, NULL, MKDEV(major_number, MINOR_LOG), NULL, DEVICE_NAME_LOG);	
+	sysfs_device = device_create(fw_class, NULL, MKDEV(major_number, MINOR_LOG_CLEAR), NULL, DEVICE_NAME_CLEAR_LOG);	
 	if (IS_ERR(sysfs_device))
 	{
 		class_destroy(fw_class);
-		unregister_chrdev(major_number, DEVICE_NAME_LOG);
+		unregister_chrdev(major_number, DEVICE_NAME_CLEAR_LOG);
 		return -1;
 	}
 	
 	//create sysfs file attributes	
 	if (device_create_file(sysfs_device, (const struct device_attribute *)&dev_attr_reset.attr))
 	{
-		device_destroy(fw_class, MKDEV(major_number, MINOR_LOG));
+		device_destroy(fw_class, MKDEV(major_number, MINOR_LOG_CLEAR));
 		class_destroy(fw_class);
-		unregister_chrdev(major_number, DEVICE_NAME_LOG);
+		unregister_chrdev(major_number, DEVICE_NAME_CLEAR_LOG);
 		return -1;
 	}
 	
@@ -58,7 +58,7 @@ int log_clear_create_dev(struct class *devices_class)
 void log_clear_remove_dev(void)
 {
 	device_remove_file(sysfs_device, (const struct device_attribute *)&dev_attr_reset.attr);
-	device_destroy(fw_class, MKDEV(major_number, MINOR_LOG));
+	device_destroy(fw_class, MKDEV(major_number, MINOR_LOG_CLEAR));
 	class_destroy(fw_class);
-	unregister_chrdev(major_number, DEVICE_NAME_LOG);
+	unregister_chrdev(major_number, DEVICE_NAME_CLEAR_LOG);
 }

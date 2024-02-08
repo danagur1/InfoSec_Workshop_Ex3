@@ -33,8 +33,8 @@ typedef enum {
 
 // auxiliary strings, for your convenience
 #define DEVICE_NAME_RULES			"rules"
-#define DEVICE_NAME_LOG				"log"
-#define DEVICE_NAME_CONN_TAB		"conn_tab"
+#define DEVICE_NAME_CLEAR_LOG		"log"
+#define DEVICE_NAME_SHOW_LOG		"fw_log"
 #define CLASS_NAME					"fw"
 #define LOOPBACK_NET_DEVICE_NAME	"lo"
 #define IN_NET_DEVICE_NAME			"eth1"
@@ -49,7 +49,8 @@ typedef enum {
 // device minor numbers, for your convenience
 typedef enum {
 	MINOR_RULES    = 0,
-	MINOR_LOG      = 1,
+	MINOR_LOG_SHOW      = 1,
+	MINOR_LOG_CLEAR = 2,
 } minor_t;
 
 typedef enum {
