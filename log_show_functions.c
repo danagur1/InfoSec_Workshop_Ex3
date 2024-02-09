@@ -114,12 +114,6 @@ static int print_log(log_row_t log){
 	return 0;
 }
 
-static int release_log(log_row_t log){
-    kfree(log_output+position_in_log_output);
-    position_in_log_output += RULE_OUTPUT_SIZE;
-	return 0;
-}
-
 static ssize_t log_read(struct file *filp, char *buff, size_t length, loff_t *offp) {
 printk(KERN_INFO "in log read");
     count_log = 0;
