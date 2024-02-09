@@ -126,7 +126,7 @@ static int release_log(log_row_t log){
 static ssize_t log_read(struct file *filp, char *buff, size_t length, loff_t *offp) {
 printk(KERN_INFO "in log read");
     count_log = 0;
-	log_output = (char*)kmallc(RULE_OUTPUT_SIZE*log_list_length(), GFP_KERNEL);
+	log_output = (char*)kmallc(RULE_OUTPUT_SIZE*get_log_list_length(), GFP_KERNEL);
 	if (log_output==NULL){
 		return -1;
 	}

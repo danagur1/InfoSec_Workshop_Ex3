@@ -28,7 +28,7 @@ int add_to_log_list(log_row_t *log) {
     return 0;
 }
 
-int log_list_length(void){
+int get_log_list_length(void){
     return log_list_length;
 }
 

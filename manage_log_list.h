@@ -10,4 +10,4 @@ int func_for_log_list(int (*func)(log_row_t));
 
 log_row_t *find_identical_log(log_row_t *log, int (*compare_logs)(log_row_t*, log_row_t*));
 
-int log_list_length(void);
+int get_log_list_length(void);
