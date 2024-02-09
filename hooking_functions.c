@@ -139,8 +139,10 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 	unsigned char action;
 	struct net_device *dev = skb->dev;
 	int no_log = 0;
+	printk(KERN_INFO "Starting log\n");
 	if (strcmp(dev->name, "lo")){
 		//no log in case of loopback
+		printk(KERN_INFO "exist log cause of loopback. dev->name=%s\n", dev->name);
 		return;
 	}
 	//handle special cases wnen no rule matching the action:
@@ -154,9 +156,10 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 	}
 	log = log_by_protocol(ip_hdr(skb)->protocol, skb, reason, action, &no_log);
 	if (no_log){
+		printk(KERN_INFO "exist log cause of error in ptotocol\n");
 		return;
 	}
-	//printk(KERN_INFO "Before exist_log_check\n");
+	printk(KERN_INFO "exit log normally\n");
 	exist_log_check(&log);
 }
 
@@ -174,30 +177,32 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 		//printk(KERN_INFO "in hook function. check_direction=%d, check_ip=%d, check_port=%d, check_ack=%d\n", check_direction(skb, curr_rule), check_ip(skb, curr_rule), check_port(skb,curr_rule), check_ack(skb, curr_rule));
 		check_direction_result = check_direction(skb, curr_rule);
 		if (check_direction_result==-1){
+printk(KERN_INFO "before log function call");
 			log(NULL, skb, 0, 1);
 			return NF_DROP;
 		}
 		if (check_direction_result&&check_ip(skb, curr_rule)&&check_port(skb,curr_rule)&&check_ack(skb, curr_rule)){
-			/*if (curr_rule.action==NF_DROP){
-				printk(KERN_INFO "Action taken is Drop\n");
+			if (curr_rule.action==NF_DROP){
+				printk(KERN_INFO "Action taken is Drop!!!\n");
 			}
 			if (curr_rule.action==NF_ACCEPT){
 				printk(KERN_INFO "Action taken is Accept\n");
-			}*/
+			}
+printk(KERN_INFO "before log function call");
 			log(&curr_rule, skb, rule_table_idx, 0);
 			return curr_rule.action;
 		}
 	}
 	//printk(KERN_INFO "No rule found. rule_table_size=%d\n", *rule_table_size);
 	if (*rule_table_size==0){
-		//printk(KERN_INFO "No rules in table\n");
+		printk(KERN_INFO "No rules in table\n");
 		log(NULL, skb, 0, 3);
 	}
 	else{
-		//printk(KERN_INFO "No rule matched\n");
+		printk(KERN_INFO "No rule matched\n");
 		log(NULL, skb, 0, 2);
 	}
-	printk(KERN_INFO "Action taken is Drop\n");
+	printk(KERN_INFO "Action taken is Drop!\n");
 	return NF_DROP;
 }
 

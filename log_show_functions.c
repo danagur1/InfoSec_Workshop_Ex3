@@ -120,11 +120,13 @@ static void release_log(log_row_t log){
 }
 
 static ssize_t log_read(struct file *filp, char *buff, size_t length, loff_t *offp) {
+printk(KERN_INFO "in log read");
     count_log = 0;
     func_for_log_list(print_log);
     copy_to_user(buff, log_output, RULE_OUTPUT_SIZE*count_log);
     position_in_log_output = 0;
     func_for_log_list(release_log);
+printk(KERN_INFO "completed log read");
 	return 0;
 }
 

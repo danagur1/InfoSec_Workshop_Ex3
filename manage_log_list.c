@@ -5,11 +5,13 @@
 static struct klist log_list;
 
 void init_log_list(void){
+printk(KERN_INFO "init of log list");
     klist_init(&log_list, NULL, NULL);
 }
 
 int add_to_log_list(log_row_t *log) {
     struct klist_node *node = kmalloc(sizeof(struct klist_node), GFP_KERNEL);
+printk(KERN_INFO "adding to log list");
     if (!node) {
 	return -1;
     }
@@ -22,6 +24,7 @@ int add_to_log_list(log_row_t *log) {
 void remove_all_from_log_list(void) {
     struct klist_iter iter;
     struct klist_node *node;
+printk(KERN_INFO "clearing log list");
     klist_iter_init(&log_list, &iter);
     while ((node = klist_next(&iter)) != NULL) {
         klist_del(node);
@@ -31,9 +34,9 @@ void remove_all_from_log_list(void) {
 }
 
 log_row_t *find_identical_log(log_row_t *log, int (*compare_logs)(log_row_t*, log_row_t*)) {
-     
     struct klist_iter iter;
     struct klist_node *node;
+printk(KERN_INFO "searching in log list");
     klist_iter_init(&log_list, &iter);
     while ((node = klist_next(&iter)) != NULL) {
         if (compare_logs(node->n_klist, log) == 0) {
@@ -48,6 +51,7 @@ log_row_t *find_identical_log(log_row_t *log, int (*compare_logs)(log_row_t*, lo
 int func_for_log_list(void (*func)(log_row_t)) {
     struct klist_iter iter;
     struct klist_node *node;
+printk(KERN_INFO "making functions on log list");
     klist_iter_init(&log_list, &iter);
     while ((node = klist_next(&iter)) != NULL) {
         func(*((log_row_t*)(node->n_klist)));
