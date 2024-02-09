@@ -3,7 +3,9 @@ LOG_CLEAR_FILEPATH= "/sys/class/fw/log/reset"
 
 
 def show():
-    return
+    with open(LOG_SHOW_FILEPATH, "w") as log_show_file:
+        #test:
+        print(log_show_file.readlines())
 
 
 def clear():

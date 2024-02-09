@@ -1,13 +1,16 @@
-#include "fw.h"
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/device.h>
 #include <linux/uaccess.h>
+#include "fw.h"
+#include "manage_log_list.h"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
+
+int RULE_OUTPUT_SIZE = sizeof(unsigned long)+3+sizeof(__be32)+sizeof(__be16);
 
 char* buffer_index;							// The moving index of the original buffer
 static int major_number;					// Major of the char device
@@ -15,6 +18,7 @@ static struct class* devices_class = NULL;	// The device's class
 static struct device* log_device = NULL;	// The device's name
 static char *log_output = NULL;
 int position_in_log_output = 0;
+int count_log = 0;
 
 static void free_log_output(void){
     if (log_output!=NULL){
@@ -22,26 +26,110 @@ static void free_log_output(void){
     }
 }
 
-static int print_log(log_row_t *log){
-    log_output+position_in_log_output = kmalloc(sizeof(log_row_t), GFP_KERNEL);
-    if (log_output+position_in_log_output==NULL){
-        return -1;
-    }
-    memcpy(log_output+position_in_log_output, log, sizeof(log_row_t));
-    log_to_str(log_output+position_in_log_output, log);
-    position_in_log_output+=sizeof(log_row_t);
-    return 0;
+static void reverse_parse_timestamp(unsigned long src, char *dst){
+    memcpy(dst, src, sizeof(unsigned long));
+    position_in_log_output += sizeof(unsigned long);
 }
 
-/* Our custom open function  for file_operations --------------------- */
-static int my_open(struct inode *_inode, struct file *_file) { 
-	return 0;
+static void reverse_parse_protocol(unsigned char src , char *dst){
+	printk(KERN_INFO "in parse_protocol function\n");
+	switch (src)
+	{
+	case 255:
+		*dst = '0';
+		break;
+	case 1:
+		*dst = '1';
+		break;
+	case 6:
+		*dst = '2';
+		break;
+	case 17:
+		*dst = '3';
+		break;
+	case 143:
+		*dst = '4';
+		break;
+	default:
+		return -1;
+	}	
+	position_in_log_output += 1;
+}
+
+static void reverse_parse_action(unsigned char *src, char *dst){
+	if (src==NF_DROP){
+		*dst='0';
+	}
+	else if (src==NF_ACCEPT)
+	{
+		*dst='1';
+	}
+	else{
+		return -1;
+	}
+	position_in_log_output += 1;
+}
+
+static void reverse_parse_ip(__be32 *src, char *dst){
+	memcpy(dst, src, sizeof(__be32));
+	position_in_log_output += sizeof(__be32);
+}
+
+static void reverse_parse_port(__be16 *src, char *dst){
+	memcpy(dst, src, sizeof(__be16));
+    position_in_log_output += sizeof(__be16);
+}
+
+static void reverse_parse_reason(reason_t src, char *dst){
+    if (src==REASON_FW_INACTIVE){
+        *dst = 51;
+    }
+    else if (src==REASON_NO_MATCHING_RULE){
+        *dst = 52;
+    }
+    else if (src==REASON_XMAS_PACKET){
+        *dst = 53;
+    }
+    else if (src==REASON_ILLEGAL_VALUE){
+        *dst = 54;
+    }
+    else {
+        *dst = (char)src;
+    }
+    position_in_log_output += 1;
+}
+
+static void reverse_parse_count(unsigned int src, char *dst){
+    memcpy(dst, src, sizeof(unsigned int));
+    position_in_log_output += sizeof(unsigned int);
+}
+
+static int print_log(log_row_t log){
+    count_log++;
+    log_output+position_in_log_output = kmalloc(RULE_OUTPUT_SIZE);
+    reverse_parse_timestamp(log.timestamp);
+    reverse_parse_protocol(log.protocol);
+    reverse_parse_action(log.action);
+    reverse_parse_ip(log.src_ip);
+    reverse_parse_ip(log.dst_ip);
+    reverse_parse_port(log.src_port);
+    reverse_parse_port(log.dst_port);
+    reverse_parse_reason(log.reason);
+    reverse_parse_count(log.count);
+}
+
+static int release_log(log_row_t log){
+    free(log_output+position_in_log_output);
+    position_in_log_output += RULE_OUTPUT_SIZE;
 }
 
 /* Our custom read function  for file_operations --------------------- */
 static ssize_t my_read(struct file *filp, char *buff, size_t length, loff_t *offp) {
-    free_log_output();
+    count_log = 0;
     func_for_log_list(print_log);
+    copy_to_user(buff, log_output, RULE_OUTPUT_SIZE*count_log);
+    position_in_log_output = 0;
+    func_for_log_list(release_log);
 	return 0;
 }
 
