@@ -140,7 +140,7 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 	struct net_device *dev = skb->dev;
 	int no_log = 0;
 	printk(KERN_INFO "Starting log\n");
-	if (strcmp(dev->name, "lo")){
+	if (strcmp(dev->name, "lo")==0){
 		//no log in case of loopback
 		printk(KERN_INFO "exist log cause of loopback. dev->name=%s\n", dev->name);
 		return;
