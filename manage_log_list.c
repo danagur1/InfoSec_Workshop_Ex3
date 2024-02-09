@@ -14,7 +14,7 @@ printk(KERN_INFO "init of log list");
 int add_to_log_list(log_row_t *log) {
     struct klist_node *node;
     if (log_list_length<5){
-        node = &log_node_pool[log_node_count++]; 
+        node = &log_node_pool[log_list_length++]; 
     }
     else{
         node = kmalloc(sizeof(struct klist_node), GFP_KERNEL);
