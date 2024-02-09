@@ -102,7 +102,7 @@ static void reverse_parse_count(unsigned int *src){
 static void print_log(log_row_t log){
 	char *curr_log_position = log_output+position_in_log_output;
     count_log++;
-    log_output = (char*)kmalloc(RULE_OUTPUT_SIZE, GFP_KERNEL);
+    log_output+curr_log_position = (char*)kmalloc(RULE_OUTPUT_SIZE, GFP_KERNEL);
     reverse_parse_timestamp(&(log.timestamp));
     reverse_parse_protocol(log.protocol);
     reverse_parse_action(log.action);
