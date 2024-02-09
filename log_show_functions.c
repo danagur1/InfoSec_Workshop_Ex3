@@ -22,8 +22,8 @@ int position_in_log_output = 0;
 int count_log = 0;
 
 static void reverse_parse_timestamp(unsigned long *src){
-printk(KERN_INFO "in reverse_parse_timestamp\n");
 	char *curr_log_position = log_output+position_in_log_output;
+	printk(KERN_INFO "in reverse_parse_timestamp\n");
     memcpy(curr_log_position, src, sizeof(unsigned long));
     position_in_log_output += sizeof(unsigned long);
 }
@@ -96,8 +96,8 @@ static void reverse_parse_reason(reason_t src){
 }
 
 static void reverse_parse_count(unsigned int *src){
-printk(KERN_INFO "in reverse_parse_count\n");
 	char *curr_log_position = log_output+position_in_log_output;
+	printk(KERN_INFO "in reverse_parse_count\n");
     memcpy(curr_log_position, src, sizeof(unsigned int));
     position_in_log_output += sizeof(unsigned int);
 }
