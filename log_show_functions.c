@@ -119,8 +119,7 @@ static void release_log(log_row_t log){
     position_in_log_output += RULE_OUTPUT_SIZE;
 }
 
-/* Our custom read function  for file_operations --------------------- */
-static ssize_t my_read(struct file *filp, char *buff, size_t length, loff_t *offp) {
+static ssize_t log_read(struct file *filp, char *buff, size_t length, loff_t *offp) {
     count_log = 0;
     func_for_log_list(print_log);
     copy_to_user(buff, log_output, RULE_OUTPUT_SIZE*count_log);
@@ -131,8 +130,7 @@ static ssize_t my_read(struct file *filp, char *buff, size_t length, loff_t *off
 
 static struct file_operations fops = { // Our 'file_operations' struct with declerations on our functions
 	.owner = THIS_MODULE,
-	.read = my_read,
-	.open = my_open
+	.read = log_read,
 };
 
 int log_show_create_dev(struct class *devices_class_input) {
