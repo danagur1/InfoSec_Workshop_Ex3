@@ -26,7 +26,7 @@ static void free_log_output(void){
     }
 }
 
-static void reverse_parse_timestamp(unsigned long src, char *dst){
+static void reverse_parse_timestamp(unsigned long *src, char *dst){
     memcpy(dst, src, sizeof(unsigned long));
     position_in_log_output += sizeof(unsigned long);
 }
@@ -99,7 +99,7 @@ static void reverse_parse_reason(reason_t src, char *dst){
     position_in_log_output += 1;
 }
 
-static void reverse_parse_count(unsigned int src, char *dst){
+static void reverse_parse_count(unsigned int *src, char *dst){
     memcpy(dst, src, sizeof(unsigned int));
     position_in_log_output += sizeof(unsigned int);
 }
@@ -107,15 +107,15 @@ static void reverse_parse_count(unsigned int src, char *dst){
 static int print_log(log_row_t log){
     count_log++;
     log_output+position_in_log_output = kmalloc(RULE_OUTPUT_SIZE);
-    reverse_parse_timestamp(log.timestamp);
+    reverse_parse_timestamp(&(log.timestamp));
     reverse_parse_protocol(log.protocol);
     reverse_parse_action(log.action);
-    reverse_parse_ip(log.src_ip);
-    reverse_parse_ip(log.dst_ip);
-    reverse_parse_port(log.src_port);
-    reverse_parse_port(log.dst_port);
+    reverse_parse_ip(&(log.src_ip));
+    reverse_parse_ip(&(log.dst_ip));
+    reverse_parse_port(&(log.src_port));
+    reverse_parse_port(&(log.dst_port));
     reverse_parse_reason(log.reason);
-    reverse_parse_count(log.count);
+    reverse_parse_count(&(log.count));
 }
 
 static int release_log(log_row_t log){
