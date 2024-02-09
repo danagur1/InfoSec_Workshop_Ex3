@@ -2,7 +2,7 @@ LOG_SHOW_FILEPATH= "/dev/fw_log"
 LOG_CLEAR_FILEPATH= "/sys/class/fw/log/reset"
 
 
-def show():
+def load():
     with open(LOG_SHOW_FILEPATH, "w") as log_show_file:
         #test:
         print(log_show_file.readlines())
