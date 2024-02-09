@@ -105,7 +105,7 @@ static void reverse_parse_count(unsigned int *src){
     position_in_log_output += sizeof(unsigned int);
 }
 
-static int print_log(log_row_t log){
+static void print_log(log_row_t log){
 	char *curr_log_position = log_output+position_in_log_output;
     count_log++;
     curr_log_position = (char*)kmalloc(RULE_OUTPUT_SIZE, GFP_KERNEL);
