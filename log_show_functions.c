@@ -47,12 +47,9 @@ static void reverse_parse_protocol(unsigned char src , char *dst){
 	case 17:
 		*dst = '3';
 		break;
-	case 143:
-		*dst = '4';
-		break;
 	default:
-		return -1;
-	}	
+		*dst = '4';
+		break;	
 	position_in_log_output += 1;
 }
 
@@ -60,12 +57,9 @@ static void reverse_parse_action(unsigned char *src, char *dst){
 	if (src==NF_DROP){
 		*dst='0';
 	}
-	else if (src==NF_ACCEPT)
+	else
 	{
 		*dst='1';
-	}
-	else{
-		return -1;
 	}
 	position_in_log_output += 1;
 }
