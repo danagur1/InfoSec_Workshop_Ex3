@@ -59,6 +59,5 @@ void log_clear_remove_dev(void)
 {
 	device_remove_file(sysfs_device, (const struct device_attribute *)&dev_attr_reset.attr);
 	device_destroy(fw_class, MKDEV(major_number, MINOR_LOG_CLEAR));
-	class_destroy(fw_class);
 	unregister_chrdev(major_number, DEVICE_NAME_CLEAR_LOG);
 }
