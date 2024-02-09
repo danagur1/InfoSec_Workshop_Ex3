@@ -49,7 +49,8 @@ static void reverse_parse_protocol(unsigned char src , char *dst){
 		break;
 	default:
 		*dst = '4';
-		break;	
+		break;
+	}
 	position_in_log_output += 1;
 }
 
