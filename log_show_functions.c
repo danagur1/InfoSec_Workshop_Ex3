@@ -26,76 +26,82 @@ static void free_log_output(void){
     }
 }
 
-static void reverse_parse_timestamp(unsigned long *src, char *dst){
-    memcpy(dst, src, sizeof(unsigned long));
+static void reverse_parse_timestamp(unsigned long *src){
+	char *curr_log_position = log_output+position_in_log_output;
+    memcpy(curr_log_position, src, sizeof(unsigned long));
     position_in_log_output += sizeof(unsigned long);
 }
 
-static void reverse_parse_protocol(unsigned char src , char *dst){
-	printk(KERN_INFO "in parse_protocol function\n");
+static void reverse_parse_protocol(unsigned char src){
+	char *curr_log_position = log_output+position_in_log_output;
 	switch (src)
 	{
 	case 255:
-		*dst = '0';
+		*curr_log_position = '0';
 		break;
 	case 1:
-		*dst = '1';
+		*curr_log_position = '1';
 		break;
 	case 6:
-		*dst = '2';
+		*curr_log_position = '2';
 		break;
 	case 17:
-		*dst = '3';
+		*curr_log_position = '3';
 		break;
 	default:
-		*dst = '4';
+		*curr_log_position = '4';
 		break;
 	}
 	position_in_log_output += 1;
 }
 
-static void reverse_parse_action(unsigned char *src, char *dst){
+static void reverse_parse_action(unsigned char *src){
+	char *curr_log_position = log_output+position_in_log_output;
 	if (src==NF_DROP){
-		*dst='0';
+		*curr_log_position='0';
 	}
 	else
 	{
-		*dst='1';
+		*curr_log_position='1';
 	}
 	position_in_log_output += 1;
 }
 
-static void reverse_parse_ip(__be32 *src, char *dst){
-	memcpy(dst, src, sizeof(__be32));
+static void reverse_parse_ip(__be32 *src){
+	char *curr_log_position = log_output+position_in_log_output;
+	memcpy(curr_log_position, src, sizeof(__be32));
 	position_in_log_output += sizeof(__be32);
 }
 
-static void reverse_parse_port(__be16 *src, char *dst){
-	memcpy(dst, src, sizeof(__be16));
+static void reverse_parse_port(__be16 *src){
+	char *curr_log_position = log_output+position_in_log_output;
+	memcpy(curr_log_position, src, sizeof(__be16));
     position_in_log_output += sizeof(__be16);
 }
 
-static void reverse_parse_reason(reason_t src, char *dst){
+static void reverse_parse_reason(reason_t src){
+	char *curr_log_position = log_output+position_in_log_output;
     if (src==REASON_FW_INACTIVE){
-        *dst = 51;
+        *curr_log_position = 51;
     }
     else if (src==REASON_NO_MATCHING_RULE){
-        *dst = 52;
+        *curr_log_position = 52;
     }
     else if (src==REASON_XMAS_PACKET){
-        *dst = 53;
+        *curr_log_position = 53;
     }
     else if (src==REASON_ILLEGAL_VALUE){
-        *dst = 54;
+        *curr_log_position = 54;
     }
     else {
-        *dst = (char)src;
+        *curr_log_position = (char)src;
     }
     position_in_log_output += 1;
 }
 
-static void reverse_parse_count(unsigned int *src, char *dst){
-    memcpy(dst, src, sizeof(unsigned int));
+static void reverse_parse_count(unsigned int *src){
+	char *curr_log_position = log_output+position_in_log_output;
+    memcpy(curr_log_position, src, sizeof(unsigned int));
     position_in_log_output += sizeof(unsigned int);
 }
 
