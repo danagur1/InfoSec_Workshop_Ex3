@@ -22,6 +22,7 @@ int position_in_log_output = 0;
 int count_log = 0;
 
 static void reverse_parse_timestamp(unsigned long *src){
+printk(KERN_INFO "in reverse_parse_timestamp\n");
 	char *curr_log_position = log_output+position_in_log_output;
     memcpy(curr_log_position, src, sizeof(unsigned long));
     position_in_log_output += sizeof(unsigned long);
@@ -95,12 +96,14 @@ static void reverse_parse_reason(reason_t src){
 }
 
 static void reverse_parse_count(unsigned int *src){
+printk(KERN_INFO "in reverse_parse_count\n");
 	char *curr_log_position = log_output+position_in_log_output;
     memcpy(curr_log_position, src, sizeof(unsigned int));
     position_in_log_output += sizeof(unsigned int);
 }
 
 static int print_log(log_row_t log){
+printk(KERN_INFO "in print_log\n");
     count_log++;
     reverse_parse_timestamp(&(log.timestamp));
     reverse_parse_protocol(log.protocol);
@@ -115,16 +118,22 @@ static int print_log(log_row_t log){
 }
 
 static ssize_t log_read(struct file *filp, char *buff, size_t length, loff_t *offp) {
-printk(KERN_INFO "in log read");
+int log_list_length = get_log_list_length();
+printk(KERN_INFO "in log read\n");
     count_log = 0;
-	log_output = (char*)kmalloc(RULE_OUTPUT_SIZE*get_log_list_length(), GFP_KERNEL);
+	log_output = (char*)kmalloc(RULE_OUTPUT_SIZE*log_list_length, GFP_KERNEL);
 	if (log_output==NULL){
+printk(KERN_INFO "log output is NULL");
 		return -1;
 	}
     func_for_log_list(print_log);
-    copy_to_user(buff, log_output, RULE_OUTPUT_SIZE*count_log);
+if (log_output==NULL){
+printk(KERN_INFO "log output is NULL in 2nd check");
+	}
+printk(KERN_INFO "wrote to user: %s\n", log_output);
+    copy_to_user(buff, log_output, RULE_OUTPUT_SIZE*log_list_length);
 	kfree(log_output);
-printk(KERN_INFO "completed log read");
+printk(KERN_INFO "completed log read\n");
 	return 0;
 }
 
