@@ -99,10 +99,13 @@ static void reverse_parse_count(unsigned int *src){
     position_in_log_output += sizeof(unsigned int);
 }
 
-static void print_log(log_row_t log){
+static int print_log(log_row_t log){
 	char *curr_log_position = log_output+position_in_log_output;
     count_log++;
-    log_output+curr_log_position = (char*)kmalloc(RULE_OUTPUT_SIZE, GFP_KERNEL);
+    curr_log_position = (char*)kmalloc(RULE_OUTPUT_SIZE, GFP_KERNEL);
+	if (curr_log_position==NULL){
+		return -1;
+	}
     reverse_parse_timestamp(&(log.timestamp));
     reverse_parse_protocol(log.protocol);
     reverse_parse_action(log.action);
@@ -112,11 +115,13 @@ static void print_log(log_row_t log){
     reverse_parse_port(&(log.dst_port));
     reverse_parse_reason(log.reason);
     reverse_parse_count(&(log.count));
+	return 0;
 }
 
-static void release_log(log_row_t log){
+static int release_log(log_row_t log){
     kfree(log_output+position_in_log_output);
     position_in_log_output += RULE_OUTPUT_SIZE;
+	return 0;
 }
 
 static ssize_t log_read(struct file *filp, char *buff, size_t length, loff_t *offp) {

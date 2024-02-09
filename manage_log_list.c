@@ -48,13 +48,17 @@ printk(KERN_INFO "searching in log list");
     return NULL;
 }
 
-int func_for_log_list(void (*func)(log_row_t)) {
+int func_for_log_list(int (*func)(log_row_t)) {
     struct klist_iter iter;
     struct klist_node *node;
+    int func_result;
 printk(KERN_INFO "making functions on log list");
     klist_iter_init(&log_list, &iter);
     while ((node = klist_next(&iter)) != NULL) {
-        func(*((log_row_t*)(node->n_klist)));
+        func_result = func(*((log_row_t*)(node->n_klist)));\
+        if (func_result!=0){
+            return -1;
+        }
     }
     klist_iter_exit(&iter);
     return 0;
