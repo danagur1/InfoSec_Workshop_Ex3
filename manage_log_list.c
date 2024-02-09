@@ -50,7 +50,7 @@ int func_for_log_list(void (*func)(log_row_t)) {
     struct klist_node *node;
     klist_iter_init(&log_list, &iter);
     while ((node = klist_next(&iter)) != NULL) {
-        func(*((log_row_t)(node->n_klist)));
+        func(*((log_row_t*)(node->n_klist)));
     }
     klist_iter_exit(&iter);
     return 0;
