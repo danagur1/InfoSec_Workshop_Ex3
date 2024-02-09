@@ -55,7 +55,7 @@ static void reverse_parse_protocol(unsigned char src){
 	position_in_log_output += 1;
 }
 
-static void reverse_parse_action(unsigned char *src){
+static void reverse_parse_action(unsigned char src){
 	char *curr_log_position = log_output+position_in_log_output;
 	if (src==NF_DROP){
 		*curr_log_position='0';
