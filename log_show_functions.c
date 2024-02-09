@@ -129,7 +129,7 @@ printk(KERN_INFO "in log read");
 	}
     func_for_log_list(print_log);
     copy_to_user(buff, log_output, RULE_OUTPUT_SIZE*count_log);
-	free(log_output);
+	kfree(log_output);
 printk(KERN_INFO "completed log read");
 	return 0;
 }
