@@ -51,10 +51,11 @@ log_row_t *find_identical_log(log_row_t *log, int (*compare_logs)(log_row_t*, lo
     struct klist_iter iter;
     struct klist_node *node;
     int array_length = log_list_length;
+    int i;
     if (array_length>5){
         array_length = 5;
     }
-    for (int i = 0; i < array_length; ++i) {
+    for (i = 0; i < array_length; ++i) {
         if (compare_logs(log_node_pool[i].n_klist, log) == 0) {
             return log_node_pool[i].n_klist;
         }
@@ -75,10 +76,11 @@ int func_for_log_list(int (*func)(log_row_t)) {
     struct klist_node *node;
     int func_result;
     int array_length = log_list_length;
+    int i;
     if (array_length>5){
         array_length = 5;
     }
-    for (int i = 0; i < array_length; ++i) {
+    for (i = 0; i < array_length; ++i) {
         func_result = func(*((log_row_t*)(log_node_pool[i].n_klist)));
         if (func_result != 0) {
             return -1;
