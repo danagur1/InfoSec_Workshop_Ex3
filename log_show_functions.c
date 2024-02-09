@@ -20,12 +20,6 @@ static char *log_output = NULL;
 int position_in_log_output = 0;
 int count_log = 0;
 
-static void free_log_output(void){
-    if (log_output!=NULL){
-        kfree(log_output);
-    }
-}
-
 static void reverse_parse_timestamp(unsigned long *src){
 	char *curr_log_position = log_output+position_in_log_output;
     memcpy(curr_log_position, src, sizeof(unsigned long));
@@ -121,7 +115,7 @@ static void print_log(log_row_t log){
 }
 
 static int release_log(log_row_t log){
-    free(log_output+position_in_log_output);
+    kfree(log_output+position_in_log_output);
     position_in_log_output += RULE_OUTPUT_SIZE;
 }
 
@@ -163,5 +157,4 @@ void log_show_remove_dev(void) {
 	device_destroy(devices_class, MKDEV(major_number, MINOR_LOG_SHOW));
 	class_destroy(devices_class);
 	unregister_chrdev(major_number, DEVICE_NAME_SHOW_LOG);
-    free_log_output();
 }
