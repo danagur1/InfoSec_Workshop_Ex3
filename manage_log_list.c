@@ -48,7 +48,6 @@ log_row_t *find_identical_log(log_row_t *log, int (*compare_logs)(log_row_t*, lo
 int func_for_log_list(void (*func)(log_row_t *)) {
     struct klist_iter iter;
     struct klist_node *node;
-    int result;
     klist_iter_init(&log_list, &iter);
     while ((node = klist_next(&iter)) != NULL) {
         func(node->n_klist);
