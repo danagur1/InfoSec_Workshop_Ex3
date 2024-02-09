@@ -102,9 +102,6 @@ static void reverse_parse_count(unsigned int *src){
 
 static int print_log(log_row_t log){
     count_log++;
-	if (curr_log_position==NULL){
-		return -1;
-	}
     reverse_parse_timestamp(&(log.timestamp));
     reverse_parse_protocol(log.protocol);
     reverse_parse_action(log.action);
