@@ -3,6 +3,7 @@
 #include <linux/fs.h>
 #include <linux/device.h>
 #include <linux/uaccess.h>
+#include <linux/slab.h>
 #include "fw.h"
 #include "manage_log_list.h"
 
@@ -100,9 +101,7 @@ static void reverse_parse_count(unsigned int *src){
 }
 
 static int print_log(log_row_t log){
-	char *curr_log_position = log_output+position_in_log_output;
     count_log++;
-    curr_log_position = (char*)kmalloc(RULE_OUTPUT_SIZE, GFP_KERNEL);
 	if (curr_log_position==NULL){
 		return -1;
 	}
@@ -127,10 +126,13 @@ static int release_log(log_row_t log){
 static ssize_t log_read(struct file *filp, char *buff, size_t length, loff_t *offp) {
 printk(KERN_INFO "in log read");
     count_log = 0;
+	log_output = (char*)kmallc(RULE_OUTPUT_SIZE*log_list_length(), GFP_KERNEL);
+	if (log_output==NULL){
+		return -1;
+	}
     func_for_log_list(print_log);
     copy_to_user(buff, log_output, RULE_OUTPUT_SIZE*count_log);
-    position_in_log_output = 0;
-    func_for_log_list(release_log);
+	free(log_output);
 printk(KERN_INFO "completed log read");
 	return 0;
 }

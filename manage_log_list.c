@@ -2,7 +2,9 @@
 #include <linux/slab.h> // for kmalloc and kfree
 #include "fw.h"
 
+static struct klist_node log_node_pool[5];
 static struct klist log_list;
+int log_list_length = 0;
 
 void init_log_list(void){
 printk(KERN_INFO "init of log list");
@@ -10,15 +12,23 @@ printk(KERN_INFO "init of log list");
 }
 
 int add_to_log_list(log_row_t *log) {
-    struct klist_node *node = kmalloc(sizeof(struct klist_node), GFP_KERNEL);
-printk(KERN_INFO "adding to log list");
-    if (!node) {
-	return -1;
+    if (log_list_length<5){
+        node = &log_node_pool[log_node_count++]; 
     }
-    printk(KERN_INFO "Allocated memory\n");
+    else{
+        struct klist_node *node = kmalloc(sizeof(struct klist_node), GFP_KERNEL);
+        if (!node) {
+	        return -1;
+        }
+    }
     klist_add_tail(node, &log_list);
     node->n_klist = log;
+    log_list_length++;
     return 0;
+}
+
+int log_list_length(void){
+    return log_list_length;
 }
 
 void remove_all_from_log_list(void) {
