@@ -114,7 +114,7 @@ static void print_log(log_row_t log){
     reverse_parse_count(&(log.count));
 }
 
-static int release_log(log_row_t log){
+static void release_log(log_row_t log){
     kfree(log_output+position_in_log_output);
     position_in_log_output += RULE_OUTPUT_SIZE;
 }
