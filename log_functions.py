@@ -6,6 +6,8 @@ def load():
     with open(LOG_SHOW_FILEPATH, "r") as log_show_file:
         #test:
         print(log_show_file.readlines())
+        return True
+    return False
 
 
 def clear():
