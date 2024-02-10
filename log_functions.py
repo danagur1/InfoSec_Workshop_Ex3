@@ -3,15 +3,21 @@ LOG_CLEAR_FILEPATH= "/sys/class/fw/log/reset"
 
 
 def load():
-    with open(LOG_SHOW_FILEPATH, "rb") as log_show_file:
-        #test:
-        print(log_show_file.read(20))
-        return True
-    return False
-
+    try:
+        with open(LOG_SHOW_FILEPATH, "rb") as log_show_file:
+            #test:
+            validation_bit = log_show_file.read(1)
+            while validation_bit==1:
+                print(log_show_file.read(13))
+                validation_bit = log_show_file.read(1)
+            return True
+    except (Exception, ):
+        return False
 
 def clear():
-    with open(LOG_CLEAR_FILEPATH, "w") as log_clear_file:
-        log_clear_file.write("0")
-        return True
-    return False
+    try:
+        with open(LOG_CLEAR_FILEPATH, "w") as log_clear_file:
+            log_clear_file.write("0")
+            return True
+    except (Exception, ):
+        return False

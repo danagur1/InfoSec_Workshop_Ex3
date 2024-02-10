@@ -11,7 +11,7 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
 
-int RULE_OUTPUT_SIZE = sizeof(unsigned long)+3+sizeof(__be32)+sizeof(__be16);
+int RULE_OUTPUT_SIZE = sizeof(unsigned long)+4+sizeof(__be32)+sizeof(__be16);
 
 char* buffer_index;							// The moving index of the original buffer
 static int major_number;					// Major of the char device
@@ -102,9 +102,15 @@ static void reverse_parse_count(unsigned int *src){
     position_in_log_output += sizeof(unsigned int);
 }
 
+static void put_validation_log(char valid_log){
+	log_output[log_output+position_in_log_output] = valid_log;
+	position_in_log_output++;
+}
+
 static int print_log(log_row_t log){
 printk(KERN_INFO "in print_log\n");
     count_log++;
+	put_validation_log(1);
     reverse_parse_timestamp(&(log.timestamp));
     reverse_parse_protocol(log.protocol);
     reverse_parse_action(log.action);
@@ -119,20 +125,21 @@ printk(KERN_INFO "in print_log\n");
 
 static ssize_t log_read(struct file *filp, char *buff, size_t length, loff_t *offp) {
 int log_list_length = get_log_list_length();
-printk(KERN_INFO "in log read\n");
+	printk(KERN_INFO "in log read\n");
     count_log = 0;
 	log_output = (char*)kmalloc(RULE_OUTPUT_SIZE*log_list_length, GFP_KERNEL);
 	if (log_output==NULL){
-printk(KERN_INFO "log output is NULL");
+	printk(KERN_INFO "log output is NULL");
 		return -1;
 	}
     func_for_log_list(print_log);
-if (log_output==NULL){
-printk(KERN_INFO "log output is NULL in 2nd check");
-	}
-printk(KERN_INFO "wrote to user: %s\n", log_output);
-printk(KERN_INFO "wrote to user size of %d\n", RULE_OUTPUT_SIZE*log_list_length);
-printk(KERN_INFO "RULE_OUTPUT_SIZE is %d\n", RULE_OUTPUT_SIZE);
+	put_validation_log(0);
+	if (log_output==NULL){
+	printk(KERN_INFO "log output is NULL in 2nd check");
+		}
+	printk(KERN_INFO "wrote to user: %s\n", log_output);
+	printk(KERN_INFO "wrote to user size of %d\n", RULE_OUTPUT_SIZE*log_list_length);
+	printk(KERN_INFO "RULE_OUTPUT_SIZE is %d\n", RULE_OUTPUT_SIZE);
     copy_to_user(buff, log_output, RULE_OUTPUT_SIZE*log_list_length);
 	kfree(log_output);
 	return RULE_OUTPUT_SIZE*log_list_length;
