@@ -11,7 +11,7 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
 
-int RULE_OUTPUT_SIZE = 28;
+int RULE_OUTPUT_SIZE = 24;
 
 char* buffer_index;							// The moving index of the original buffer
 static int major_number;					// Major of the char device

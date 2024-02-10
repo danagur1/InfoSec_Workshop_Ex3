@@ -56,9 +56,9 @@ def load():
             #test:
             validation_bit = log_show_file.read(1)[0]
             while validation_bit==1:
-                log = log_show_file.read(28)
-                print(parse_timestamp(log[:8]), parse_ip(log[10:14]), parse_ip(log[14:18]), parse_port(log[18:20]), parse_port(log[20:22]), 
-                      parse_protocol(log[8]), parse_action(log[9]), parse_reason(log[23]), parse_count(log[24:28]))
+                log = log_show_file.read(23)
+                print(parse_timestamp(log[:4]), parse_ip(log[6:10]), parse_ip(log[10:14]), parse_port(log[14:16]), parse_port(log[16:18]), 
+                      parse_protocol(log[4]), parse_action(log[5]), parse_reason(log[18]), parse_count(log[19:23]))
                 validation_bit = log_show_file.read(1)
         return True
     except (Exception, ):
