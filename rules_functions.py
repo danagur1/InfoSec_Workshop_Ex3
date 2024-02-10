@@ -168,21 +168,24 @@ def write_rule(rule):
 
 
 def load(rules_file_path):
-    with open(rules_file_path, "r") as rules_file:
-        with open(RULES_DEVICE_FILEPATH, "w") as rules_table_driver:
-            rule = rules_file.readline()
-            while True:
-                if rule=='':
-                    break
-                else:
-                    rule= rule.split()
-                parsed_rule = read_rule(rule)
-                if not parsed_rule:
-                    return False
-                print(parsed_rule)
-                rules_table_driver.write(parsed_rule+"\n") # added line terminator to identify end of rule
+    try:
+        with open(rules_file_path, "r") as rules_file:
+            with open(RULES_DEVICE_FILEPATH, "w") as rules_table_driver:
                 rule = rules_file.readline()
-    return True
+                while True:
+                    if rule=='':
+                        break
+                    else:
+                        rule= rule.split()
+                    parsed_rule = read_rule(rule)
+                    if not parsed_rule:
+                        return False
+                    print(parsed_rule)
+                    rules_table_driver.write(parsed_rule+"\n") # added line terminator to identify end of rule
+                    rule = rules_file.readline()
+        return True
+    except (Exception, ):
+        return False
     """
     FOR TESTING:
     rule = rules_file.readline().split()
@@ -192,15 +195,18 @@ def load(rules_file_path):
 
 
 def show():
-    with open(RULES_DEVICE_FILEPATH, "r") as rules_file:
-        rule = rules_file.readline()
-        while True:
-            if rule=='\n':
-                break
-            rule = rule.split()
-            print(write_rule(rule))
+    try:
+        with open(RULES_DEVICE_FILEPATH, "r") as rules_file:
             rule = rules_file.readline()
-    return True
+            while True:
+                if rule=='\n':
+                    break
+                rule = rule.split()
+                print(write_rule(rule))
+                rule = rules_file.readline()
+        return True
+    except (Exception, ):
+        return False
 
 
 """load_rules("rules example.txt")"""

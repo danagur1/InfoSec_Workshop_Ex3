@@ -10,7 +10,7 @@ def load():
             while validation_bit==1:
                 print(log_show_file.read(13))
                 validation_bit = log_show_file.read(1)
-            return True
+        return True
     except (Exception, ):
         return False
 
@@ -18,6 +18,6 @@ def clear():
     try:
         with open(LOG_CLEAR_FILEPATH, "w") as log_clear_file:
             log_clear_file.write("0")
-            return True
+        return True
     except (Exception, ):
         return False
