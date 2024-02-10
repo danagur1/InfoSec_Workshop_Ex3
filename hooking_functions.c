@@ -82,9 +82,7 @@ static int compare_logs(log_row_t *log1, log_row_t *log2){
 
 long get_time(void){
 	//returns the current time in seconds
-	struct timespec64 current_time;
-    ktime_get_real_ts64(&current_time);
-    return (unsigned long)current_time.tv_sec;
+	 return (unsigned long)(ktime_get_real_seconds());
 }
 
 void exist_log_check(log_row_t *log){
