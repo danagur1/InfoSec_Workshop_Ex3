@@ -86,6 +86,7 @@ long get_time(void){
 	struct timespec64 ts;
     ktime_get_real_ts64(&ts);
 	result = ts.tv_sec;
+printk(KERN_INFO "In time got %lu\n", result);
     return result;
 }
 

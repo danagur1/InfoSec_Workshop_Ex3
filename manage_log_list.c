@@ -16,6 +16,7 @@ int add_to_log_list(log_row_t *log) {
     if (log==NULL){
         printk(KERN_INFO "log is NULL in add_to_log_list\n");
     }
+printk(KERN_INFO "in add to list. time passed is %lu\n", log->timestamp);
     printk(KERN_INFO "log_list_length=%d\n", log_list_length);
     if (log_list_length<5){
         printk(KERN_INFO "adding to log list in pool\n");
@@ -91,9 +92,7 @@ int func_for_log_list(int (*func)(log_row_t)) {
     }
     for (i = 0; i < array_length; ++i) {
 printk(KERN_INFO "in loop over pull with i=%d, array_length=%d\n", i, array_length);
-if ((log_row_t*)(log_node_pool[i].n_klist)==NULL){
-printk(KERN_INFO "(log_row_t*)(log_node_pool[i].n_klist) is NULL in func_for_log_list\n");
-}
+printk(KERN_INFO "in read from list. time passed is %lu\n", ((log_row_t*)(log_node_pool[i].n_klist))->timestamp);
         func_result = func(*((log_row_t*)(log_node_pool[i].n_klist)));
         if (func_result != 0) {
             return -1;

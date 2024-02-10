@@ -116,11 +116,12 @@ static void put_validation_log(char valid_log){
 
 static int print_log(log_row_t log){
 printk(KERN_INFO "in print_log\n");
+printk(KERN_INFO "in log start. time passed is %lu\n", log.timestamp);
     count_log++;
 	put_validation_log(1);
-printk(KERN_INFO "log_output in 0= %hhu\n", log_output[0]);
+printk(KERN_INFO "before reverse_parse_timestamp. time passed is %lu\n", log.timestamp);
     reverse_parse_timestamp(&(log.timestamp));
-printk(KERN_INFO "log_output in 0= %hhu\n", log_output[0]);
+printk(KERN_INFO "before reverse_parse_timestamp. time passed is %lu\n", log.timestamp);
     reverse_parse_protocol(log.protocol);
 printk(KERN_INFO "log_output in 0= %hhu\n", log_output[0]);
     reverse_parse_action(log.action);
