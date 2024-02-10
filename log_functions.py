@@ -61,7 +61,8 @@ def load():
                       parse_protocol(log[4]), parse_action(log[5]), parse_reason(log[18]), parse_count(log[19:23]))
                 validation_bit = log_show_file.read(1)
         return True
-    except (Exception, ):
+    except Exception as e:
+        print(e)
         return False
 
 def clear():
