@@ -27,8 +27,8 @@ int add_to_log_list(log_row_t *log) {
         if (!node) {
 	        return -1;
         }
+        klist_add_tail(node, &log_list);
     }
-    klist_add_tail(node, &log_list);
     node->n_klist = log;
     printk(KERN_INFO "assigned log_list_length=%d\n", log_list_length);
     if (node->n_klist==NULL){
