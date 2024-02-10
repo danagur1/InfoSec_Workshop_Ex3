@@ -5,7 +5,7 @@ LOG_CLEAR_FILEPATH= "/sys/class/fw/log/reset"
 
 def parse_timestamp(bytes_timestamp):
     print("time bytes are", ".".join(str(b) for b in bytes_timestamp))
-    timestamp = struct.unpack(">I", bytes_timestamp)[0]
+    timestamp = struct.unpack("<I", bytes_timestamp)[0]
     print("time passed is", timestamp)
     formatted_time = datetime.utcfromtimestamp(timestamp)
     return formatted_time.strftime('%m/%d/%Y %H:%M:%S')
@@ -33,7 +33,7 @@ def parse_ip(bytes_ip):
     return '.'.join(ip)
 
 def parse_port(bytes_port):
-    port = struct.unpack(">H", bytes_port)[0]
+    port = struct.unpack("<H", bytes_port)[0]
     return str(port)
 
 def parse_reason(byte_reason):
@@ -49,7 +49,7 @@ def parse_reason(byte_reason):
         return "REASON_ILLEGAL_VALUE"
     
 def parse_count(bytes_count):
-    count = struct.unpack(">I", bytes_count)[0]
+    count = struct.unpack("<I", bytes_count)[0]
     print("count bytes are", bytes_count)
     return str(count)
     
