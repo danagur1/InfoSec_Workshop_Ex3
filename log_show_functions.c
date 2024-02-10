@@ -124,7 +124,8 @@ printk(KERN_INFO "in print_log\n");
 }
 
 static ssize_t log_read(struct file *filp, char *buff, size_t length, loff_t *offp) {
-int log_list_length = get_log_list_length();
+	int log_list_length = get_log_list_length();
+	position_in_log_output = 0;
 	printk(KERN_INFO "in log read\n");
     count_log = 0;
 	log_output = (char*)kmalloc(RULE_OUTPUT_SIZE*log_list_length+1, GFP_KERNEL);
