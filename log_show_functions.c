@@ -127,7 +127,7 @@ static ssize_t log_read(struct file *filp, char *buff, size_t length, loff_t *of
 int log_list_length = get_log_list_length();
 	printk(KERN_INFO "in log read\n");
     count_log = 0;
-	log_output = (char*)kmalloc(RULE_OUTPUT_SIZE*log_list_length, GFP_KERNEL);
+	log_output = (char*)kmalloc(RULE_OUTPUT_SIZE*log_list_length+1, GFP_KERNEL);
 	if (log_output==NULL){
 	printk(KERN_INFO "log output is NULL");
 		return -1;
@@ -138,11 +138,11 @@ int log_list_length = get_log_list_length();
 	printk(KERN_INFO "log output is NULL in 2nd check");
 		}
 	printk(KERN_INFO "wrote to user: %s\n", log_output);
-	printk(KERN_INFO "wrote to user size of %d\n", RULE_OUTPUT_SIZE*log_list_length);
+	printk(KERN_INFO "wrote to user size of %d\n", RULE_OUTPUT_SIZE*log_list_length+1);
 	printk(KERN_INFO "RULE_OUTPUT_SIZE is %d\n", RULE_OUTPUT_SIZE);
-    copy_to_user(buff, log_output, RULE_OUTPUT_SIZE*log_list_length);
+    copy_to_user(buff, log_output, RULE_OUTPUT_SIZE*log_list_length+1);
 	kfree(log_output);
-	return RULE_OUTPUT_SIZE*log_list_length;
+	return RULE_OUTPUT_SIZE*log_list_length+1;
 }
 
 static struct file_operations fops = { // Our 'file_operations' struct with declerations on our functions
