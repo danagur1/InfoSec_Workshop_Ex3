@@ -13,13 +13,16 @@ printk(KERN_INFO "init of log list");
 
 int add_to_log_list(log_row_t *log) {
     struct klist_node *node;
-if (log==NULL){
-printk(KERN_INFO "log is NULL in add_to_log_list\n");
-}
+    if (log==NULL){
+        printk(KERN_INFO "log is NULL in add_to_log_list\n");
+    }
+    printk(KERN_INFO "log_list_length=%d\n", log_list_length);
     if (log_list_length<5){
+        printk(KERN_INFO "adding to log list in pool\n");
         node = &log_node_pool[log_list_length++]; 
     }
     else{
+        printk(KERN_INFO "adding to log list in klist\n");
         node = (struct klist_node*)kmalloc(sizeof(struct klist_node), GFP_KERNEL);
         if (!node) {
 	        return -1;
@@ -27,10 +30,10 @@ printk(KERN_INFO "log is NULL in add_to_log_list\n");
     }
     klist_add_tail(node, &log_list);
     node->n_klist = log;
-printk(KERN_INFO "assigned log_list_length=%d\n", log_list_length);
-if (node->n_klist==NULL){
-printk(KERN_INFO "node->n_klist is NULL in add_to_log_list\n");
-}
+    printk(KERN_INFO "assigned log_list_length=%d\n", log_list_length);
+    if (node->n_klist==NULL){
+        printk(KERN_INFO "node->n_klist is NULL in add_to_log_list\n");
+    }
     return 0;
 }
 
