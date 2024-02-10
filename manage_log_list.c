@@ -102,7 +102,7 @@ printk(KERN_INFO "(log_row_t*)(log_node_pool[i].n_klist) is NULL in func_for_log
 printk(KERN_INFO "Before loop over klist and after loop over log_node_pool\n");
     klist_iter_init(&log_list, &iter);
     while ((node = klist_next(&iter)) != NULL) {
-        func_result = func(*((log_row_t*)(node->n_klist)));\
+        func_result = func(*((log_row_t*)(node->n_klist)));
         if (func_result!=0){
             return -1;
         }
