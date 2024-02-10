@@ -3,9 +3,9 @@ LOG_CLEAR_FILEPATH= "/sys/class/fw/log/reset"
 
 
 def load():
-    with open(LOG_SHOW_FILEPATH, "r") as log_show_file:
+    with open(LOG_SHOW_FILEPATH, "rb") as log_show_file:
         #test:
-        print(log_show_file.readlines())
+        print(log_show_file.read(20))
         return True
     return False
 

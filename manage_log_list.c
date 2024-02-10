@@ -13,18 +13,24 @@ printk(KERN_INFO "init of log list");
 
 int add_to_log_list(log_row_t *log) {
     struct klist_node *node;
+if (log==NULL){
+printk(KERN_INFO "log is NULL in add_to_log_list\n");
+}
     if (log_list_length<5){
         node = &log_node_pool[log_list_length++]; 
     }
     else{
-        node = kmalloc(sizeof(struct klist_node), GFP_KERNEL);
+        node = (struct klist_node*)kmalloc(sizeof(struct klist_node), GFP_KERNEL);
         if (!node) {
 	        return -1;
         }
     }
     klist_add_tail(node, &log_list);
     node->n_klist = log;
-    log_list_length++;
+printk(KERN_INFO "assigned log_list_length=%d\n", log_list_length);
+if (node->n_klist==NULL){
+printk(KERN_INFO "node->n_klist is NULL in add_to_log_list\n");
+}
     return 0;
 }
 
@@ -81,11 +87,16 @@ int func_for_log_list(int (*func)(log_row_t)) {
         array_length = 5;
     }
     for (i = 0; i < array_length; ++i) {
+printk(KERN_INFO "in loop over pull with i=%d, array_length=%d\n", i, array_length);
+if ((log_row_t*)(log_node_pool[i].n_klist)==NULL){
+printk(KERN_INFO "(log_row_t*)(log_node_pool[i].n_klist) is NULL in func_for_log_list\n");
+}
         func_result = func(*((log_row_t*)(log_node_pool[i].n_klist)));
         if (func_result != 0) {
             return -1;
         }
     }
+printk(KERN_INFO "Before loop over klist and after loop over log_node_pool\n");
     klist_iter_init(&log_list, &iter);
     while ((node = klist_next(&iter)) != NULL) {
         func_result = func(*((log_row_t*)(node->n_klist)));\

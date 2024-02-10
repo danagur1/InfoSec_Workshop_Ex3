@@ -131,10 +131,11 @@ if (log_output==NULL){
 printk(KERN_INFO "log output is NULL in 2nd check");
 	}
 printk(KERN_INFO "wrote to user: %s\n", log_output);
+printk(KERN_INFO "wrote to user size of %d\n", RULE_OUTPUT_SIZE*log_list_length);
+printk(KERN_INFO "RULE_OUTPUT_SIZE is %d\n", RULE_OUTPUT_SIZE);
     copy_to_user(buff, log_output, RULE_OUTPUT_SIZE*log_list_length);
 	kfree(log_output);
-printk(KERN_INFO "completed log read\n");
-	return 0;
+	return RULE_OUTPUT_SIZE*log_list_length;
 }
 
 static struct file_operations fops = { // Our 'file_operations' struct with declerations on our functions
