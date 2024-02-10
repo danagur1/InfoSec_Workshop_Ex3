@@ -4,7 +4,7 @@ LOG_SHOW_FILEPATH= "/dev/fw_log"
 LOG_CLEAR_FILEPATH= "/sys/class/fw/log/reset"
 
 def parse_timestamp(bytes_timestamp):
-    timestamp = struct.unpack(">Q", bytes_timestamp)[0]
+    timestamp = struct.unpack(">I", bytes_timestamp)[0]
     formatted_time = datetime.utcfromtimestamp(timestamp)
     return formatted_time.strftime('%m/%d/%Y %H:%M:%S')
 
