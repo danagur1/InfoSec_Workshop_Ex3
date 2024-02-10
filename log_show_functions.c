@@ -23,8 +23,14 @@ int count_log = 0;
 
 static void reverse_parse_timestamp(unsigned long *src){
 	char *curr_log_position = log_output+position_in_log_output;
-	printk(KERN_INFO "in reverse_parse_timestamp\n");
+	printk(KERN_INFO "in reverse_parse_timestamp. time passed is %lu\n", *src);
     memcpy(curr_log_position, src, sizeof(unsigned long));
+printk("position_in_log_output=%d", position_in_log_output);
+printk(KERN_INFO "time[0]= %hhu\n", log_output[1]);
+printk(KERN_INFO "time[1]= %hhu\n", log_output[2]);
+printk(KERN_INFO "time[2]= %hhu\n", log_output[3]);
+printk(KERN_INFO "time[3]= %hhu\n", log_output[4]);
+printk(KERN_INFO "sizeof(unsigned long)=%d\n", sizeof(unsigned long));
     position_in_log_output += sizeof(unsigned long);
 }
 
@@ -99,6 +105,7 @@ static void reverse_parse_count(unsigned int *src){
 	char *curr_log_position = log_output+position_in_log_output;
 	printk(KERN_INFO "in reverse_parse_count\n");
     memcpy(curr_log_position, src, sizeof(unsigned int));
+	printk(KERN_INFO "count that was sent is %d\n", *src);
     position_in_log_output += sizeof(unsigned int);
 }
 
@@ -111,9 +118,13 @@ static int print_log(log_row_t log){
 printk(KERN_INFO "in print_log\n");
     count_log++;
 	put_validation_log(1);
+printk(KERN_INFO "log_output in 0= %hhu\n", log_output[0]);
     reverse_parse_timestamp(&(log.timestamp));
+printk(KERN_INFO "log_output in 0= %hhu\n", log_output[0]);
     reverse_parse_protocol(log.protocol);
+printk(KERN_INFO "log_output in 0= %hhu\n", log_output[0]);
     reverse_parse_action(log.action);
+printk(KERN_INFO "log_output in 0= %hhu\n", log_output[0]);
     reverse_parse_ip(&(log.src_ip));
     reverse_parse_ip(&(log.dst_ip));
     reverse_parse_port(&(log.src_port));
@@ -121,6 +132,15 @@ printk(KERN_INFO "in print_log\n");
     reverse_parse_reason(log.reason);
     reverse_parse_count(&(log.count));
 	return 0;
+}
+
+static void print_output(char *str_to_print, int len){
+	int i;
+	printk(KERN_INFO "the output is:\n");
+	for (i=0; i<len; i++){
+		printk(KERN_INFO "[%hhu]", str_to_print[i]);
+	}
+	printk(KERN_INFO "\n");
 }
 
 static ssize_t log_read(struct file *filp, char *buff, size_t length, loff_t *offp) {
@@ -138,8 +158,8 @@ static ssize_t log_read(struct file *filp, char *buff, size_t length, loff_t *of
 	if (log_output==NULL){
 	printk(KERN_INFO "log output is NULL in 2nd check");
 		}
-	printk(KERN_INFO "wrote to user: %s\n", log_output);
-	printk(KERN_INFO "wrote to user size of %d\n", RULE_OUTPUT_SIZE*log_list_length+1);
+	printk(KERN_INFO "wrote to user: %.24s\n", log_output);
+	print_output(log_output, RULE_OUTPUT_SIZE*log_list_length+1);
 	printk(KERN_INFO "RULE_OUTPUT_SIZE is %d\n", RULE_OUTPUT_SIZE);
     copy_to_user(buff, log_output, RULE_OUTPUT_SIZE*log_list_length+1);
 	kfree(log_output);

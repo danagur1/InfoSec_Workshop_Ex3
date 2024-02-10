@@ -85,7 +85,7 @@ typedef struct {
 
 // logging
 typedef struct {
-	unsigned long  	timestamp;     	// time of creation/update
+	__be32  	timestamp;     	// time of creation/update
 	unsigned char  	protocol;     	// values from: prot_t
 	unsigned char  	action;       	// valid values: NF_ACCEPT, NF_DROP
 	__be32   		src_ip;		  	// if you use this struct in userspace, change the type to unsigned int
@@ -93,7 +93,7 @@ typedef struct {
 	__be16 			src_port;	  	// if you use this struct in userspace, change the type to unsigned short
 	__be16 			dst_port;	  	// if you use this struct in userspace, change the type to unsigned short
 	reason_t     	reason;       	// rule#index, or values from: reason_t
-	unsigned int   	count;        	// counts this line's hits
+	__be32   	count;        	// counts this line's hits
 } log_row_t;
 
 #endif // _FW_H_
