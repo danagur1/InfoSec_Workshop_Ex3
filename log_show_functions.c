@@ -103,7 +103,7 @@ static void reverse_parse_count(unsigned int *src){
 }
 
 static void put_validation_log(char valid_log){
-	log_output[log_output+position_in_log_output] = valid_log;
+	log_output[position_in_log_output] = valid_log;
 	position_in_log_output++;
 }
 
