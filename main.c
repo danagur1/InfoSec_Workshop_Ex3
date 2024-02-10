@@ -6,7 +6,8 @@
 #include "hooking_functions.h"
 #include "log_show_functions.h"
 #include "log_clear_functions.h"
-//#include "fw.h"
+#include "manage_log_list.h"
+#include "fw.h"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Dana Gur");
@@ -45,6 +46,7 @@ static void __exit my_module_exit_function(void) {
 	unregister_hook();
 	log_clear_remove_dev();
 	log_show_remove_dev();
+	remove_all_from_log_list();
 	/*
 	unregister_hook();
 	log_clear_remove_dev();
