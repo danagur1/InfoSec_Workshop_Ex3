@@ -9,6 +9,7 @@ int log_list_length = 0;
 void init_log_list(void){
 printk(KERN_INFO "init of log list");
     klist_init(&log_list, NULL, NULL);
+log_list_length = 0;
 }
 
 int add_to_log_list(log_row_t *log) {
@@ -19,7 +20,7 @@ int add_to_log_list(log_row_t *log) {
 printk(KERN_INFO "in add to list. time passed is %lu\n", log->timestamp);
     printk(KERN_INFO "log_list_length=%d\n", log_list_length);
     if (log_list_length<5){
-        printk(KERN_INFO "adding to log list in pool\n");
+        printk(KERN_INFO "adding to log list in pool in position %d\n", log_list_length);
         node = &log_node_pool[log_list_length++]; 
     }
     else{
@@ -35,10 +36,15 @@ printk(KERN_INFO "in add to list. time passed is %lu\n", log->timestamp);
     if (node->n_klist==NULL){
         printk(KERN_INFO "node->n_klist is NULL in add_to_log_list\n");
     }
+printk(KERN_INFO "in add to list#2. time passed is %lu\n", ((log_row_t*)(log_node_pool[0].n_klist))->timestamp);
+printk(KERN_INFO "in add to list#3. time passed is %lu\n", ((log_row_t*)(node->n_klist))->timestamp);
     return 0;
 }
 
 int get_log_list_length(void){
+if (log_list_length>0){
+printk(KERN_INFO "in get_log_list_length #1. time passed is %lu\n", ((log_row_t*)(log_node_pool[0].n_klist))->timestamp);
+}
     return log_list_length;
 }
 
@@ -62,6 +68,9 @@ log_row_t *find_identical_log(log_row_t *log, int (*compare_logs)(log_row_t*, lo
     struct klist_node *node;
     int array_length = log_list_length;
     int i;
+if (array_length>0){
+printk(KERN_INFO "in find_identical_log #1. time passed is %lu\n", ((log_row_t*)(log_node_pool[0].n_klist))->timestamp);
+}
     if (array_length>5){
         array_length = 5;
     }
@@ -78,6 +87,9 @@ log_row_t *find_identical_log(log_row_t *log, int (*compare_logs)(log_row_t*, lo
         }
     }
     klist_iter_exit(&iter);
+if (array_length>0){
+printk(KERN_INFO "in find_identical_log #2. time passed is %lu\n", ((log_row_t*)(log_node_pool[0].n_klist))->timestamp);
+}
     return NULL;
 }
 
@@ -92,7 +104,9 @@ int func_for_log_list(int (*func)(log_row_t)) {
     }
     for (i = 0; i < array_length; ++i) {
 printk(KERN_INFO "in loop over pull with i=%d, array_length=%d\n", i, array_length);
-printk(KERN_INFO "in read from list. time passed is %lu\n", ((log_row_t*)(log_node_pool[i].n_klist))->timestamp);
+if ((log_row_t*)(log_node_pool[i].n_klist)==NULL){
+printk(KERN_INFO "(log_row_t*)(log_node_pool[i].n_klist) is NULL in func_for_log_list\n");
+}
         func_result = func(*((log_row_t*)(log_node_pool[i].n_klist)));
         if (func_result != 0) {
             return -1;

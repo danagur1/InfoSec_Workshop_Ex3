@@ -74,6 +74,10 @@ Logging functions
 
 static int compare_logs(log_row_t *log1, log_row_t *log2){
 	//compare log rows by all parameters except count
+printk(KERN_INFO "Compering, log1->timestamp=%lu, log2->timestamp=%lu", log1->timestamp, log2->timestamp);
+printk(KERN_INFO "Compering, log1->protocol=%d, log2->protocol=%d", log1->protocol, log2->protocol);
+printk(KERN_INFO "Compering, log1->action=%d, log2->action=%d", log1->action, log2->action);
+printk(KERN_INFO "Compering, log1->src_ip=%d, log2->src_ip=%d", log1->src_ip, log2->src_ip);
     return (log1->timestamp==log2->timestamp)&&(log1->protocol==log2->protocol)&&(log1->action==log2->action)&&
     (log1->src_ip==log2->src_ip)&&(log1->dst_ip==log2->dst_ip)&&(log1->src_port==log2->src_port)&&
     (log1->dst_port==log2->dst_port)&&(log1->reason==log2->reason);
@@ -96,6 +100,7 @@ void exist_log_check(log_row_t *log){
 	if (log_exist==NULL){
 		printk(KERN_INFO "Before add_to_log_list\n");
 		add_to_log_list(log);
+get_log_list_length();
 	}
 	else{
 		printk(KERN_INFO "Before updating log\n");
@@ -133,6 +138,7 @@ log_row_t log_by_protocol(__u8 protocol, struct sk_buff *skb, reason_t reason, u
 	else{
 		*no_log = 1;
 	}
+printk(KERN_INFO "At the end of log_by_protocol function. time passed=%lu\n", log.timestamp);
 	return log;
 }
 
@@ -142,6 +148,15 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 	unsigned char action;
 	struct net_device *dev = skb->dev;
 	int no_log = 0;
+if (rule==NULL){
+printk(KERN_INFO "NULL error in log function\n");
+}
+if (sk_buff==NULL){
+printk(KERN_INFO "NULL error in log function\n");
+}
+if (dev==NULL){
+printk(KERN_INFO "NULL error in log function\n");
+}
 	printk(KERN_INFO "Starting log\n");
 	if (strcmp(dev->name, "lo")==0){
 		//no log in case of loopback
@@ -162,8 +177,11 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 		printk(KERN_INFO "exist log cause of error in ptotocol\n");
 		return;
 	}
+printk(KERN_INFO "At the end of log function. time passed=%lu\n", log.timestamp);
 	printk(KERN_INFO "exit log normally\n");
 	exist_log_check(&log);
+printk(KERN_INFO "At the very end of log function. time passed is checked now");
+get_log_list_length();
 }
 
 /*
@@ -173,7 +191,10 @@ The hook function of the firewall:
 unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
 	int rule_table_idx;
 	int check_direction_result;
-	printk(KERN_INFO "in hook function. rule_table_size=%d\n", *rule_table_size);
+if (skb==NULL){
+printk(KERN_INFO "NULL error in log hookfn_by_rule_table\n");
+}
+	printk(KERN_INFO "in hook function. rule_table_size=%u\n", *rule_table_size);
 	for (rule_table_idx = 0; rule_table_idx<*rule_table_size; rule_table_idx++){
 		rule_t curr_rule= rule_table[rule_table_idx];
 		//printk(KERN_INFO "in loop for=%d\n", rule_table_idx);
@@ -182,6 +203,8 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 		if (check_direction_result==-1){
 printk(KERN_INFO "before log function call");
 			log(NULL, skb, 0, 1);
+printk(KERN_INFO "At the very end of hook function. time passed is checked now");
+get_log_list_length();
 			return NF_DROP;
 		}
 		if (check_direction_result&&check_ip(skb, curr_rule)&&check_port(skb,curr_rule)&&check_ack(skb, curr_rule)){
@@ -191,21 +214,27 @@ printk(KERN_INFO "before log function call");
 			if (curr_rule.action==NF_ACCEPT){
 				printk(KERN_INFO "Action taken is Accept\n");
 			}
-printk(KERN_INFO "before log function call");
 			log(&curr_rule, skb, rule_table_idx, 0);
+printk(KERN_INFO "At the very end of hook function. time passed is checked now");
+get_log_list_length();
 			return curr_rule.action;
 		}
 	}
 	//printk(KERN_INFO "No rule found. rule_table_size=%d\n", *rule_table_size);
 	if (*rule_table_size==0){
-		printk(KERN_INFO "No rules in table\n");
 		log(NULL, skb, 0, 3);
+printk(KERN_INFO "At the very end of hook function. time passed is checked now");
+get_log_list_length();
+
 	}
 	else{
-		printk(KERN_INFO "No rule matched\n");
+		
 		log(NULL, skb, 0, 2);
+printk(KERN_INFO "At the very end of hook function. time passed is checked now");
+get_log_list_length();
 	}
-	printk(KERN_INFO "Action taken is Drop!\n");
+		printk(KERN_INFO "here\n");
+get_log_list_length();
 	return NF_DROP;
 }
 
