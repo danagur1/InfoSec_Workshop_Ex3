@@ -55,16 +55,17 @@ def parse_count(bytes_count):
     
 def load():
     try:
+        print("timestamp\t\tsrc_ip\t\tdst_ip\t\tsrc_port\t\tdst_port\t\tprotocol\t\taction\t\treason\t\tcount")
         with open(LOG_SHOW_FILEPATH, "rb") as log_show_file:
             #test:
             validation_bit = log_show_file.read(1)[0]
-            print("validation bit is", validation_bit)
+            #print("validation bit is", validation_bit)
             while validation_bit==1:
                 log = log_show_file.read(23)
-                print("log is ", ".".join([str(x) for x in log]))
-                print("time is ", log[:4])
+                #print("log is ", ".".join([str(x) for x in log]))
+                #print("time is ", log[:4])
                 print(parse_timestamp(log[:4]), parse_ip(log[6:10]), parse_ip(log[10:14]), parse_port(log[14:16]), parse_port(log[16:18]), 
-                      parse_protocol(log[4]), parse_action(log[5]), parse_reason(log[18]), parse_count(log[19:23]))
+                      parse_protocol(log[4]), parse_action(log[5]), parse_reason(log[18]), parse_count(log[19:23]), sep='\t\t')
                 validation_bit = log_show_file.read(1)
         return True
     except Exception as e:
