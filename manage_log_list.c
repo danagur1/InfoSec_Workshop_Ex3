@@ -19,7 +19,7 @@ int add_to_log_list(log_row_t *log) {
     if (log==NULL){
         printk(KERN_INFO "log is NULL in add_to_log_list\n");
     }
-printk(KERN_INFO "in add to list. time passed is %lu\n", log->timestamp);
+    printk(KERN_INFO "in add to list. time passed is %lu\n", log->timestamp);
     printk(KERN_INFO "log_list_length=%d\n", log_list_length);
     if (log_list_length<POOL_LEN){
         printk(KERN_INFO "adding to log list in pool in position %d\n", log_list_length);
@@ -39,8 +39,6 @@ printk(KERN_INFO "in add to list. time passed is %lu\n", log->timestamp);
     if (node->n_klist==NULL){
         printk(KERN_INFO "node->n_klist is NULL in add_to_log_list\n");
     }
-printk(KERN_INFO "in add to list#2. time passed is %lu\n", ((log_row_t*)(log_node_pool[0].n_klist))->timestamp);
-printk(KERN_INFO "in add to list#3. time passed is %lu\n", ((log_row_t*)(node->n_klist))->timestamp);
     return 0;
 }
 
