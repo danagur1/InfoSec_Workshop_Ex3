@@ -2,7 +2,8 @@
 #include <linux/slab.h> // for kmalloc and kfree
 #include "fw.h"
 
-static struct klist_node log_node_pool[5];
+static POOL_LEN = 1
+static struct klist_node log_node_pool[POOL_LEN];
 static struct klist log_list;
 int log_list_length = 0;
 
@@ -19,7 +20,7 @@ int add_to_log_list(log_row_t *log) {
     }
 printk(KERN_INFO "in add to list. time passed is %lu\n", log->timestamp);
     printk(KERN_INFO "log_list_length=%d\n", log_list_length);
-    if (log_list_length<5){
+    if (log_list_length<POOL_LEN){
         printk(KERN_INFO "adding to log list in pool in position %d\n", log_list_length);
         node = &log_node_pool[log_list_length++]; 
     }
@@ -53,14 +54,14 @@ void remove_all_from_log_list(void) {
     struct klist_node *node;
     int i;
     int array_length = log_list_length;
-    if (array_length>5){
-        array_length = 5;
+    if (array_length>POOL_LEN){
+        array_length = POOL_LEN;
     }
     for (i = 0; i < array_length; i++) {
         kfree(log_node_pool[i].n_klist); //free the log itsself also 
     }
     printk(KERN_INFO "clearing log list");
-    if (log_list_length>5){
+    if (log_list_length>POOL_LEN){
         klist_iter_init(&log_list, &iter);
         while ((node = klist_next(&iter)) != NULL) {
             kfree(node->n_klist); //free the log itsself also 
@@ -80,8 +81,8 @@ log_row_t *find_identical_log(log_row_t *log, int (*compare_logs)(log_row_t*, lo
 if (array_length>0){
 printk(KERN_INFO "in find_identical_log #1. time passed is %lu\n", ((log_row_t*)(log_node_pool[0].n_klist))->timestamp);
 }
-    if (array_length>5){
-        array_length = 5;
+    if (array_length>POOL_LEN){
+        array_length = POOL_LEN;
     }
     for (i = 0; i < array_length; i++) {
         if (compare_logs(log_node_pool[i].n_klist, log)) {
@@ -108,8 +109,8 @@ int func_for_log_list(int (*func)(log_row_t)) {
     int func_result;
     int array_length = log_list_length;
     int i;
-    if (array_length>5){
-        array_length = 5;
+    if (array_length>POOL_LEN){
+        array_length = POOL_LEN;
     }
     for (i = 0; i < array_length; ++i) {
 printk(KERN_INFO "in loop over pull with i=%d, array_length=%d\n", i, array_length);
