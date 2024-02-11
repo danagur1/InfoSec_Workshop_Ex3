@@ -148,15 +148,6 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 	unsigned char action;
 	struct net_device *dev = skb->dev;
 	int no_log = 0;
-if (rule==NULL){
-printk(KERN_INFO "NULL error in log function\n");
-}
-if (sk_buff==NULL){
-printk(KERN_INFO "NULL error in log function\n");
-}
-if (dev==NULL){
-printk(KERN_INFO "NULL error in log function\n");
-}
 	printk(KERN_INFO "Starting log\n");
 	if (strcmp(dev->name, "lo")==0){
 		//no log in case of loopback
