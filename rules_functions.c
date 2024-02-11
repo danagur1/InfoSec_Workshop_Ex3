@@ -222,59 +222,67 @@ ssize_t modify(struct device *dev, struct device_attribute *attr, const char *bu
         printk(KERN_INFO "in modify function with %d\n", count);
 	while (buf_index<count)
 	{
-		rule_t curr_rule = rule_table[rule_table_index];
-	printk(KERN_INFO "continue because buf_index=%d\n, count=%d\n", buf_index, count);
-		buf_index += parse_rule_name(buf+buf_index, rule_table[rule_table_index].rule_name)+1;
-		if(check_and_update_idx(&buf_index, parse_direction(buf+buf_index, &curr_rule.direction))==-1){
+		rule_t *curr_rule = rule_table+rule_table_index;
+		printk(KERN_INFO "continue because buf_index=%d\n, count=%d\n", 		buf_index, count);
+		buf_index += parse_rule_name(buf+buf_index, 
+		rule_table[rule_table_index].rule_name)+1;
+		if(check_and_update_idx(&buf_index, parse_direction(
+		buf+buf_index, &(rule_table[0].direction)))==-1){
 			return -1;
 		}
-		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &curr_rule.src_ip))==-1){
+printk(KERN_INFO "direction in rules is %hhu on rule=%d", curr_rule->direction, rule_table_index);
+printk(KERN_INFO "after assining direction rule_table_index after udated=%d. curr_rule->direction=%hhu\n", rule_table_index, rule_table[0].direction);
+printk(KERN_INFO "after assining direction rule_table in 0.direction=%hhu\n", rule_table[0].direction);
+		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &curr_rule->src_ip))==-1){
 			return -1;
 		}
-		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &curr_rule.src_prefix_mask))==-1){
+		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &curr_rule->src_prefix_mask))==-1){
 			return -1;
 		}
 //printk(KERN_INFO "before src_prefix_size and now buf_index=%d and has-%.10s near it and before it-%.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
-		if(check_and_update_idx(&buf_index, parse_perfix_size(buf+buf_index, &curr_rule.src_prefix_size))==-1){
+		if(check_and_update_idx(&buf_index, parse_perfix_size(buf+buf_index, &curr_rule->src_prefix_size))==-1){
 			return -1;
 		}
 //printk(KERN_INFO "before dst_ip and now buf_index=%d and has-%.10s near it and before it-%.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
-		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &curr_rule.dst_ip))==-1){
+		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &curr_rule->dst_ip))==-1){
 			return -1;
 		}
 		//printk(KERN_INFO "before dst_prefix_mask and now buf_index=%d and has-%.10s near it and before it-%.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
-		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &curr_rule.dst_prefix_mask))==-1){
+		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &curr_rule->dst_prefix_mask))==-1){
 			return -1;
 		}
 		printk(KERN_INFO "before dst prefix_size and now buf_index=%d and has-%.10s near it and before it-%.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
-		if(check_and_update_idx(&buf_index, parse_perfix_size(buf+buf_index, &curr_rule.dst_prefix_size))==-1){
+		if(check_and_update_idx(&buf_index, parse_perfix_size(buf+buf_index, &curr_rule->dst_prefix_size))==-1){
 			return -1;
 		}
 printk(KERN_INFO "after dst prefix_size and now buf_index=%d and has-%.10s near it and before it-%.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
-		if(check_and_update_idx(&buf_index, parse_protocol(buf+buf_index, &curr_rule.protocol))==-1){
+		if(check_and_update_idx(&buf_index, parse_protocol(buf+buf_index, &curr_rule->protocol))==-1){
 			return -1;
 		}
-		if(check_and_update_idx(&buf_index, parse_port(buf+buf_index, &curr_rule.src_port))==-1){
+		if(check_and_update_idx(&buf_index, parse_port(buf+buf_index, &curr_rule->src_port))==-1){
 			return -1;
 		}
-		if(check_and_update_idx(&buf_index, parse_port(buf+buf_index, &curr_rule.dst_port))==-1){
+		if(check_and_update_idx(&buf_index, parse_port(buf+buf_index, &curr_rule->dst_port))==-1){
 			return -1;
 		}
-		if(check_and_update_idx(&buf_index, parse_ack(buf+buf_index, &curr_rule.ack))==-1){
+		if(check_and_update_idx(&buf_index, parse_ack(buf+buf_index, &curr_rule->ack))==-1){
 			return -1;
 		}
-		if(check_and_update_idx(&buf_index, parse_action(buf+buf_index, &curr_rule.action))==-1){
+		if(check_and_update_idx(&buf_index, parse_action(buf+buf_index, &curr_rule->action))==-1){
 			return -1;
 		}
 		printk(KERN_INFO "ended the loop and not buf_index=%d and has %.10s near it and before it %.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		rule_table_index++;
 	}
+printk(KERN_INFO "after assining all loop: rule_table in 0.direction=%hhu\n", rule_table[0].direction);
 	printk(KERN_INFO "*finished loop");
 	*rule_table_size = rule_table_index;
 	printk(KERN_INFO "*rule_table_size=%d\n", *rule_table_size);
 	if (store_not_parsed_input(buf, count)==-1){
 		return -1;
 	}
+printk(KERN_INFO "at the end of modify");
+printk(KERN_INFO "rule_table in 0.direction=%hhu\n", rule_table[0].direction);
 	return count;
 }
 

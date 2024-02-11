@@ -24,7 +24,7 @@ return 1 in case of match, 0 in case of no match, -1 in case of illegal value
 int check_direction(struct sk_buff *skb, rule_t rule){
 	struct net_device *dev = skb->dev;
 	if (dev) {
-		printk(KERN_INFO "in check_direction: dev->name=%s\n", dev->name);
+		printk(KERN_INFO "in check_direction: dev->name=%s and direction=%hhu\n", dev->name, rule.direction);
         if (rule.direction==DIRECTION_IN) {
             return strcmp(dev->name, "enp0s9") == 0;
         } else if (rule.direction==DIRECTION_OUT) {
@@ -33,6 +33,7 @@ int check_direction(struct sk_buff *skb, rule_t rule){
             return (strcmp(dev->name, "enp0s8") == 0) || (strcmp(dev->name, "enp0s9") == 0);
     	}
 		else{
+printk(KERN_INFO "failed to match direction\n");
 			return -1;
 		}
 	}
@@ -186,14 +187,16 @@ The hook function of the firewall:
 unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
 	int rule_table_idx;
 	int check_direction_result;
+printk(KERN_INFO "rule_table in 0 .direction=%hhu\n", rule_table[0].direction);
 if (skb==NULL){
 printk(KERN_INFO "NULL error in log hookfn_by_rule_table\n");
 }
-	printk(KERN_INFO "in hook function. rule_table_size=%u\n", *rule_table_size);
+	printk(KERN_INFO "in hook function. rule_table_size=%d\n", *rule_table_size);
 	for (rule_table_idx = 0; rule_table_idx<*rule_table_size; rule_table_idx++){
 		rule_t curr_rule= rule_table[rule_table_idx];
-		//printk(KERN_INFO "in loop for=%d\n", rule_table_idx);
-		//printk(KERN_INFO "in hook function. check_direction=%d, check_ip=%d, check_port=%d, check_ack=%d\n", check_direction(skb, curr_rule), check_ip(skb, curr_rule), check_port(skb,curr_rule), check_ack(skb, curr_rule));
+		printk(KERN_INFO "in loop for=%d\n", rule_table_idx);
+		printk(KERN_INFO "in hook function. check_direction=%d, check_ip=%d, check_port=%d, check_ack=%d\n", check_direction(skb, curr_rule), check_ip(skb, curr_rule), check_port(skb,curr_rule), check_ack(skb, curr_rule));
+printk(KERN_INFO "for current rule direction=%hhu\n", curr_rule.direction);
 		check_direction_result = check_direction(skb, curr_rule);
 		if (check_direction_result==-1){
 printk(KERN_INFO "before log function call");
