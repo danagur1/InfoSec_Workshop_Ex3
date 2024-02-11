@@ -23,7 +23,6 @@ int add_to_log_list(log_row_t *log) {
     INIT_LIST_HEAD(&element->log_list_element);
     klist_add_tail(&element->log_list_element, &log_list);
     log_list_length++;
-    return 0;
 }
 
 void remove_all_from_log_list(void) {
