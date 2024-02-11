@@ -143,7 +143,7 @@ printk(KERN_INFO "At the end of log_by_protocol function. time passed=%lu\n", lo
 }
 
 void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reason){
-	log_row_t log;
+	log_row_t *log = (log_row_t*)kmalloc(sizeof(log_row_t), GFP_KERNEL);
 	reason_t reason = rule_table_idx;
 	unsigned char action;
 	struct net_device *dev = skb->dev;
@@ -163,14 +163,14 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 		action = rule->action;
 		//printk(KERN_INFO "Just put action- 3");
 	}
-	log = log_by_protocol(ip_hdr(skb)->protocol, skb, reason, action, &no_log);
+	*log = log_by_protocol(ip_hdr(skb)->protocol, skb, reason, action, &no_log);
 	if (no_log){
 		printk(KERN_INFO "exist log cause of error in ptotocol\n");
 		return;
 	}
 printk(KERN_INFO "At the end of log function. time passed=%lu\n", log.timestamp);
 	printk(KERN_INFO "exit log normally\n");
-	exist_log_check(&log);
+	exist_log_check(log);
 printk(KERN_INFO "At the very end of log function. time passed is checked now");
 get_log_list_length();
 }

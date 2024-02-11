@@ -9,7 +9,7 @@ int log_list_length = 0;
 void init_log_list(void){
 printk(KERN_INFO "init of log list");
     klist_init(&log_list, NULL, NULL);
-log_list_length = 0;
+    log_list_length = 0;
 }
 
 int add_to_log_list(log_row_t *log) {
@@ -51,10 +51,19 @@ printk(KERN_INFO "in get_log_list_length #1. time passed is %lu\n", ((log_row_t*
 void remove_all_from_log_list(void) {
     struct klist_iter iter;
     struct klist_node *node;
+    int i;
+    int array_length = log_list_length;
+    if (array_length>5){
+        array_length = 5;
+    }
+    for (i = 0; i < array_length; i++) {
+        kfree(log_node_pool[i].n_klist); //free the log itsself also 
+    }
     printk(KERN_INFO "clearing log list");
     if (log_list_length>5){
         klist_iter_init(&log_list, &iter);
         while ((node = klist_next(&iter)) != NULL) {
+            kfree(node->n_klist); //free the log itsself also 
             klist_del(node);
             kfree(node);
         } 
@@ -74,7 +83,7 @@ printk(KERN_INFO "in find_identical_log #1. time passed is %lu\n", ((log_row_t*)
     if (array_length>5){
         array_length = 5;
     }
-    for (i = 0; i < array_length; ++i) {
+    for (i = 0; i < array_length; i++) {
         if (compare_logs(log_node_pool[i].n_klist, log) == 0) {
             return log_node_pool[i].n_klist;
         }
