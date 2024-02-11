@@ -25,9 +25,9 @@ int check_direction(struct sk_buff *skb, rule_t rule){
 	struct net_device *dev = skb->dev;
 	if (dev) {
 		printk(KERN_INFO "in check_direction: dev->name=%s\n", dev->name);
-        if (rule.direction==DIRECTION_IN) {
+        if ((rule.direction==DIRECTION_IN) || (rule.direction==DIRECTION_ANY)) {
             return strcmp(dev->name, "enp0s9") == 0;
-        } else if (rule.direction==DIRECTION_OUT) {
+        } else if ((rule.direction==DIRECTION_OUT) || (rule.direction=DIRECTION_ANY)) {
             return strcmp(dev->name, "enp0s8") == 0;
         } else {
 			printk(KERN_INFO "in check_direction: no dev\n");
