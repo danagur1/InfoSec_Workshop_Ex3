@@ -21,6 +21,18 @@ Checking functions- compare information from the packet and rules.
 return 1 in case of match, 0 in case of no match, -1 in case of illegal value
 */
 
+int check_xmas_tree_packet(struct sk_buff *skb){
+    struct tcphdr *tcp_header;
+    if (ip_hdr(skb)->protocol == IPPROTO_TCP) {
+        tcp_header = tcp_hdr(skb);
+        if (tcp_header->syn && tcp_header->fin && tcp_header->urg &&
+            tcp_header->psh && tcp_header->rst && tcp_header->ack) {
+            return 1;
+        }
+    }
+	return 0;
+}
+
 int check_direction(struct sk_buff *skb, rule_t rule){
 	struct net_device *dev = skb->dev;
 	if (dev) {
@@ -122,6 +134,9 @@ reason_t find_special_reason(int reason_code){
 	else if (reason_code==2){
 		return REASON_NO_MATCHING_RULE;
 	}
+	else if (reason_code==4){
+		REASON_XMAS_PACKET;
+	}
 	else {
 		return REASON_ILLEGAL_VALUE;
 	}
@@ -176,33 +191,36 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 	}
 	printk(KERN_INFO "exit log normally\n");
 	exist_log_check(log);
-printk(KERN_INFO "At the very end of log function. time passed is checked now");
-get_log_list_length();
+	printk(KERN_INFO "At the very end of log function. time passed is checked now");
+	get_log_list_length();
 }
 
 /*
 The hook function of the firewall:
 */
-
 unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
 	int rule_table_idx;
 	int check_direction_result;
-printk(KERN_INFO "rule_table in 0 .direction=%hhu\n", rule_table[0].direction);
-if (skb==NULL){
-printk(KERN_INFO "NULL error in log hookfn_by_rule_table\n");
-}
+	printk(KERN_INFO "rule_table in 0 .direction=%hhu\n", rule_table[0].direction);
+	if (skb==NULL){
+		printk(KERN_INFO "NULL error in log hookfn_by_rule_table\n");
+	}
 	printk(KERN_INFO "in hook function. rule_table_size=%d, *rule_table_size==1=%d by pointer %p\n", *rule_table_size, *rule_table_size==1, (void*)rule_table_size);
+	if (check_xmas_tree_packet(skb)){
+		log(NULL, skb, 0, 4)
+		return NF_DROP;
+	}
 	for (rule_table_idx = 0; rule_table_idx<*rule_table_size; rule_table_idx++){
 		rule_t curr_rule= rule_table[rule_table_idx];
 		printk(KERN_INFO "in loop for=%d\n", rule_table_idx);
 		printk(KERN_INFO "in hook function. check_direction=%d, check_ip=%d, check_port=%d, check_ack=%d\n", check_direction(skb, curr_rule), check_ip(skb, curr_rule), check_port(skb,curr_rule), check_ack(skb, curr_rule));
-printk(KERN_INFO "for current rule direction=%hhu\n", curr_rule.direction);
+		printk(KERN_INFO "for current rule direction=%hhu\n", curr_rule.direction);
 		check_direction_result = check_direction(skb, curr_rule);
 		if (check_direction_result==-1){
-printk(KERN_INFO "before log function call");
+			printk(KERN_INFO "before log function call");
 			log(NULL, skb, 0, 1);
-printk(KERN_INFO "At the very end of hook function. time passed is checked now");
-get_log_list_length();
+			printk(KERN_INFO "At the very end of hook function. time passed is checked now");
+			get_log_list_length();
 			return NF_DROP;
 		}
 		if (check_direction_result&&check_ip(skb, curr_rule)&&check_port(skb,curr_rule)&&check_ack(skb, curr_rule)){
@@ -213,26 +231,24 @@ get_log_list_length();
 				printk(KERN_INFO "Action taken is Accept\n");
 			}
 			log(&curr_rule, skb, rule_table_idx, 0);
-printk(KERN_INFO "At the very end of hook function. time passed is checked now");
-get_log_list_length();
+			printk(KERN_INFO "At the very end of hook function. time passed is checked now");
+			get_log_list_length();
 			return curr_rule.action;
 		}
 	}
 	//printk(KERN_INFO "No rule found. rule_table_size=%d\n", *rule_table_size);
 	if (*rule_table_size==0){
 		log(NULL, skb, 0, 3);
-printk(KERN_INFO "At the very end of hook function. time passed is checked now");
-get_log_list_length();
-
+		printk(KERN_INFO "At the very end of hook function. time passed is checked now");
+		get_log_list_length();
 	}
 	else{
-		
 		log(NULL, skb, 0, 2);
-printk(KERN_INFO "At the very end of hook function. time passed is checked now");
-get_log_list_length();
+		printk(KERN_INFO "At the very end of hook function. time passed is checked now");
+		get_log_list_length();
 	}
-		printk(KERN_INFO "here\n");
-get_log_list_length();
+	printk(KERN_INFO "here\n");
+	get_log_list_length();
 	return NF_DROP;
 }
 
