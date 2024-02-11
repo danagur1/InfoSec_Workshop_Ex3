@@ -94,6 +94,7 @@ typedef struct {
 	__le16 			dst_port;	  	// if you use this struct in userspace, change the type to unsigned short
 	reason_t     	reason;       	// rule#index, or values from: reason_t
 	unsigned int   	count;        	// counts this line's hits
+	struct klist_node klist_node;
 } log_row_t;
 
 #endif // _FW_H_
