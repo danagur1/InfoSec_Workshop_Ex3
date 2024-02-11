@@ -69,16 +69,16 @@ static void reverse_parse_action(unsigned char src){
 	position_in_log_output += 1;
 }
 
-static void reverse_parse_ip(__be32 *src){
+static void reverse_parse_ip(__le32 *src){
 	char *curr_log_position = log_output+position_in_log_output;
-	memcpy(curr_log_position, src, sizeof(__be32));
-	position_in_log_output += sizeof(__be32);
+	memcpy(curr_log_position, src, sizeof(__le32));
+	position_in_log_output += sizeof(__le32);
 }
 
-static void reverse_parse_port(__be16 *src){
+static void reverse_parse_port(__le16 *src){
 	char *curr_log_position = log_output+position_in_log_output;
-	memcpy(curr_log_position, src, sizeof(__be16));
-    position_in_log_output += sizeof(__be16);
+	memcpy(curr_log_position, src, sizeof(__le16));
+    position_in_log_output += sizeof(__le16);
 }
 
 static void reverse_parse_reason(reason_t src){
@@ -120,14 +120,21 @@ printk(KERN_INFO "in log start. time passed is %lu\n", log.timestamp);
     count_log++;
 	put_validation_log(1);
 printk(KERN_INFO "before reverse_parse_timestamp. time passed is %lu\n", log.timestamp);
+printk(KERN_INFO "now in position=%d", position_in_log_output);
     reverse_parse_timestamp(&(log.timestamp));
 printk(KERN_INFO "before reverse_parse_timestamp. time passed is %lu\n", log.timestamp);
+printk(KERN_INFO "now in position=%d", position_in_log_output);
     reverse_parse_protocol(log.protocol);
+printk(KERN_INFO "now in position=%d", position_in_log_output);
 printk(KERN_INFO "log_output in 0= %hhu\n", log_output[0]);
     reverse_parse_action(log.action);
+printk(KERN_INFO "now in position=%d", position_in_log_output);
 printk(KERN_INFO "log_output in 0= %hhu\n", log_output[0]);
     reverse_parse_ip(&(log.src_ip));
     reverse_parse_ip(&(log.dst_ip));
+printk(KERN_INFO "now in position=%d", position_in_log_output);
+printk("now printing the second log");
+//print_output(log_output+15,15);
     reverse_parse_port(&(log.src_port));
     reverse_parse_port(&(log.dst_port));
     reverse_parse_reason(log.reason);
@@ -154,7 +161,7 @@ static ssize_t log_read(struct file *filp, char *buff, size_t length, loff_t *of
 	printk(KERN_INFO "log output is NULL");
 		return -1;
 	}
-    func_for_log_list(print_log);
+    	func_for_log_list(print_log);
 	put_validation_log(0);
 	if (log_output==NULL){
 	printk(KERN_INFO "log output is NULL in 2nd check");
