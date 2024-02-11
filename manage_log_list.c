@@ -2,7 +2,8 @@
 #include <linux/slab.h> // for kmalloc and kfree
 #include "fw.h"
 
-#define POOL_LEN 1;
+#define POOL_LEN 1
+
 static struct klist_node log_node_pool[POOL_LEN];
 static struct klist log_list;
 int log_list_length = 0;
