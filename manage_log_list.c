@@ -44,10 +44,10 @@ void remove_all_from_log_list(void) {
     struct klist_node *node, *tmp;
     int i;
     for (i=0; (i<log_list_length)&&(i<POOL_LEN);i++){
-        free(log_node_pool[i]);
+        kfree(log_node_pool[i]);
     }
     klist_for_each_entry_safe(node, tmp, &log_list, n_klist) {
-        free(node->n_klist); //free the log itself
+        kfree(node->n_klist); //free the log itself
         klist_del(node);
         kfree(node);
     }
