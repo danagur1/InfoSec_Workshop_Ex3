@@ -191,7 +191,7 @@ printk(KERN_INFO "rule_table in 0 .direction=%hhu\n", rule_table[0].direction);
 if (skb==NULL){
 printk(KERN_INFO "NULL error in log hookfn_by_rule_table\n");
 }
-	printk(KERN_INFO "in hook function. rule_table_size=%d\n", *rule_table_size);
+	printk(KERN_INFO "in hook function. rule_table_size=%d, *rule_table_size==1=%d by pointer %p\n", *rule_table_size, *rule_table_size==1, (void*)rule_table_size);
 	for (rule_table_idx = 0; rule_table_idx<*rule_table_size; rule_table_idx++){
 		rule_t curr_rule= rule_table[rule_table_idx];
 		printk(KERN_INFO "in loop for=%d\n", rule_table_idx);

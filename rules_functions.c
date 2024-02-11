@@ -277,7 +277,7 @@ printk(KERN_INFO "after dst prefix_size and now buf_index=%d and has-%.10s near 
 printk(KERN_INFO "after assining all loop: rule_table in 0.direction=%hhu\n", rule_table[0].direction);
 	printk(KERN_INFO "*finished loop");
 	*rule_table_size = rule_table_index;
-	printk(KERN_INFO "*rule_table_size=%d\n", *rule_table_size);
+	printk(KERN_INFO "in rules. *rule_table_size=%d by pointer %p\n", *rule_table_size, (void*)rule_table_size);
 	if (store_not_parsed_input(buf, count)==-1){
 		return -1;
 	}

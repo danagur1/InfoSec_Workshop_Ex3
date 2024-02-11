@@ -14,9 +14,9 @@ MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
 
 static rule_t *first_rule_table;
+int first_rule_table_size=0;
 
 static int __init my_module_init_function(void) {
-	int first_rule_table_size=0;
 	struct class *devices_class;
 	first_rule_table= (rule_t*)kmalloc(sizeof(rule_t)*MAX_RULES, GFP_KERNEL);
 	devices_class = rules_create_dev(first_rule_table, &first_rule_table_size);
