@@ -132,8 +132,8 @@ log_row_t log_by_protocol(__u8 protocol, struct sk_buff *skb, reason_t reason, u
 		udp_hdr(skb)->dest, reason, 0};
 	}
 	else if (protocol==IPPROTO_ICMP){
-		log = (log_row_t){get_time(), PROT_ICMP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, udp_hdr(skb)->source,
-		udp_hdr(skb)->dest, reason, 0};
+		log = (log_row_t){get_time(), PROT_ICMP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, 0,
+		0, reason, 0};
 	}
 	else{
 		*no_log = 1;
