@@ -4,7 +4,7 @@
 
 #define POOL_LEN 1
 
-static log_row_t log_node_pool[POOL_LEN];
+static log_row_t *log_node_pool[POOL_LEN];
 static struct klist log_list;
 int log_list_length = 0;
 
