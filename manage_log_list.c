@@ -84,13 +84,13 @@ printk(KERN_INFO "in find_identical_log #1. time passed is %lu\n", ((log_row_t*)
         array_length = 5;
     }
     for (i = 0; i < array_length; i++) {
-        if (compare_logs(log_node_pool[i].n_klist, log) == 0) {
+        if (compare_logs(log_node_pool[i].n_klist, log)) {
             return log_node_pool[i].n_klist;
         }
     }
     klist_iter_init(&log_list, &iter);
     while ((node = klist_next(&iter)) != NULL) {
-        if (compare_logs(node->n_klist, log) == 0) {
+        if (compare_logs(node->n_klist, log)) {
             klist_iter_exit(&iter);
             return node->n_klist;
         }

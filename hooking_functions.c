@@ -74,10 +74,14 @@ Logging functions
 
 static int compare_logs(log_row_t *log1, log_row_t *log2){
 	//compare log rows by all parameters except count
-printk(KERN_INFO "Compering, log1->timestamp=%lu, log2->timestamp=%lu", log1->timestamp, log2->timestamp);
-printk(KERN_INFO "Compering, log1->protocol=%d, log2->protocol=%d", log1->protocol, log2->protocol);
-printk(KERN_INFO "Compering, log1->action=%d, log2->action=%d", log1->action, log2->action);
-printk(KERN_INFO "Compering, log1->src_ip=%d, log2->src_ip=%d", log1->src_ip, log2->src_ip);
+	printk(KERN_INFO "Compering, log1->timestamp=%lu, log2->timestamp=%lu", log1->timestamp, log2->timestamp);
+	printk(KERN_INFO "Compering, log1->protocol=%d, log2->protocol=%d", log1->protocol, log2->protocol);
+	printk(KERN_INFO "Compering, log1->action=%d, log2->action=%d", log1->action, log2->action);
+	printk(KERN_INFO "Compering, log1->src_ip=%d, log2->src_ip=%d", log1->src_ip, log2->src_ip);
+	printk(KERN_INFO "Compering, log1->dst_ip=%d, log2->dst_ip=%d", log1->dst_ip, log2->dst_ip);
+	printk(KERN_INFO "Compering, log1->src_port=%d, log2->src_port=%d", log1->src_port, log2->src_port);
+	printk(KERN_INFO "Compering, log1->dst_port=%d, log2->dst_port=%d", log1->dst_port, log2->dst_port);
+	printk(KERN_INFO "Compering, log1->reason=%d, log2->reason=%d", log1->reason, log2->reason);
     return (log1->timestamp==log2->timestamp)&&(log1->protocol==log2->protocol)&&(log1->action==log2->action)&&
     (log1->src_ip==log2->src_ip)&&(log1->dst_ip==log2->dst_ip)&&(log1->src_port==log2->src_port)&&
     (log1->dst_port==log2->dst_port)&&(log1->reason==log2->reason);
