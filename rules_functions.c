@@ -227,7 +227,7 @@ ssize_t modify(struct device *dev, struct device_attribute *attr, const char *bu
 		buf_index += parse_rule_name(buf+buf_index, 
 		rule_table[rule_table_index].rule_name)+1;
 		if(check_and_update_idx(&buf_index, parse_direction(
-		buf+buf_index, &(rule_table[0].direction)))==-1){
+		buf+buf_index, &curr_rule->direction))==-1){
 			return -1;
 		}
 printk(KERN_INFO "direction in rules is %hhu on rule=%d", curr_rule->direction, rule_table_index);

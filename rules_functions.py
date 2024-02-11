@@ -184,7 +184,8 @@ def load(rules_file_path):
                     rules_table_driver.write(parsed_rule+"\n") # added line terminator to identify end of rule
                     rule = rules_file.readline()
         return True
-    except (Exception, ):
+    except Exception as e:
+        print(e)
         return False
     """
     FOR TESTING:
