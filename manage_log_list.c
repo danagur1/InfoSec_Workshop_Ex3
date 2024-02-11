@@ -15,9 +15,11 @@ void init_log_list(void) {
 }
 
 int add_to_log_list(log_row_t *log) {
-    struct log_in_list element= {log, LIST_HEAD_INIT(element.log_list_element)};
-    list_add (&element.log_list_element , &log_list);
+    struct log_in_list element = {log};
+    INIT_LIST_HEAD(&element.log_list_element);
+    list_add(&element.log_list_element, &log_list.list);
     log_list_length++;
+    return 0;
 }
 
 void remove_all_from_log_list(void) {
