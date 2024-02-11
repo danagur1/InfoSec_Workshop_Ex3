@@ -135,7 +135,7 @@ reason_t find_special_reason(int reason_code){
 		return REASON_NO_MATCHING_RULE;
 	}
 	else if (reason_code==4){
-		REASON_XMAS_PACKET;
+		retun REASON_XMAS_PACKET;
 	}
 	else {
 		return REASON_ILLEGAL_VALUE;
@@ -207,7 +207,7 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 	}
 	printk(KERN_INFO "in hook function. rule_table_size=%d, *rule_table_size==1=%d by pointer %p\n", *rule_table_size, *rule_table_size==1, (void*)rule_table_size);
 	if (check_xmas_tree_packet(skb)){
-		log(NULL, skb, 0, 4)
+		log(NULL, skb, 0, 4);
 		return NF_DROP;
 	}
 	for (rule_table_idx = 0; rule_table_idx<*rule_table_size; rule_table_idx++){
