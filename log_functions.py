@@ -66,7 +66,7 @@ def load():
                 #print("time is ", log[:4])
                 print(parse_timestamp(log[:4]), parse_ip(log[6:10]), parse_ip(log[10:14]), parse_port(log[14:16]), parse_port(log[16:18]), 
                       parse_protocol(log[4]), parse_action(log[5]), parse_reason(log[18]), parse_count(log[19:23]), sep=' ')
-                validation_bit = log_show_file.read(1)
+                validation_bit = log_show_file.read(1)[0]
         return True
     except Exception as e:
         print(e)
