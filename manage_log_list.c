@@ -42,7 +42,8 @@ int add_to_log_list(log_row_t *log) {
 
 void remove_all_from_log_list(void) {
     struct klist_node *node, *tmp;
-    for (int i=0; (i<log_list_length)&&(i<POOL_LEN);i++){
+    int i;
+    for (i=0; (i<log_list_length)&&(i<POOL_LEN);i++){
         free(log_node_pool[i]);
     }
     klist_for_each_entry_safe(node, tmp, &log_list, n_klist) {
@@ -59,7 +60,8 @@ int get_log_list_length(void) {
 
 log_row_t *find_identical_log(log_row_t *log, int (*compare_logs)(log_row_t *, log_row_t *)) {
     struct klist_node *node;
-    for (int i=0; (i<log_list_length)&&(i<POOL_LEN);i++){
+    int i;
+    for (i=0; (i<log_list_length)&&(i<POOL_LEN);i++){
         if (compare_logs(log_node_pool[i], log)) {
             return log_node_pool[i];
         }
@@ -75,7 +77,8 @@ log_row_t *find_identical_log(log_row_t *log, int (*compare_logs)(log_row_t *, l
 int func_for_log_list(int (*func)(log_row_t)) {
     struct klist_node *node;
     int func_result;
-    for (int i=0; (i<log_list_length)&&(i<POOL_LEN);i++){
+    int i;
+    for (i=0; (i<log_list_length)&&(i<POOL_LEN);i++){
         func_result = func(*(log_node_pool[i]));
         if (func_result != 0) {
             return -1;
