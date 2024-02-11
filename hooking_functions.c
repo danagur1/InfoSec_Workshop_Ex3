@@ -117,7 +117,7 @@ void exist_log_check(log_row_t *log){
 	log_exist = find_identical_log(log, compare_logs);
 	if (log_exist==NULL){
 		printk(KERN_INFO "Before add_to_log_list\n");
-		add_to_log_list(log);
+		//add_to_log_list(log);
 		printk("didn't found identical. curr length= %d", get_log_list_length());
 	}
 	else{
