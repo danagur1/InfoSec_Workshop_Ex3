@@ -168,7 +168,6 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 		printk(KERN_INFO "exist log cause of error in ptotocol\n");
 		return;
 	}
-printk(KERN_INFO "At the end of log function. time passed=%lu\n", log.timestamp);
 	printk(KERN_INFO "exit log normally\n");
 	exist_log_check(log);
 printk(KERN_INFO "At the very end of log function. time passed is checked now");
