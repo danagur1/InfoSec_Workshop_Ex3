@@ -1,3 +1,4 @@
+#include <linux/list.h>
 #include <linux/klist.h>
 #include <linux/slab.h> // for kmalloc and kfree
 #include "fw.h"
@@ -15,9 +16,12 @@ void init_log_list(void) {
 }
 
 int add_to_log_list(log_row_t *log) {
-    struct log_in_list element = {log};
-    INIT_LIST_HEAD(&element.log_list_element);
-    list_add(&element.log_list_element, &log_list.list);
+    struct log_in_list *element = kmalloc(sizeof(struct log_in_list), GFP_KERNEL);
+    if (!element)
+        return -ENOMEM;
+    element->data = log;
+    INIT_LIST_HEAD(&element->log_list_element);
+    klist_add_tail(&element->log_list_element, &log_list);
     log_list_length++;
     return 0;
 }
