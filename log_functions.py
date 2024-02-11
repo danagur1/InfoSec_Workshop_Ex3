@@ -4,9 +4,9 @@ LOG_SHOW_FILEPATH= "/dev/fw_log"
 LOG_CLEAR_FILEPATH= "/sys/class/fw/log/reset"
 
 def parse_timestamp(bytes_timestamp):
-    print("time bytes are", ".".join(str(b) for b in bytes_timestamp))
+    #print("time bytes are", ".".join(str(b) for b in bytes_timestamp))
     timestamp = struct.unpack("<I", bytes_timestamp)[0]
-    print("time passed is", timestamp)
+    #print("time passed is", timestamp)
     formatted_time = datetime.utcfromtimestamp(timestamp)
     return formatted_time.strftime('%m/%d/%Y %H:%M:%S')
 
@@ -50,12 +50,12 @@ def parse_reason(byte_reason):
     
 def parse_count(bytes_count):
     count = struct.unpack("<I", bytes_count)[0]
-    print("count bytes are", bytes_count)
+    #print("count bytes are", bytes_count)
     return str(count)
     
 def load():
     try:
-        print("timestamp\t\tsrc_ip\t\tdst_ip\t\tsrc_port\t\tdst_port\t\tprotocol\t\taction\t\treason\t\tcount")
+        #print("timestamp\t\tsrc_ip\t\tdst_ip\t\tsrc_port\t\tdst_port\t\tprotocol\t\taction\t\treason\t\tcount")
         with open(LOG_SHOW_FILEPATH, "rb") as log_show_file:
             #test:
             validation_bit = log_show_file.read(1)[0]
@@ -65,7 +65,7 @@ def load():
                 #print("log is ", ".".join([str(x) for x in log]))
                 #print("time is ", log[:4])
                 print(parse_timestamp(log[:4]), parse_ip(log[6:10]), parse_ip(log[10:14]), parse_port(log[14:16]), parse_port(log[16:18]), 
-                      parse_protocol(log[4]), parse_action(log[5]), parse_reason(log[18]), parse_count(log[19:23]), sep='\t\t')
+                      parse_protocol(log[4]), parse_action(log[5]), parse_reason(log[18]), parse_count(log[19:23]), sep=' ')
                 validation_bit = log_show_file.read(1)
         return True
     except Exception as e:
