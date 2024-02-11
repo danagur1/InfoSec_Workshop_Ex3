@@ -126,7 +126,16 @@ printk(KERN_INFO "(log_row_t*)(log_node_pool[i].n_klist) is NULL in func_for_log
 printk(KERN_INFO "Before loop over klist and after loop over log_node_pool\n");
     klist_iter_init(&log_list, &iter);
     while ((node = klist_next(&iter)) != NULL) {
-        func_result = func(*((log_row_t*)(node->n_klist)));
+	printk("in klist loop: timestamp is %lu", ((log_row_t*)(node->n_klist))->timestamp);
+printk("in klist loop: protocol is %d", ((log_row_t*)(node->n_klist))->protocol);
+printk("in klist loop: action is %d", ((log_row_t*)(node->n_klist))->action);
+printk("in klist loop: src_ip is %u", ((log_row_t*)(node->n_klist))->src_ip);
+printk("in klist loop: dst_ip is %u", ((log_row_t*)(node->n_klist))->dst_ip);
+printk("in klist loop: src_port is %u", ((log_row_t*)(node->n_klist))->src_port);
+printk("in klist loop: dst_port is %u", ((log_row_t*)(node->n_klist))->dst_port);
+printk("in klist loop: reason is %d", ((log_row_t*)(node->n_klist))->reason);
+printk("in klist loop: count is %d", ((log_row_t*)(node->n_klist))->count);
+        //func_result = func(*((log_row_t*)(node->n_klist)));
         if (func_result!=0){
             return -1;
         }
