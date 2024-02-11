@@ -118,10 +118,15 @@ void exist_log_check(log_row_t *log){
 	if (log_exist==NULL){
 		printk(KERN_INFO "Before add_to_log_list\n");
 		add_to_log_list(log);
-get_log_list_length();
+		printk("didn't found identical. curr length= %d", get_log_list_length());
 	}
 	else{
 		printk(KERN_INFO "Before updating log\n");
+		printk("found identical. curr length= %d", get_log_list_length());
+		if (log_exist==NULL){
+			printk(KERN_INFO "log_exist==NULL\n");
+			return;
+		}
 		log_exist->count = log_exist->count+1;
 		log_exist->timestamp = log->timestamp;
 	}
