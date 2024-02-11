@@ -135,7 +135,7 @@ reason_t find_special_reason(int reason_code){
 		return REASON_NO_MATCHING_RULE;
 	}
 	else if (reason_code==4){
-		retun REASON_XMAS_PACKET;
+		return REASON_XMAS_PACKET;
 	}
 	else {
 		return REASON_ILLEGAL_VALUE;
