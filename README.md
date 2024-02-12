@@ -10,6 +10,7 @@ including 5 .c files and 4 .h files
 4. log_clear_functions.c: contain all the functions related to the driver responsible for clearing log
 5. rules_functions.c: contain all the functions related to the driver responsible for loading and showing rules
 6. manage_log_list.c: contain the log list data structure and the functions related to it
+7. fw.h: include useful structures and constants
 ## user-side
 ### running
 python3 main.py
