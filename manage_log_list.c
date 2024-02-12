@@ -22,6 +22,7 @@ int add_to_log_list(log_row_t *log) {
     entry->data = log;
     INIT_LIST_HEAD(&entry->log_list_element);
     list_add_tail(&entry->log_list_element, &log_list);
+    log_list_length++;
     return 0;
 }
 
