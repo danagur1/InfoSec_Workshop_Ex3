@@ -7,11 +7,11 @@ struct log_in_list {
     struct list_head log_list_element;
 };
 
-static struct klist log_list;
+static LIST_HEAD(log_list);
 int log_list_length = 0;
 
 void init_log_list(void) {
-    LIST_HEAD(log_list);
+    INIT_LIST_HEAD(&log_list);
 }
 
 int add_to_log_list(log_row_t *log) {
@@ -23,6 +23,7 @@ int add_to_log_list(log_row_t *log) {
     entry->data = log;
     INIT_LIST_HEAD(&entry->log_list_element);
     list_add_tail(&entry->log_list_element, &log_list);
+    return 0;
 }
 
 void remove_all_from_log_list(void) {
