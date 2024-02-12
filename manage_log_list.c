@@ -19,8 +19,10 @@ int add_to_log_list(log_row_t *log) {
     struct log_in_list *element = kmalloc(sizeof(struct log_in_list), GFP_KERNEL);
     if (!element)
         return -ENOMEM;
+
     element->data = log;
-    INIT_LIST_HEAD(&element->log_list_element);
+    INIT_LIST_HEAD(&element->log_list_element.list);
+    klist_node_init(&element->log_list_element);
     klist_add_tail(&element->log_list_element, &log_list);
     log_list_length++;
 }
