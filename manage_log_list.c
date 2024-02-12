@@ -15,8 +15,8 @@ void init_log_list(void) {
 }
 
 int add_to_log_list(log_row_t *log) {
-    struct my_struct *entry;
-    struct my_struct *tmp;
+    struct log_in_list *entry;
+    struct log_in_list *tmp;
     entry = kmalloc(sizeof(*entry), GFP_KERNEL);
     if (!entry)
         return -ENOMEM;
