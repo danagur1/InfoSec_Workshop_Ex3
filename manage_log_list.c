@@ -15,6 +15,7 @@ void init_log_list(void) {
 }
 
 int add_to_log_list(log_row_t *log) {
+printk(KERN_INFO "in add_to_log_list. log_list_length=%d\n", log_list_length); 
     struct log_in_list *entry;
     entry = kmalloc(sizeof(*entry), GFP_KERNEL);
     if (!entry)
@@ -51,11 +52,13 @@ log_row_t *find_identical_log(log_row_t *log, int (*compare_logs)(log_row_t *, l
     return NULL;
 }
 
-int func_for_log_list(int (*func)(log_row_t)) { 
+int func_for_log_list(int (*func)(log_row_t)) {
+printk(KERN_INFO "in func_for_log_list. log_list_length=%d\n", log_list_length); 
     int result;
     struct log_in_list *entry;
     struct log_in_list *tmp;
     list_for_each_entry_safe(entry, tmp, &log_list, log_list_element) {
+printk(KERN_INFO "in loop in func_for_log_list\n"); 
         result = func(*(entry->data));
         if (result==-1){
             return -1;
