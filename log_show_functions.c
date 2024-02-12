@@ -23,14 +23,7 @@ int count_log = 0;
 
 static void reverse_parse_timestamp(unsigned long *src){
 	char *curr_log_position = log_output+position_in_log_output;
-	printk(KERN_INFO "in reverse_parse_timestamp. time passed is %lu\n", *src);
     memcpy(curr_log_position, src, sizeof(unsigned long));
-printk("position_in_log_output=%d", position_in_log_output);
-printk(KERN_INFO "time[0]= %hhu\n", log_output[1]);
-printk(KERN_INFO "time[1]= %hhu\n", log_output[2]);
-printk(KERN_INFO "time[2]= %hhu\n", log_output[3]);
-printk(KERN_INFO "time[3]= %hhu\n", log_output[4]);
-printk(KERN_INFO "sizeof(unsigned long)=%d\n", sizeof(unsigned long));
     position_in_log_output += sizeof(unsigned long);
 }
 
@@ -103,9 +96,7 @@ static void reverse_parse_reason(reason_t src){
 
 static void reverse_parse_count(unsigned int *src){
 	char *curr_log_position = log_output+position_in_log_output;
-	printk(KERN_INFO "in reverse_parse_count\n");
     memcpy(curr_log_position, src, sizeof(unsigned int));
-	printk(KERN_INFO "count that was sent is %d\n", *src);
     position_in_log_output += sizeof(unsigned int);
 }
 
@@ -115,26 +106,13 @@ static void put_validation_log(char valid_log){
 }
 
 static int print_log(log_row_t log){
-printk(KERN_INFO "in print_log\n");
-printk(KERN_INFO "in log start. time passed is %lu\n", log.timestamp);
-    count_log++;
+	count_log++;
 	put_validation_log(1);
-printk(KERN_INFO "before reverse_parse_timestamp. time passed is %lu\n", log.timestamp);
-printk(KERN_INFO "now in position=%d", position_in_log_output);
-    reverse_parse_timestamp(&(log.timestamp));
-printk(KERN_INFO "before reverse_parse_timestamp. time passed is %lu\n", log.timestamp);
-printk(KERN_INFO "now in position=%d", position_in_log_output);
-    reverse_parse_protocol(log.protocol);
-printk(KERN_INFO "now in position=%d", position_in_log_output);
-printk(KERN_INFO "log_output in 0= %hhu\n", log_output[0]);
-    reverse_parse_action(log.action);
-printk(KERN_INFO "now in position=%d", position_in_log_output);
-printk(KERN_INFO "log_output in 0= %hhu\n", log_output[0]);
-    reverse_parse_ip(&(log.src_ip));
+	reverse_parse_timestamp(&(log.timestamp));
+	reverse_parse_protocol(log.protocol);
+	reverse_parse_action(log.action);
+	reverse_parse_ip(&(log.src_ip));
     reverse_parse_ip(&(log.dst_ip));
-printk(KERN_INFO "now in position=%d", position_in_log_output);
-printk("now printing the second log");
-//print_output(log_output+15,15);
     reverse_parse_port(&(log.src_port));
     reverse_parse_port(&(log.dst_port));
     reverse_parse_reason(log.reason);
@@ -142,39 +120,22 @@ printk("now printing the second log");
 	return 0;
 }
 
-static void print_output(char *str_to_print, int len){
-	int i;
-	printk(KERN_INFO "the output is:\n");
-	for (i=0; i<len; i++){
-		printk(KERN_INFO "[%hhu]", str_to_print[i]);
-	}
-	printk(KERN_INFO "\n");
-}
-
 static ssize_t log_read(struct file *filp, char *buff, size_t length, loff_t *offp) {
 	int log_list_length = get_log_list_length();
 	position_in_log_output = 0;
-	printk(KERN_INFO "in log read\n");
     count_log = 0;
 	log_output = (char*)kmalloc(RULE_OUTPUT_SIZE*log_list_length+1, GFP_KERNEL);
 	if (log_output==NULL){
-	printk(KERN_INFO "log output is NULL");
 		return -1;
 	}
     	func_for_log_list(print_log);
 	put_validation_log(0);
-	if (log_output==NULL){
-	printk(KERN_INFO "log output is NULL in 2nd check");
-		}
-	printk(KERN_INFO "wrote to user: %.24s\n", log_output);
-	print_output(log_output, RULE_OUTPUT_SIZE*log_list_length+1);
-	printk(KERN_INFO "RULE_OUTPUT_SIZE is %d\n", RULE_OUTPUT_SIZE);
     copy_to_user(buff, log_output, RULE_OUTPUT_SIZE*log_list_length+1);
 	kfree(log_output);
 	return RULE_OUTPUT_SIZE*log_list_length+1;
 }
 
-static struct file_operations fops = { // Our 'file_operations' struct with declerations on our functions
+static struct file_operations fops = { 
 	.owner = THIS_MODULE,
 	.read = log_read,
 };

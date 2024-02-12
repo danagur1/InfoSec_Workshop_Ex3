@@ -57,7 +57,6 @@ Parse rule values from written to the driver:
 
 static int parse_rule_name(const char *src, char *dst){
 	int size = 0;
-	printk(KERN_INFO "in parse_rule_name function\n");
 	while (src[size]!=' '){
 		size++;
 		if (size>20){
@@ -66,14 +65,11 @@ static int parse_rule_name(const char *src, char *dst){
 	}
 	strncpy(dst, src, size);
 	dst[size] = '\0';
-	printk(KERN_INFO "name is: %s, size is %d\n", dst, size);
 	return size; //return the length of the parsed element 
 }
 
 static int parse_direction(const char *src, direction_t *dst){
-	printk(KERN_INFO "in parse_direction function\n");
 	*dst = src[0]-'0';
-	printk(KERN_INFO "src[0] is: %d and also %c, '0' is %d, *dst is %d\n", src[0], src[0], '0',*dst);
 	if ((0<=*dst)&&(*dst<=3)){
 		return 1; //return the length of the parsed element 
 	}
@@ -81,7 +77,6 @@ static int parse_direction(const char *src, direction_t *dst){
 }
 
 static int parse_ack(const char *src, ack_t *dst){
-	printk(KERN_INFO "in parse_ack function\n");
 	*dst = src[0]-'0';
 	if ((0<=*dst)&&(*dst<=3)){
 		return 1; //return the length of the parsed element 
@@ -92,7 +87,6 @@ static int parse_ack(const char *src, ack_t *dst){
 static int parse_ip(const char *src, __be32 *dst){
 	int size = 0;
 	struct in_addr addr;
-	printk(KERN_INFO "in parse_ip function\n");
 	while (src[size]!=' '){
 		size++;
 	}
@@ -100,13 +94,11 @@ static int parse_ip(const char *src, __be32 *dst){
 		return -1;
 	}
 	*dst = addr.s_addr;
-	printk(KERN_INFO "converted ip. src= %.9s\n, *dst=%u", src, *dst);
 	return size;
 }
 
 static int parse_perfix_size(const char *src, __u8 *dst){
 	unsigned long src_long;
-	printk(KERN_INFO "in parse_perfix_size function\n");
 	if (src[1] == ' '){
 		char perfix[2];
 		perfix[0] = src[0];
@@ -115,7 +107,6 @@ static int parse_perfix_size(const char *src, __u8 *dst){
 			return -1;
 		}
 		*dst = (__u8)src_long;
-		printk(KERN_INFO "parse_perfix_size is %d\n", *dst);
 		return 1;
 	}
 	else if (src[2] == ' ')
@@ -128,7 +119,6 @@ static int parse_perfix_size(const char *src, __u8 *dst){
 			return -1;
 		}
 		*dst = (__u8)src_long;
-		printk(KERN_INFO "parse_perfix_size is %d\n", *dst);
 		return 2;
 	}
 	else{
@@ -137,7 +127,6 @@ static int parse_perfix_size(const char *src, __u8 *dst){
 }
 
 static int parse_protocol(const char *src, __u8 *dst){
-	printk(KERN_INFO "in parse_protocol function\n");
 	switch (src[0])
 	{
 	case '0':
@@ -162,7 +151,6 @@ static int parse_protocol(const char *src, __u8 *dst){
 }
 
 static int parse_action(const char *src, __u8 *dst){
-	printk(KERN_INFO "in parse_action function\n");
 	if (src[0]=='0'){
 		*dst=NF_DROP;
 	}
@@ -171,7 +159,6 @@ static int parse_action(const char *src, __u8 *dst){
 		*dst=NF_ACCEPT;
 	}
 	else{
-		printk(KERN_INFO "failed to parse action because src[0]=%c\n", src[0]);
 		return -1;
 	}
 	return 1;
@@ -191,7 +178,6 @@ static int parse_port(const char *src, __be16 *dst){
 	}
 	strncpy(short_src, src, size);
 	short_src[size]='\0';
-	printk(KERN_INFO "after copy. size: %d,short_src: %s\n", size, short_src);
 	if ((kstrtoul(short_src, 10, &src_int) != 0)||((src_int<0)||(src_int>1023))){
 		kfree(short_src);
 		return -1;
@@ -204,9 +190,7 @@ static int parse_port(const char *src, __be16 *dst){
 
 //Update the current index in buf by the size of element read
 int check_and_update_idx(int *buf_index, int element_size){
-	printk(KERN_INFO "in check_and_update_idx function\n");
 	if (element_size==-1){
-	printk(KERN_INFO "element_size: %d\n", element_size);
 		return -1; //error code
 	}
 	*buf_index += element_size+1;
@@ -219,43 +203,33 @@ ssize_t modify(struct device *dev, struct device_attribute *attr, const char *bu
 {
 	int rule_table_index = 0;
 	int buf_index = 0;
-        printk(KERN_INFO "in modify function with %d\n", count);
 	while (buf_index<count)
 	{
 		rule_t *curr_rule = rule_table+rule_table_index;
-		printk(KERN_INFO "continue because buf_index=%d\n, count=%d\n", 		buf_index, count);
 		buf_index += parse_rule_name(buf+buf_index, 
 		rule_table[rule_table_index].rule_name)+1;
 		if(check_and_update_idx(&buf_index, parse_direction(
 		buf+buf_index, &curr_rule->direction))==-1){
 			return -1;
 		}
-printk(KERN_INFO "direction in rules is %hhu on rule=%d", curr_rule->direction, rule_table_index);
-printk(KERN_INFO "after assining direction rule_table_index after udated=%d. curr_rule->direction=%hhu\n", rule_table_index, rule_table[0].direction);
-printk(KERN_INFO "after assining direction rule_table in 0.direction=%hhu\n", rule_table[0].direction);
 		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &curr_rule->src_ip))==-1){
 			return -1;
 		}
 		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &curr_rule->src_prefix_mask))==-1){
 			return -1;
 		}
-//printk(KERN_INFO "before src_prefix_size and now buf_index=%d and has-%.10s near it and before it-%.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		if(check_and_update_idx(&buf_index, parse_perfix_size(buf+buf_index, &curr_rule->src_prefix_size))==-1){
 			return -1;
 		}
-//printk(KERN_INFO "before dst_ip and now buf_index=%d and has-%.10s near it and before it-%.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &curr_rule->dst_ip))==-1){
 			return -1;
 		}
-		//printk(KERN_INFO "before dst_prefix_mask and now buf_index=%d and has-%.10s near it and before it-%.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		if(check_and_update_idx(&buf_index, parse_ip(buf+buf_index, &curr_rule->dst_prefix_mask))==-1){
 			return -1;
 		}
-		printk(KERN_INFO "before dst prefix_size and now buf_index=%d and has-%.10s near it and before it-%.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		if(check_and_update_idx(&buf_index, parse_perfix_size(buf+buf_index, &curr_rule->dst_prefix_size))==-1){
 			return -1;
 		}
-printk(KERN_INFO "after dst prefix_size and now buf_index=%d and has-%.10s near it and before it-%.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		if(check_and_update_idx(&buf_index, parse_protocol(buf+buf_index, &curr_rule->protocol))==-1){
 			return -1;
 		}
@@ -271,18 +245,12 @@ printk(KERN_INFO "after dst prefix_size and now buf_index=%d and has-%.10s near 
 		if(check_and_update_idx(&buf_index, parse_action(buf+buf_index, &curr_rule->action))==-1){
 			return -1;
 		}
-		printk(KERN_INFO "ended the loop and not buf_index=%d and has %.10s near it and before it %.3s\n", buf_index, buf+buf_index, buf+buf_index-3);
 		rule_table_index++;
 	}
-printk(KERN_INFO "after assining all loop: rule_table in 0.direction=%hhu\n", rule_table[0].direction);
-	printk(KERN_INFO "*finished loop");
 	*rule_table_size = rule_table_index;
-	printk(KERN_INFO "in rules. *rule_table_size=%d by pointer %p\n", *rule_table_size, (void*)rule_table_size);
 	if (store_not_parsed_input(buf, count)==-1){
 		return -1;
 	}
-printk(KERN_INFO "at the end of modify");
-printk(KERN_INFO "rule_table in 0.direction=%hhu\n", rule_table[0].direction);
 	return count;
 }
 
@@ -295,7 +263,6 @@ static DEVICE_ATTR(rules, S_IWUSR | S_IRUGO , display, modify);
 
 struct class *rules_create_dev(rule_t *user_rule_table, int *user_rule_table_size)
 {
-	printk(KERN_INFO "in rules_create_dev function\n");
 	rule_table = user_rule_table;
 	rule_table_size = user_rule_table_size;
 
@@ -329,7 +296,6 @@ struct class *rules_create_dev(rule_t *user_rule_table, int *user_rule_table_siz
 		unregister_chrdev(major_number, DEVICE_NAME_RULES);
 		return NULL;
 	}
-	printk(KERN_INFO "Succesful call for create\n");
 	return fw_class;
 }
 
@@ -339,5 +305,4 @@ void rules_remove_dev(void)
 	device_destroy(fw_class, MKDEV(major_number, MINOR_RULES));
 	unregister_chrdev(major_number, DEVICE_NAME_RULES);
 	free_input_buf();
-	printk(KERN_INFO "Succesful call for remove\n");
 }

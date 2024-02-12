@@ -147,7 +147,6 @@ def read_rule(rule):
     dst_port = get_port_code(rule[6])
     ack = get_ack_code(rule[7])
     action = get_action_code(rule[8])
-    #print("src_ip: "+str(src_ip)+" dst_ip: "+str(dst_ip)+" src_port: "+str(src_port)+" dst_port: "+str(dst_port)+" ack: "+str(ack)+" action: "+str(action))
     if src_ip and dst_ip and src_port and dst_port and ack and action:
         return ' '.join([rule[0], direction, src_ip, src_prefix_mask, src_prefix_size, dst_ip, dst_prefix_mask,
                          dst_prefix_size, protocol, src_port, dst_port, ack, action])
@@ -180,19 +179,11 @@ def load(rules_file_path):
                     parsed_rule = read_rule(rule)
                     if not parsed_rule:
                         return False
-                    print(parsed_rule)
                     rules_table_driver.write(parsed_rule+"\n") # added line terminator to identify end of rule
                     rule = rules_file.readline()
         return True
     except Exception as e:
-        print(e)
         return False
-    """
-    FOR TESTING:
-    rule = rules_file.readline().split()
-    while rule:
-        print(read_rule(rule))
-        rule = rules_file.readline().split()"""
 
 
 def show():

@@ -36,7 +36,6 @@ int check_xmas_tree_packet(struct sk_buff *skb){
 int check_direction(struct sk_buff *skb, rule_t rule){
 	struct net_device *dev = skb->dev;
 	if (dev) {
-		printk(KERN_INFO "in check_direction: dev->name=%s and direction=%hhu\n", dev->name, rule.direction);
         if (rule.direction==DIRECTION_IN) {
             return strcmp(dev->name, "enp0s9") == 0;
         } else if (rule.direction==DIRECTION_OUT) {
@@ -45,7 +44,6 @@ int check_direction(struct sk_buff *skb, rule_t rule){
             return (strcmp(dev->name, "enp0s8") == 0) || (strcmp(dev->name, "enp0s9") == 0);
     	}
 		else{
-printk(KERN_INFO "failed to match direction\n");
 			return -1;
 		}
 	}
@@ -54,10 +52,8 @@ printk(KERN_INFO "failed to match direction\n");
 
 int check_ip(struct sk_buff *skb, rule_t rule){
 	if ((ip_hdr(skb)->protocol!=IPPROTO_ICMP)&&(rule.protocol==PROT_ICMP)){
-		//printk(KERN_INFO "check_ip return 0 because of icmp");
 		return 0;
 	}
-	//printk(KERN_INFO "1:%u, 2:%u, 3:%u", ip_hdr(skb)->saddr, rule.src_prefix_mask, rule.src_ip);
 	return ((ip_hdr(skb)->saddr & rule.src_prefix_mask) == (rule.src_ip & rule.src_prefix_mask)) && ((ip_hdr(skb)->daddr & rule.dst_prefix_mask) == (rule.dst_ip & rule.dst_prefix_mask));
 }
 
@@ -89,14 +85,7 @@ Logging functions
 
 static int compare_logs(log_row_t *log1, log_row_t *log2){
 	//compare log rows by all parameters except count
-	printk(KERN_INFO "Compering, log1->protocol=%d, log2->protocol=%d, result=%d", log1->protocol, log2->protocol, (log1->protocol==log2->protocol));
-	printk(KERN_INFO "Compering, log1->action=%d, log2->action=%d, result=%d", log1->action, log2->action, (log1->action==log2->action));
-	printk(KERN_INFO "Compering, log1->src_ip=%d, log2->src_ip=%d, result=%d", log1->src_ip, log2->src_ip, (log1->src_ip==log2->src_ip));
-	printk(KERN_INFO "Compering, log1->dst_ip=%d, log2->dst_ip=%d, result=%d", log1->dst_ip, log2->dst_ip, (log1->dst_ip==log2->dst_ip));
-	printk(KERN_INFO "Compering, log1->src_port=%d, log2->src_port=%d, result=%d", log1->src_port, log2->src_port,(log1->src_port==log2->src_port));
-	printk(KERN_INFO "Compering, log1->dst_port=%d, log2->dst_port=%d, result=%d", log1->dst_port, log2->dst_port, (log1->dst_port==log2->dst_port));
-	printk(KERN_INFO "Compering, log1->reason=%d, log2->reason=%d, result=%d", log1->reason, log2->reason, (log1->reason==log2->reason));
-    return (log1->protocol==log2->protocol)&&(log1->action==log2->action)&&
+	return (log1->protocol==log2->protocol)&&(log1->action==log2->action)&&
     (log1->src_ip==log2->src_ip)&&(log1->dst_ip==log2->dst_ip)&&(log1->src_port==log2->src_port)&&
     (log1->dst_port==log2->dst_port)&&(log1->reason==log2->reason);
 }
@@ -108,7 +97,6 @@ long get_time(void){
 	struct timespec64 ts;
     ktime_get_real_ts64(&ts);
 	result = ts.tv_sec;
-printk(KERN_INFO "In time got %lu\n", result);
     return result;
 }
 
@@ -116,15 +104,10 @@ void exist_log_check(log_row_t *log){
 	log_row_t *log_exist;
 	log_exist = find_identical_log(log, compare_logs);
 	if (log_exist==NULL){
-		printk(KERN_INFO "Before add_to_log_list\n");
 		add_to_log_list(log);
-		printk("didn't found identical. curr length= %d", get_log_list_length());
 	}
 	else{
-		printk(KERN_INFO "Before updating log\n");
-		printk("found identical. curr length= %d", get_log_list_length());
 		if (log_exist==NULL){
-			printk(KERN_INFO "log_exist==NULL\n");
 			return;
 		}
 		log_exist->count = log_exist->count+1;
@@ -164,7 +147,6 @@ log_row_t log_by_protocol(__u8 protocol, struct sk_buff *skb, reason_t reason, u
 	else{
 		*no_log = 1;
 	}
-printk(KERN_INFO "At the end of log_by_protocol function. time passed=%lu\n", log.timestamp);
 	return log;
 }
 
@@ -174,10 +156,8 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 	unsigned char action;
 	struct net_device *dev = skb->dev;
 	int no_log = 0;
-	printk(KERN_INFO "Starting log\n");
 	if (strcmp(dev->name, "lo")==0){
 		//no log in case of loopback
-		printk(KERN_INFO "exist log cause of loopback. dev->name=%s\n", dev->name);
 		return;
 	}
 	//handle special cases wnen no rule matching the action:
@@ -187,17 +167,12 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 	}
 	else {
 		action = rule->action;
-		//printk(KERN_INFO "Just put action- 3");
 	}
 	*log = log_by_protocol(ip_hdr(skb)->protocol, skb, reason, action, &no_log);
 	if (no_log){
-		printk(KERN_INFO "exist log cause of error in ptotocol\n");
 		return;
 	}
-	printk(KERN_INFO "exit log normally\n");
 	exist_log_check(log);
-	printk(KERN_INFO "At the very end of log function. time passed is checked now");
-	get_log_list_length();
 }
 
 /*
@@ -206,59 +181,34 @@ The hook function of the firewall:
 unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
 	int rule_table_idx;
 	int check_direction_result;
-	printk(KERN_INFO "rule_table in 0 .direction=%hhu\n", rule_table[0].direction);
 	if (skb==NULL){
-		printk(KERN_INFO "NULL error in log hookfn_by_rule_table\n");
 	}
-	printk(KERN_INFO "in hook function. rule_table_size=%d, *rule_table_size==1=%d by pointer %p\n", *rule_table_size, *rule_table_size==1, (void*)rule_table_size);
 	if (check_xmas_tree_packet(skb)){
 		log(NULL, skb, 0, 4);
 		return NF_DROP;
 	}
 	for (rule_table_idx = 0; rule_table_idx<*rule_table_size; rule_table_idx++){
 		rule_t curr_rule= rule_table[rule_table_idx];
-		printk(KERN_INFO "in loop for=%d\n", rule_table_idx);
-		printk(KERN_INFO "in hook function. check_direction=%d, check_ip=%d, check_port=%d, check_ack=%d\n", check_direction(skb, curr_rule), check_ip(skb, curr_rule), check_port(skb,curr_rule), check_ack(skb, curr_rule));
-		printk(KERN_INFO "for current rule direction=%hhu\n", curr_rule.direction);
 		check_direction_result = check_direction(skb, curr_rule);
 		if (check_direction_result==-1){
-			printk(KERN_INFO "before log function call");
 			log(NULL, skb, 0, 1);
-			printk(KERN_INFO "At the very end of hook function. time passed is checked now");
-			get_log_list_length();
 			return NF_DROP;
 		}
 		if (check_direction_result&&check_ip(skb, curr_rule)&&check_port(skb,curr_rule)&&check_ack(skb, curr_rule)){
-			if (curr_rule.action==NF_DROP){
-				printk(KERN_INFO "Action taken is Drop!!!\n");
-			}
-			if (curr_rule.action==NF_ACCEPT){
-				printk(KERN_INFO "Action taken is Accept\n");
-			}
 			log(&curr_rule, skb, rule_table_idx, 0);
-			printk(KERN_INFO "At the very end of hook function. time passed is checked now");
-			get_log_list_length();
 			return curr_rule.action;
 		}
 	}
-	//printk(KERN_INFO "No rule found. rule_table_size=%d\n", *rule_table_size);
 	if (*rule_table_size==0){
 		log(NULL, skb, 0, 3);
-		printk(KERN_INFO "At the very end of hook function. time passed is checked now");
-		get_log_list_length();
 	}
 	else{
 		log(NULL, skb, 0, 2);
-		printk(KERN_INFO "At the very end of hook function. time passed is checked now");
-		get_log_list_length();
 	}
-	printk(KERN_INFO "here\n");
-	get_log_list_length();
 	return NF_DROP;
 }
 
 int register_hook(rule_t *input_rule_table, int *input_rule_table_size){
-	printk(KERN_INFO "In register_hook\n");
 	init_log_list();
 	rule_table = input_rule_table;
 	rule_table_size = input_rule_table_size;
