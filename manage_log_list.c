@@ -55,7 +55,7 @@ int func_for_log_list(int (*func)(log_row_t)) {
     struct log_in_list *entry;
     struct log_in_list *tmp;
     list_for_each_entry_safe(entry, tmp, &log_list, log_list_element) {
-        result = func(entry->data);
+        result = func(*(entry->data));
         if (result==-1){
             return -1;
         }
