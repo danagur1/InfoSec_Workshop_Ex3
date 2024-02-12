@@ -199,6 +199,3 @@ def show():
         return True
     except (Exception, ):
         return False
-
-
-"""load_rules("rules example.txt")"""
