@@ -16,7 +16,6 @@ void init_log_list(void) {
 
 int add_to_log_list(log_row_t *log) {
     struct log_in_list *entry;
-    struct log_in_list *tmp;
     entry = kmalloc(sizeof(*entry), GFP_KERNEL);
     if (!entry)
         return -ENOMEM;
@@ -28,7 +27,7 @@ int add_to_log_list(log_row_t *log) {
 
 void remove_all_from_log_list(void) {
     struct log_in_list *entry, *next;
-    list_for_each_entry_safe(entry, next, &log_list.list, log_list_element) {
+    list_for_each_entry_safe(entry, next, &log_list, log_list_element) {
         list_del(&entry->log_list_element);
         kfree(entry->data);
         kfree(entry);
@@ -41,9 +40,9 @@ int get_log_list_length(void) {
 }
 
 log_row_t *find_identical_log(log_row_t *log, int (*compare_logs)(log_row_t *, log_row_t *)) {
-    struct list_head *position = NULL ; 
-    struct mystruct  *datastructureptr  = NULL ; 
-    list_for_each_entry(entry, &log_list.list, log_list_element) {
+    struct log_in_list *entry;
+    struct log_in_list *tmp;
+    list_for_each_entry_safe(entry, tmp, &log_list, log_list_element) {
         if(compare_logs(entry->data, log)){
             return entry->data;
         }
@@ -51,11 +50,11 @@ log_row_t *find_identical_log(log_row_t *log, int (*compare_logs)(log_row_t *, l
     return NULL;
 }
 
-int func_for_log_list(int (*func)(log_row_t)) {
-    struct list_head *position = NULL ; 
-    struct mystruct  *datastructureptr  = NULL ; 
+int func_for_log_list(int (*func)(log_row_t)) { 
     int result;
-    list_for_each_entry(entry, &log_list.list, log_list_element) {
+    struct log_in_list *entry;
+    struct log_in_list *tmp;
+    list_for_each_entry_safe(entry, tmp, &log_list, log_list_element) {
         result = func(entry->data);
         if (result==-1){
             return -1;
