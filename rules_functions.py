@@ -31,23 +31,32 @@ def reverse_parse_rule_name(rule_name):
     return struct.unpack('<21s', rule_name)[0].decode().rstrip('\0')
 
 def parse_ip(ip_add):
+    #print("in parse_ip with input ip_add= "+str(ip_add))
     if ip_add == "any":
         ip = "10.1.1.1"
-        prefix_size = "8"
+        perfix_size = "8"
     elif not is_ip(ip_add):
         return False, False, False
     else:
-        ip, prefix_size = ip_add.split("/")
-    prefix_mask = socket.inet_ntoa(struct.pack(">L", (1 << 32) - (1 << 32 >> int(prefix_size))))
+        ip, perfix_size = ip_add.split("/")
+    if perfix_size=="0":
+        ip = "10.1.1.1"
+        perfix_size = "8"
+    #print("perfix size="+str(int(perfix_size)))
+    perfix_mask = socket.inet_ntoa(struct.pack(">L", (1 << 32) - (1 << 32 >> int(perfix_size))))
     ip = b"".join([int(x).to_bytes(1, 'little') for x in ip.split(".")])
-    prefix_mask = b"".join([int(x).to_bytes(1, 'little') for x in prefix_mask.split(".")])
-    return ip, prefix_mask, struct.pack("<B", int(prefix_size))
+    perfix_mask = b"".join([int(x).to_bytes(1, 'little') for x in perfix_mask.split(".")])
+    #print("in parse_ip with "+str([ip, perfix_mask, struct.pack("<B", int(perfix_size)-1)]))
+    return ip, perfix_mask, struct.pack("<B", (int(perfix_size)-1))
 
 
-def reverse_parse_ip(ip, prefix_size):
-    perfix_size= str(struct.unpack("<B", perfix_size))
-    ip = [str(int(byte)) for byte in ip]
-    result = "/".join([ip, prefix_size])
+def reverse_parse_ip(ip, perfix_size):
+    #print("ip= "+str(ip)+",perfix_size= "+str(perfix_size))
+    perfix_size= str(struct.unpack("<B", perfix_size)[0]+1)
+    #print("perfix_size= "+str(perfix_size)+",len(perfix_size)= "+str(len(perfix_size)))
+    ip = ".".join([str(int(byte)) for byte in ip])
+    result = "/".join([ip, perfix_size])
+    #print("didn't failed till here")
     if result==r"10.0.0.1/8": # this is the meaning of any ip
         return "any"
     return result
@@ -65,11 +74,11 @@ def get_direction_code(direction):
 
 
 def reverse_direction(direction_code):
-    if direction_code == b'1':
+    if direction_code == b'\x01':
         return "in"
-    elif direction_code == b'2':
+    elif direction_code == b'\x02':
         return "out"
-    elif direction_code == b'3':
+    elif direction_code == b'\x03':
         return "any"
 
 
@@ -106,18 +115,21 @@ def get_port_code(port):
         port =0
     elif not (is_int(port) and 1 <= int(port) and int(port) <= 1023):
         return False
-    return struct.pack("<H", int(port))
+    return struct.pack(">H", int(port))
 
 
 def reverse_port(port_code):
-    return str(struct.unpack("<H", port_code)[0])
+    port = str(struct.unpack(">H", port_code)[0])
+    if port=="0":
+        return "any" 
+    return port
 
 
 def get_ack_code(ack):
     if ack == "yes":
-        return b'1'
-    elif ack == "no":
         return b'2'
+    elif ack == "no":
+        return b'1'
     elif ack == "any":
         return b'3'
     else:
@@ -149,30 +161,37 @@ def reverse_action(action_code):
 def read_rule(rule):
     rule_name = parse_rule_name(rule[0])
     direction = get_direction_code(rule[1])
-    src_ip, src_prefix_mask, src_prefix_size = parse_ip(rule[2])
-    dst_ip, dst_prefix_mask, dst_prefix_size = parse_ip(rule[3])
+    src_ip, src_perfix_mask, src_perfix_size = parse_ip(rule[2])
+    dst_ip, dst_perfix_mask, dst_perfix_size = parse_ip(rule[3])
     protocol = get_protocol_code(rule[4])
     src_port = get_port_code(rule[5])
     dst_port = get_port_code(rule[6])
     ack = get_ack_code(rule[7])
     action = get_action_code(rule[8])
     if rule_name and src_ip and dst_ip and src_port and dst_port and ack and action:
-        return b' '.join([rule_name, direction, src_ip, src_prefix_mask, src_prefix_size, dst_ip, dst_prefix_mask,
-                         dst_prefix_size, protocol, src_port, dst_port, ack, action])
+        #print(str([rule_name, direction, src_ip, src_perfix_mask, src_perfix_size, dst_ip, dst_perfix_mask,
+        #                 dst_perfix_size, protocol, src_port, dst_port, ack, action]))
+        #print("len= "+str(len([rule_name, direction, src_ip, src_perfix_mask, src_perfix_size, dst_ip, dst_perfix_mask,
+        #                 dst_perfix_size, protocol, src_port, dst_port, ack, action])))
+        return b' '.join([rule_name, direction, src_ip, src_perfix_mask, src_perfix_size, dst_ip, dst_perfix_mask,
+                         dst_perfix_size, protocol, src_port, dst_port, ack, action])
     else:
         return False
 
 
 def write_rule(rule):
+    #print("rule= "+str(rule))
+    rule_name = reverse_parse_rule_name(rule[0])
     direction = reverse_direction(rule[1])
     src_ip_with_perfix = reverse_parse_ip(rule[2], rule[4])
     dst_ip_with_perfix = reverse_parse_ip(rule[5], rule[7])
     protocol = reverse_protocol(rule[8])
+    #print("ok here")
     src_port = reverse_port(rule[9])
     dst_port = reverse_port(rule[10])
     ack = reverse_ack(rule[11])
     action = reverse_action(rule[12])
-    return ' '.join([rule[0], direction, src_ip_with_perfix, dst_ip_with_perfix, protocol, src_port, dst_port, ack, action])
+    return ' '.join([rule_name, direction, src_ip_with_perfix, dst_ip_with_perfix, protocol, src_port, dst_port, ack, action])
 
 
 def load(rules_file_path):
@@ -191,20 +210,20 @@ def load(rules_file_path):
                     rules_table_driver.write(parsed_rule+b"\n") # added line terminator to identify end of rule
                     rule = rules_file.readline()
         return True
-    except Exception as e:
+    except (Exception, ):
         return False
 
 
 def show():
     try:
         with open(RULES_DEVICE_FILEPATH, "rb") as rules_file:
-            rule = rules_file.readline()
             while True:
-                if rule==b'\n':
+                rule = rules_file.read(60)[:-1]
+                if rule==b'':
                     break
                 rule = rule.split(b' ')
                 print(write_rule(rule))
-                rule = rules_file.readline()
         return True
-    except (Exception, ):
+    except Exception as e:
+        print(e)
         return False

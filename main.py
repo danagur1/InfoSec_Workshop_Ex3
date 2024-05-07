@@ -1,6 +1,7 @@
 import sys
 import rules_functions
 import log_functions
+import conn_functions
 
 
 def show_rules():
@@ -16,6 +17,11 @@ def load_rules(rules_file_path):
 def log_show():
     if not log_functions.load():
         print("ERROR: failed to show log")
+
+
+def conn_show():
+    if not conn_functions.load():
+        print("ERROR: failed to show connection table")
 
 
 def log_clear():
@@ -41,5 +47,7 @@ if __name__ == "__main__":
         log_show()
     elif option == "clear_log":
         log_clear()
+    elif option == "show_conns":
+        conn_show()
     else:
-        print("Invalid argument. Choose from: show_rules, load_rules, show_log, clear_log")
+        print("Invalid argument. Choose from: show_rules, load_rules, show_log, clear_log, show_conns")

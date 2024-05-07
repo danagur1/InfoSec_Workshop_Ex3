@@ -35,6 +35,7 @@ typedef enum {
 #define DEVICE_NAME_RULES			"rules"
 #define DEVICE_NAME_CLEAR_LOG		"log"
 #define DEVICE_NAME_SHOW_LOG		"fw_log"
+#define DEVICE_NAME_SHOW_CONN		"conns"
 #define CLASS_NAME					"fw"
 #define LOOPBACK_NET_DEVICE_NAME	"lo"
 #define IN_NET_DEVICE_NAME			"eth1"
@@ -48,9 +49,10 @@ typedef enum {
 
 // device minor numbers, for your convenience
 typedef enum {
-	MINOR_RULES    = 0,
+	MINOR_RULES			= 0,
 	MINOR_LOG_SHOW      = 1,
-	MINOR_LOG_CLEAR = 2,
+	MINOR_LOG_CLEAR		= 2,
+	MINOR_CONN_SHOW		= 3,
 } minor_t;
 
 typedef enum {
@@ -95,5 +97,27 @@ typedef struct {
 	reason_t     	reason;       	// rule#index, or values from: reason_t
 	unsigned int   	count;        	// counts this line's hits
 } log_row_t;
+
+typedef enum {
+	STATE_CLOSED            = 0,
+	STATE_LISTEN            = 1,
+	STATE_SYN_SENT          = 2,
+    STATE_SYN_RECEIVED      = 3,
+    STATE_ESTABLISHED       = 4,
+    STATE_CLOSE_WAIT        = 5,
+    STATE_LAST_ACK          = 6,
+    STATE_FIN_WAIT_1        = 7,
+    STATE_FIN_WAIT_2        = 8,
+    STATE_CLOSING           = 9,
+    STATE_TIME_WAIT         = 10,
+} state_t;
+
+typedef struct {
+	__be32   		src_ip;
+	__be32			dst_ip;
+	__be16 			src_port;
+	__be16 			dst_port;
+	state_t     	state;
+} conn_row_t;
 
 #endif // _FW_H_

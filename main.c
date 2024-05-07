@@ -6,7 +6,9 @@
 #include "hooking_functions.h"
 #include "log_show_functions.h"
 #include "log_clear_functions.h"
+#include "conn_show_functions.h"
 #include "manage_log_list.h"
+#include "manage_conn_list.h"
 #include "fw.h"
 
 MODULE_LICENSE("GPL");
@@ -29,6 +31,9 @@ static int __init my_module_init_function(void) {
 	if (log_show_create_dev(devices_class)<0){
 		return -1;
 	}
+	if (conn_show_create_dev(devices_class)<0){
+		return -1;
+	}
 	if (register_hook(first_rule_table, &first_rule_table_size)<0){
 		return -1;
 	}
@@ -41,7 +46,9 @@ static void __exit my_module_exit_function(void) {
 	unregister_hook();
 	log_clear_remove_dev();
 	log_show_remove_dev();
+	conn_show_remove_dev();
 	remove_all_from_log_list();
+	remove_all_from_conn_list();
 	return;
 }
 module_init(my_module_init_function);

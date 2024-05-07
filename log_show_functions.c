@@ -13,7 +13,6 @@ MODULE_DESCRIPTION("Stateless firewall");
 
 int RULE_OUTPUT_SIZE = 24;
 
-char* buffer_index;							// The moving index of the original buffer
 static int major_number;					// Major of the char device
 static struct class* devices_class = NULL;	// The device's class
 static struct device* log_device = NULL;	// The device's name
@@ -160,6 +159,5 @@ int log_show_create_dev(struct class *devices_class_input) {
 
 void log_show_remove_dev(void) {
 	device_destroy(devices_class, MKDEV(major_number, MINOR_LOG_SHOW));
-	class_destroy(devices_class);
 	unregister_chrdev(major_number, DEVICE_NAME_SHOW_LOG);
 }

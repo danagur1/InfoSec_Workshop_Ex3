@@ -26,6 +26,7 @@ const char *input_buf_pointer;
 int input_buf_index;
 
 static char *not_parsed_input = NULL;
+int not_parsed_input_len = 0;
 
 static struct file_operations fops = {
 	.owner = THIS_MODULE
@@ -44,17 +45,21 @@ static void free_input_buf(void){
 
 static int store_not_parsed_input(const char *buf, size_t count){
 	free_input_buf();
-	not_parsed_input = (char*)kmalloc(count*sizeof(char), GFP_KERNEL);
+	not_parsed_input_len = count+1;
+	not_parsed_input = (char*)kmalloc((not_parsed_input_len)*sizeof(char), GFP_KERNEL);
 	if (not_parsed_input==NULL){
 		return -1;
 	}
-	strncpy(not_parsed_input, buf, count);
+	memcpy(not_parsed_input, buf, not_parsed_input_len);
+	not_parsed_input[count] = '\n';
+	printk("in store_not_parsed_input not_parsed_input_len= %d\n", not_parsed_input_len);
 	return 0;
 }
 
 static ssize_t display(struct device *dev, struct device_attribute *attr, char *buf)	//sysfs show implementation
 {
-	return sprintf(buf, "%s\n", not_parsed_input);
+	memcpy(buf, not_parsed_input, not_parsed_input_len);
+	return not_parsed_input_len;
 }
 
 
@@ -103,6 +108,7 @@ static int parse_dst_prefix_mask(rule_t *curr_rule){
 
 static int parse_prefix_size(__u8 *dst){
 	memcpy(dst, input_buf_pointer+input_buf_index, sizeof(__u8));
+	*dst = *dst+1;
 	return sizeof(__u8); //return the length of the parsed element
 }
 
@@ -155,7 +161,7 @@ static int parse_dst_port(rule_t *curr_rule){
 static int parse_ack(rule_t *curr_rule){
 	ack_t *dst = &(curr_rule->ack);
 	*dst = (input_buf_pointer+input_buf_index)[0]-'0';
-	if ((0<=*dst)&&(*dst<=3)){
+	if ((1<=*dst)&&(*dst<=3)){
 		return 1; //return the length of the parsed element 
 	}
 	return -1; //error code
@@ -210,6 +216,7 @@ ssize_t modify(struct device *dev, struct device_attribute *attr, const char *bu
 		rule_table_index++;
 	}
 	*rule_table_size = rule_table_index;
+	printk(KERN_INFO "got input %100.s\n", buf);
 	if (store_not_parsed_input(buf, count)==-1){
 		return -1;
 	}

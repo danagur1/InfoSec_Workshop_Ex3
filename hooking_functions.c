@@ -7,6 +7,7 @@
 #include <net/ip.h>
 #include "fw.h"
 #include "manage_log_list.h"
+#include "manage_conn_list.h"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Dana Gur");
@@ -57,7 +58,7 @@ int check_ip(struct sk_buff *skb, rule_t rule){
 	return ((ip_hdr(skb)->saddr & rule.src_prefix_mask) == (rule.src_ip & rule.src_prefix_mask)) && ((ip_hdr(skb)->daddr & rule.dst_prefix_mask) == (rule.dst_ip & rule.dst_prefix_mask));
 }
 
-int check_port(struct sk_buff *skb, rule_t rule){
+int check_protocol_and_port(struct sk_buff *skb, rule_t rule){
     // packet is TCP
 	if (rule.protocol==PROT_TCP){
 		return (skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_TCP)&&
@@ -72,9 +73,9 @@ int check_port(struct sk_buff *skb, rule_t rule){
 }
 
 int check_ack(struct sk_buff *skb, rule_t rule){
-	if (rule.protocol==PROT_TCP) { 
+	if ((skb->protocol == htons(ETH_P_IP))&&(ip_hdr(skb)->protocol==IPPROTO_TCP)) { 
 		// check_port already checked that the packet is tcp
-        return ((tcp_hdr(skb)->source)&&(rule.ack==ACK_YES))||((!tcp_hdr(skb)->source)&&(rule.ack==ACK_NO))||(ACK_ANY);
+        return ((tcp_hdr(skb)->ack)&&(rule.ack==ACK_YES))||((!tcp_hdr(skb)->ack)&&(rule.ack==ACK_NO))||(rule.ack==ACK_ANY);
     }
 	return 1;
 }
@@ -130,37 +131,50 @@ reason_t find_special_reason(int reason_code){
 	}
 }
 
-log_row_t log_by_protocol(__u8 protocol, struct sk_buff *skb, reason_t reason, unsigned char action, int *no_log){
+conn_row_t *buff_to_conn(struct sk_buff *skb){
+	conn_row_t *conn = (conn_row_t*)kmalloc(sizeof(conn_row_t), GFP_KERNEL);
+	*conn = (conn_row_t){ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source, tcp_hdr(skb)->dest, STATE_LISTEN};
+	return conn;
+}
+
+void log_conn_table(struct sk_buff *skb, int reason){
+	if ((!tcp_hdr(skb)->ack)&&(reason>=0)){ //ack==0 and reason is rule
+		if (rule_table[reason].action==NF_ACCEPT){ //rule accepts
+			add_to_conn_list(buff_to_conn(skb));
+		}
+	}
+}
+
+//create log_row_t element for table by combined data from the rule and from the packet
+log_row_t log_by_protocol(__u8 protocol, struct sk_buff *skb, int reason, unsigned char action){
 	log_row_t log;
-	if ((protocol==IPPROTO_TCP)&&(skb->protocol == htons(ETH_P_IP))){
+	if (protocol==IPPROTO_TCP){
 		log = (log_row_t){get_time(), PROT_TCP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source,
 		tcp_hdr(skb)->dest, reason, 0};
+		log_conn_table(skb, reason);
 	}
-	else if ((protocol==IPPROTO_UDP)&&(skb->protocol == htons(ETH_P_IP))){
+	else if (protocol==IPPROTO_UDP){
 		log = (log_row_t){get_time(), PROT_UDP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, udp_hdr(skb)->source,
 		udp_hdr(skb)->dest, reason, 0};
 	}
-	else if (protocol==IPPROTO_ICMP){
+	else{
 		log = (log_row_t){get_time(), PROT_ICMP, action, ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, 0,
 		0, reason, 0};
-	}
-	else{
-		*no_log = 1;
 	}
 	return log;
 }
 
+//main log function- called from hook
 void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reason){
 	log_row_t *log = (log_row_t*)kmalloc(sizeof(log_row_t), GFP_KERNEL);
-	reason_t reason = rule_table_idx;
+	int reason = rule_table_idx;
 	unsigned char action;
 	struct net_device *dev = skb->dev;
-	int no_log = 0;
 	if (strcmp(dev->name, "lo")==0){
 		//no log in case of loopback
 		return;
 	}
-	//handle special cases wnen no rule matching the action:
+	//handle special cases of dropping packets (empty table, no rule found, wrong direction, xmas packet):
 	if (special_reason>0){
 		reason = find_special_reason(special_reason);
 		action = NF_DROP;
@@ -168,10 +182,12 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 	else {
 		action = rule->action;
 	}
-	*log = log_by_protocol(ip_hdr(skb)->protocol, skb, reason, action, &no_log);
-	if (no_log){
+	if (skb->protocol != htons(ETH_P_IP)){
 		return;
 	}
+	//create log_row_t element for logging:
+	*log = log_by_protocol(ip_hdr(skb)->protocol, skb, reason, action);
+	//change the table according to exist\new log:
 	exist_log_check(log);
 }
 
@@ -194,7 +210,7 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 			log(NULL, skb, 0, 1);
 			return NF_DROP;
 		}
-		if (check_direction_result&&check_ip(skb, curr_rule)&&check_port(skb,curr_rule)&&check_ack(skb, curr_rule)){
+		if (check_direction_result&&check_ip(skb, curr_rule)&&check_protocol_and_port(skb,curr_rule)&&check_ack(skb, curr_rule)){
 			log(&curr_rule, skb, rule_table_idx, 0);
 			return curr_rule.action;
 		}
@@ -214,7 +230,7 @@ int register_hook(rule_t *input_rule_table, int *input_rule_table_size){
 	rule_table_size = input_rule_table_size;
 	by_table_nh_ops.hook = &hookfn_by_rule_table;
 	by_table_nh_ops.pf = PF_INET;
-	by_table_nh_ops.hooknum = NF_INET_FORWARD;
+	by_table_nh_ops.hooknum = NF_INET_PRE_ROUTING;
 	by_table_nh_ops.priority = NF_IP_PRI_FIRST;
 	return nf_register_net_hook(&init_net, &by_table_nh_ops);
 }
