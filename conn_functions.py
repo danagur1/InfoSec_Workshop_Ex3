@@ -25,7 +25,7 @@ def load():
             validation_bit = conn_show_file.read(1)[0]
             while validation_bit==1:
                 conn = conn_show_file.read(ROW_OUTPUT_SIZE-1)
-                print(parse_ip(conn[:4]), parse_port(conn[8:10]), parse_ip(conn[4:8]), parse_port(conn[10:12]), parse_state(conn[12:13])
+                print(parse_ip(conn[:4]), parse_ip(conn[4:8]), parse_port(conn[8:10]), parse_port(conn[10:12]), parse_state(conn[12:13])
                     , sep='\t\t')
                 validation_bit = conn_show_file.read(1)[0]
         return True

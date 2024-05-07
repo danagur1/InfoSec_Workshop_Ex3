@@ -55,14 +55,12 @@ static int print_conn(conn_row_t conn){
     reverse_parse_ip(&(conn.dst_ip));
     reverse_parse_port(&(conn.src_port));
     reverse_parse_port(&(conn.dst_port));
-	printk(KERN_INFO "in print_conn dstination port is %d\n", conn.dst_port);
     reverse_parse_state(conn.state);
 	return 0;
 }
 
 static ssize_t display(struct device *dev, struct device_attribute *attr, char *buf) {
 	int conn_list_length = get_conn_list_length();
-	printk(KERN_INFO "in conn_read\n");
 	position_in_conn_output = 0;
     count_conn = 0;
 	conn_output = (char*)kmalloc(ROW_OUTPUT_SIZE*conn_list_length+1, GFP_KERNEL);
@@ -72,9 +70,7 @@ static ssize_t display(struct device *dev, struct device_attribute *attr, char *
     func_for_conn_list(print_conn);
 	put_validation_conn(0);
 	//copy conn_output to buf as a string
-	printk(KERN_INFO "conn_output[0]= %d\n", conn_output[0]);
 	memcpy(buf, conn_output, ROW_OUTPUT_SIZE*conn_list_length);
-	printk(KERN_INFO "ROW_OUTPUT_SIZE*conn_list_length=%d, buf[ROW_OUTPUT_SIZE*conn_list_length]=%d\n", ROW_OUTPUT_SIZE*conn_list_length, buf[ROW_OUTPUT_SIZE*conn_list_length]);
 	kfree(conn_output);
 	return ROW_OUTPUT_SIZE*conn_list_length+1;
 }
