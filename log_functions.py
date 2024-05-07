@@ -31,7 +31,9 @@ def parse_ip(bytes_ip):
     return '.'.join(ip)
 
 def parse_port(bytes_port):
-    port = struct.unpack("<H", bytes_port)[0]
+    port = str(struct.unpack("<H", bytes_port)[0])
+    if port=="0":
+        return "any"
     return str(port)
 
 def parse_reason(byte_reason):

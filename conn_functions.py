@@ -1,24 +1,21 @@
 import struct
 from datetime import datetime
 CONN_SHOW_FILEPATH= "/sys/class/fw/conns/conns"
-ROW_OUTPUT_SIZE = 13
+ROW_OUTPUT_SIZE = 14
     
 def parse_ip(bytes_ip):
     ip = [str(int(byte)) for byte in bytes_ip]
-    print("parse_ip returning "+'.'.join(ip))
     return '.'.join(ip)
 
 def parse_port(bytes_port):
     port = struct.unpack(">H", bytes_port)[0]
-    print("parse_port returning "+str(port))
     return str(port)
 
 def parse_state(byte_state):
     state_map = {0:"STATE_CLOSED", 1:"STATE_LISTEN", 2:"STATE_SYN_SENT", 3:"STATE_SYN_RECEIVED", 4:"STATE_ESTABLISHED", 
                  5:"STATE_CLOSE_WAIT", 6:"STATE_LAST_ACK", 7:"STATE_FIN_WAIT_1", 8:"STATE_FIN_WAIT_2", 9:"STATE_CLOSING", 
                  10:"STATE_TIME_WAIT"}
-    print("parse_state returning "+state_map[byte_state])
-    return state_map[byte_state]
+    return state_map[struct.unpack("<B", byte_state)[0]]
 
     
 def load():

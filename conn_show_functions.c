@@ -11,7 +11,7 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
 
-int ROW_OUTPUT_SIZE = 13;
+int ROW_OUTPUT_SIZE = 14;
 
 static int major_number;					// Major of the char device
 static struct class* devices_class = NULL;	// The device's class
@@ -72,8 +72,9 @@ static ssize_t display(struct device *dev, struct device_attribute *attr, char *
     func_for_conn_list(print_conn);
 	put_validation_conn(0);
 	//copy conn_output to buf as a string
-	conn_output[ROW_OUTPUT_SIZE*conn_list_length+1] = '\0';
-    sprintf(buf, "%s\n", conn_output);
+	printk(KERN_INFO "conn_output[0]= %d\n", conn_output[0]);
+	memcpy(buf, conn_output, ROW_OUTPUT_SIZE*conn_list_length);
+	printk(KERN_INFO "ROW_OUTPUT_SIZE*conn_list_length=%d, buf[ROW_OUTPUT_SIZE*conn_list_length]=%d\n", ROW_OUTPUT_SIZE*conn_list_length, buf[ROW_OUTPUT_SIZE*conn_list_length]);
 	kfree(conn_output);
 	return ROW_OUTPUT_SIZE*conn_list_length+1;
 }

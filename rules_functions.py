@@ -31,7 +31,6 @@ def reverse_parse_rule_name(rule_name):
     return struct.unpack('<21s', rule_name)[0].decode().rstrip('\0')
 
 def parse_ip(ip_add):
-    #print("in parse_ip with input ip_add= "+str(ip_add))
     if ip_add == "any":
         ip = "10.1.1.1"
         perfix_size = "8"
@@ -42,21 +41,16 @@ def parse_ip(ip_add):
     if perfix_size=="0":
         ip = "10.1.1.1"
         perfix_size = "8"
-    #print("perfix size="+str(int(perfix_size)))
     perfix_mask = socket.inet_ntoa(struct.pack(">L", (1 << 32) - (1 << 32 >> int(perfix_size))))
     ip = b"".join([int(x).to_bytes(1, 'little') for x in ip.split(".")])
     perfix_mask = b"".join([int(x).to_bytes(1, 'little') for x in perfix_mask.split(".")])
-    #print("in parse_ip with "+str([ip, perfix_mask, struct.pack("<B", int(perfix_size)-1)]))
     return ip, perfix_mask, struct.pack("<B", (int(perfix_size)-1))
 
 
 def reverse_parse_ip(ip, perfix_size):
-    #print("ip= "+str(ip)+",perfix_size= "+str(perfix_size))
     perfix_size= str(struct.unpack("<B", perfix_size)[0]+1)
-    #print("perfix_size= "+str(perfix_size)+",len(perfix_size)= "+str(len(perfix_size)))
     ip = ".".join([str(int(byte)) for byte in ip])
     result = "/".join([ip, perfix_size])
-    #print("didn't failed till here")
     if result==r"10.0.0.1/8": # this is the meaning of any ip
         return "any"
     return result
@@ -169,10 +163,6 @@ def read_rule(rule):
     ack = get_ack_code(rule[7])
     action = get_action_code(rule[8])
     if rule_name and src_ip and dst_ip and src_port and dst_port and ack and action:
-        #print(str([rule_name, direction, src_ip, src_perfix_mask, src_perfix_size, dst_ip, dst_perfix_mask,
-        #                 dst_perfix_size, protocol, src_port, dst_port, ack, action]))
-        #print("len= "+str(len([rule_name, direction, src_ip, src_perfix_mask, src_perfix_size, dst_ip, dst_perfix_mask,
-        #                 dst_perfix_size, protocol, src_port, dst_port, ack, action])))
         return b' '.join([rule_name, direction, src_ip, src_perfix_mask, src_perfix_size, dst_ip, dst_perfix_mask,
                          dst_perfix_size, protocol, src_port, dst_port, ack, action])
     else:
@@ -180,13 +170,11 @@ def read_rule(rule):
 
 
 def write_rule(rule):
-    #print("rule= "+str(rule))
     rule_name = reverse_parse_rule_name(rule[0])
     direction = reverse_direction(rule[1])
     src_ip_with_perfix = reverse_parse_ip(rule[2], rule[4])
     dst_ip_with_perfix = reverse_parse_ip(rule[5], rule[7])
     protocol = reverse_protocol(rule[8])
-    #print("ok here")
     src_port = reverse_port(rule[9])
     dst_port = reverse_port(rule[10])
     ack = reverse_ack(rule[11])
