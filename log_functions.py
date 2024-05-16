@@ -40,6 +40,7 @@ def parse_reason(byte_reason):
     if byte_reason<51:
         return str(byte_reason)
     elif byte_reason==51:
+        print("in parse_reason reading REASON_FW_INACTIVE reason")
         return "REASON_FW_INACTIVE"
     elif byte_reason==52:
         return "REASON_NO_MATCHING_RULE"
@@ -59,8 +60,9 @@ def load():
             validation_bit = log_show_file.read(1)[0]
             while validation_bit==1:
                 log = log_show_file.read(23)
-                print(parse_timestamp(log[:4]), parse_ip(log[6:10]), parse_ip(log[10:14]), parse_port(log[14:16]), parse_port(log[16:18]), 
-                      parse_protocol(log[4]), parse_action(log[5]), parse_reason(log[18]), parse_count(log[19:23]), sep='\t\t')
+                print("in load and reason= "+str(log[18]))
+                print(parse_timestamp(log[:4]), parse_ip(log[6:10]), parse_ip(log[10:14]), parse_port(log[14:16]), parse_port(log[16:18]),
+                        parse_protocol(log[4]), parse_action(log[5]), parse_reason(log[18]), parse_count(log[19:23]), sep="\t\t")
                 validation_bit = log_show_file.read(1)[0]
         return True
     except Exception as e:

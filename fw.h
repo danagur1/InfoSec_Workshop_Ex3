@@ -99,18 +99,29 @@ typedef struct {
 } log_row_t;
 
 typedef enum {
-	STATE_CLOSED            = 0,
-	STATE_LISTEN            = 1,
-	STATE_SYN_SENT          = 2,
-    STATE_SYN_RECEIVED      = 3,
-    STATE_ESTABLISHED       = 4,
-    STATE_CLOSE_WAIT        = 5,
-    STATE_LAST_ACK          = 6,
-    STATE_FIN_WAIT_1        = 7,
-    STATE_FIN_WAIT_2        = 8,
-    STATE_CLOSING           = 9,
-    STATE_TIME_WAIT         = 10,
+	//STATE_STATE1_TO_STATE2 = after part of the transition between states completed, but not all of it
+	STATE_CLOSED            			= 0,
+	STATE_CLOSED_TO_SYN_RECEIVED		= 1,
+	STATE_SYN_SENT          			= 2,
+	STATE_SYN_SENT_TO_SYN_RECEIVED		= 3,
+	STATE_SYN_SENT_TO_ESTABLISHED		= 4, 
+    STATE_SYN_RECEIVED      			= 5,
+    STATE_ESTABLISHED       			= 6,
+	STATE_ESTABLISHED_TO_CLOSE_WAIT		= 7,
+    STATE_CLOSE_WAIT        			= 8,
+    STATE_LAST_ACK          			= 9,
+    STATE_FIN_WAIT_1        			= 10,
+	STATE_FIN_WAIT_1_TO_CLOSING			= 11,
+    STATE_FIN_WAIT_2        			= 12,
+	STATE_FIN_WAIT_2_TO_TIME_WAIT		= 13,
+    STATE_CLOSING           			= 14,
+    STATE_TIME_WAIT         			= 15,
 } state_t;
+
+typedef enum {
+	CLIENT_TO_SERVER = 0,
+	SERVER_TO_CLIENT = 1,
+} client_server_t;
 
 typedef struct {
 	__be32   		src_ip;
@@ -118,6 +129,10 @@ typedef struct {
 	__be16 			src_port;
 	__be16 			dst_port;
 	state_t     	state;
+	client_server_t client_server; 
+	//client_server=CLIENT_TO_SERVER if this line represents packets sent from client to server, 
+	//client_server=SERVER_TO_CLIENT if this line represents packets sent from server to client
+	unsigned long  	timestamp;
 } conn_row_t;
 
 #endif // _FW_H_

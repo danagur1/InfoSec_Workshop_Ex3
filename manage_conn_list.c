@@ -8,14 +8,23 @@ struct conn_in_list {
 };
 
 static LIST_HEAD(conn_list);
-int conn_list_length = 0;
+int conn_list_length;
 
 void init_conn_list(void) {
+    conn_list_length = 0;
     INIT_LIST_HEAD(&conn_list);
 }
 
 int add_to_conn_list(conn_row_t *conn) {
     struct conn_in_list *entry;
+    printk(KERN_INFO "add_to_conn_list: conn->src_ip %d\n", conn->src_ip);
+    printk(KERN_INFO "add_to_conn_list: conn->dst_ip %d\n", conn->dst_ip);
+    printk(KERN_INFO "add_to_conn_list: conn->src_port %d\n", conn->src_port);
+    printk(KERN_INFO "add_to_conn_list: conn->dst_port %d\n", conn->dst_port);
+    printk(KERN_INFO "add_to_conn_list: conn->state %d\n", conn->state);
+    printk(KERN_INFO "add_to_conn_list: conn->client_server %d\n", conn->client_server);
+    printk(KERN_INFO "add_to_conn_list: conn->timestamp %lu\n", conn->timestamp);
+    printk(KERN_INFO "add_to_conn_list: conn_list_length %d\n", conn_list_length);
     entry = kmalloc(sizeof(*entry), GFP_KERNEL);
     if (!entry)
         return -ENOMEM;

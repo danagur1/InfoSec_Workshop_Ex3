@@ -76,6 +76,7 @@ static void reverse_parse_port(__le16 *src){
 static void reverse_parse_reason(reason_t src){
 	char *curr_log_position = log_output+position_in_log_output;
     if (src==REASON_FW_INACTIVE){
+		printk(KERN_INFO "in reverse_parse_reason writing the log of REASON_FW_INACTIVE\n");
         *curr_log_position = 51;
     }
     else if (src==REASON_NO_MATCHING_RULE){
