@@ -10,6 +10,8 @@
 #include <linux/ip.h>
 #include <linux/tcp.h>
 #include <linux/udp.h>
+#include <linux/types.h>
+
 
 
 // the protocols we will work with

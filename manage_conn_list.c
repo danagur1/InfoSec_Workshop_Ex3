@@ -17,7 +17,7 @@ void init_conn_list(void) {
 
 int add_to_conn_list(conn_row_t *conn) {
     struct conn_in_list *entry;
-    printk(KERN_INFO "checking addition. adding a connecion row with source ip %d\n", conn->src_ip);
+    printk(KERN_INFO "checking addition1. adding a connecion row with source port %d\n", conn->src_port);
     if (!conn){
         printk("failed cause of conn=NULL");
         return 0;
@@ -27,6 +27,8 @@ int add_to_conn_list(conn_row_t *conn) {
         return -ENOMEM;
     entry->data = conn;
     INIT_LIST_HEAD(&entry->conn_list_element);
+    printk(KERN_INFO "in add_to_conn_list1 (entry->data)->src_port=%d, (entry->data)->dst_port=%d\n", (entry->data)->src_port, (entry->data)->dst_port);
+    printk(KERN_INFO "in add_to_conn_list1 sizeof((entry->data)->src_port)=%d, sizeof((entry->data)->dst_port)=%d\n", sizeof((entry->data)->src_port), sizeof((entry->data)->dst_port));
     list_add_tail(&entry->conn_list_element, &conn_list);
     conn_list_length++;
     return 0;
