@@ -16,11 +16,12 @@ void init_conn_list(void) {
 }
 
 int add_to_conn_list(conn_row_t *conn) {
+    struct conn_in_list *entry;
+    printk(KERN_INFO "checking addition. adding a connecion row with source ip %d\n", conn->src_ip);
     if (!conn){
         printk("failed cause of conn=NULL");
         return 0;
     }
-    struct conn_in_list *entry;
     entry = kmalloc(sizeof(*entry), GFP_KERNEL);
     if (!entry)
         return -ENOMEM;

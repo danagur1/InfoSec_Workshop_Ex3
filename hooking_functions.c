@@ -169,7 +169,7 @@ log_row_t log_by_protocol(__u8 protocol, struct sk_buff *skb, int reason, unsign
 }
 
 //main log function- called from hook
-//special_reason>0 iff there is a special reason for drop verdict in this log
+//in case of error return -2, else return 0
 int log(rule_t *rule, struct sk_buff *skb, int reason){
 	log_row_t *log = (log_row_t*)kmalloc(sizeof(log_row_t), GFP_KERNEL);
 	unsigned char action;
@@ -201,6 +201,7 @@ int log(rule_t *rule, struct sk_buff *skb, int reason){
 
 /*
 find match rules function
+in case of error return -2
 in case the verdict is ACCEPT- return the reason (the index of the rule that accepted)
 else- retrurn -1
 */
@@ -321,18 +322,31 @@ conn_row_t *buff_to_conn_reverse(struct sk_buff *skb, state_t next_state, unsign
 	return conn;
 }
 
+//creates a new line in the connection table accoreding to the data of the packet, the state and the reason
+//return -2 on error, else 0
 int add_to_conn_table(struct sk_buff *skb, state_t next_state, unsigned int reason){
 	conn_row_t *conn = buff_to_conn(skb, next_state, reason);
-	conn_row_t *conn_reverse = buff_to_conn(skb, next_state, reason);
-	if ((conn==NULL)||(conn_reverse==NULL)){
+	conn_row_t *conn_reverse;
+	if (conn==NULL){
 		return -2;
 	}
+	conn_reverse = buff_to_conn(skb, next_state, reason);
+	if (conn_reverse==NULL){
+		kfree(conn);
+		return -2;
+	}
+	printk(KERN_INFO "checking addition. in add_to_conn_table before 1st addition. ip=%d\n", conn->src_ip);
 	add_to_conn_list(conn);	
+	printk(KERN_INFO "checking addition. in add_to_conn_table before 2nd addition. ip=%d\n", conn_reverse->src_ip);
 	add_to_conn_list(conn_reverse);
 	return 0;
 }
 
 int check_match(conn_row_t *row_for_check_match, conn_row_t *current_row_check){
+	printk(KERN_INFO "in check_match. check1=%d, check2=%d, check3=%d, check4=%d\n", (row_for_check_match->src_ip==current_row_check->src_ip),
+	(row_for_check_match->dst_ip==current_row_check->dst_ip), (row_for_check_match->src_port==current_row_check->src_port), 
+	(row_for_check_match->dst_port==current_row_check->dst_port));
+	printk(KERN_INFO "in check_match. src ip 1=%d, src ip 2=%d\n", row_for_check_match->src_ip, current_row_check->src_ip);
 	return ((row_for_check_match->src_ip==current_row_check->src_ip)&&(row_for_check_match->dst_ip==current_row_check->dst_ip)&&
 			(row_for_check_match->src_port==current_row_check->src_port)&&(row_for_check_match->dst_port==current_row_check->dst_port));
 }
@@ -378,19 +392,27 @@ int update_state_and_decide(conn_row_t *match_row_found, conn_row_t *match_row_f
 }
 
 //search the connection table for matching connection rows for the packet and the opposite direction connection- return the verdict
-//in case of invalid packet: return -1, else: return the reason of the match found
+//in case of error return -2, in case of invalid packet: return -1, else: return the reason of the match found
 int search_conn_table(struct sk_buff *skb){
 	conn_row_t *match_row_found; //the connection row in table the matches the packets' data
 	conn_row_t *match_row_found_reverse; //the connection row in table that matches the packets' data in the opposite direction
+	conn_row_t *row_for_check_match_reverse;
 	conn_row_t *row_for_check_match = (conn_row_t*)kmalloc(sizeof(conn_row_t), GFP_KERNEL);
-	conn_row_t *row_for_check_match_reverse = (conn_row_t*)kmalloc(sizeof(conn_row_t), GFP_KERNEL);
+	if (!row_for_check_match){
+		return -2;
+	}
+	row_for_check_match_reverse = (conn_row_t*)kmalloc(sizeof(conn_row_t), GFP_KERNEL);
+	if (!row_for_check_match_reverse){
+		kfree(row_for_check_match);
+		return -2;
+	}
 	//find the match and reverse match rows by a comparing function on the relevant data:
-	*row_for_check_match = (conn_row_t){ip_hdr(skb)->daddr, ip_hdr(skb)->saddr, tcp_hdr(skb)->dest, tcp_hdr(skb)->source, 0, 0};
+	*row_for_check_match = (conn_row_t){ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source, tcp_hdr(skb)->dest, 0, 0, 0, 0};
 	match_row_found = find_identical_conn(row_for_check_match, check_match);
 	if (match_row_found==NULL){
 		return -1;
 	}
-	*row_for_check_match_reverse = (conn_row_t){ip_hdr(skb)->daddr, ip_hdr(skb)->saddr, tcp_hdr(skb)->dest, tcp_hdr(skb)->source, 0, 0};
+	*row_for_check_match_reverse = (conn_row_t){ip_hdr(skb)->daddr, ip_hdr(skb)->saddr, tcp_hdr(skb)->dest, tcp_hdr(skb)->source, 0, 0, 0, 0};
 	match_row_found_reverse = find_identical_conn(row_for_check_match_reverse, check_match);
 	kfree(row_for_check_match);
 	kfree(row_for_check_match_reverse);
@@ -400,6 +422,9 @@ int search_conn_table(struct sk_buff *skb){
 // when ack=1 there should be a connection row relevant to the table- decide drop/forward based on the match from the table
 unsigned int handle_packet_ack_1(struct sk_buff *skb){
 	int reason = search_conn_table(skb);
+	if (reason==-2){ //error check
+		return NF_DROP;
+	}
 	if (reason==-1){ //in case no existing connection match found
 		log(NULL, skb, REASON_ILLEGAL_VALUE); //in case of error still return NF_DROP
 		return NF_DROP;
@@ -418,6 +443,9 @@ unsigned int handle_packet_ack_0(struct sk_buff *skb){
 	int search_result;
 	//in case there is a connection with the packet's data and it is closed (the tcp state transition table enforce this):
 	printk("in handle_packet_ack_0 with search result %d\n", search_conn_table_result);
+	if (search_conn_table_result==-2){ //error check
+		return NF_DROP;
+	}
 	if (search_conn_table_result!=-1){
 		return search_conn_table_result;
 	}
@@ -444,6 +472,7 @@ unsigned int handle_packet_ack_0(struct sk_buff *skb){
 
 //decide forward/drop the packet based on the connection table and log
 unsigned int handle_tcp_by_conn(struct sk_buff *skb){
+	printk("in handle_tcp_by_conn- received a packet with src ip= %d\n", (ip_hdr(skb)->saddr));
 	// when ack=1 there should be a connection row relevant to the table- decide drop/forward based on the match from the table
 	if (tcp_hdr(skb)->ack){
 		return handle_packet_ack_1(skb);
