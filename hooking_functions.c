@@ -187,7 +187,12 @@ int log(rule_t *rule, struct sk_buff *skb, int reason){
 		action = NF_DROP;
 	}
 	else {
-		action = rule->action;
+		if (rule==NULL){ //means this log determinated by connection table
+			action = NF_ACCEPT;
+		}
+		else{
+			action = rule->action;
+		}
 	}
 	//don't log non-IP packets
 	if (skb->protocol != htons(ETH_P_IP)){
@@ -469,13 +474,15 @@ unsigned int handle_packet_ack_0(struct sk_buff *skb){
 		return NF_DROP;
 	}
 	//in case of accept verdict- the result is the reason (the index of the rule that had match in the table)
-	if (search_result!=-1){
-		//use the reason for create the connection table row
-		if (add_to_conn_table(skb, next_state, (unsigned int)search_result)!=-2){
-			return NF_DROP;
-		} 
+	if (search_result==-1){
+		return NF_DROP;
 	}
-	return search_result_to_verdict(search_result);
+	else{
+		if (add_to_conn_table(skb, next_state, (unsigned int)search_result)==-2){
+			return NF_DROP;
+		}
+		return NF_ACCEPT;
+	}
 }
 
 //decide forward/drop the packet based on the connection table and log
