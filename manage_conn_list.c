@@ -31,6 +31,7 @@ int add_to_conn_list(conn_row_t *conn) {
     entry->data = conn;
     INIT_LIST_HEAD(&entry->conn_list_element);
     list_add_tail(&entry->conn_list_element, &conn_list);
+    return 0;
     conn_list_length++;
     return 0;
 }

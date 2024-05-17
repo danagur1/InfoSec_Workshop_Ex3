@@ -150,21 +150,6 @@ void exist_log_check(log_row_t *log){
 	}
 }
 
-reason_t find_special_reason(int reason_code){
-	if (reason_code==3){
-		return REASON_FW_INACTIVE;
-	}
-	else if (reason_code==2){
-		return REASON_NO_MATCHING_RULE;
-	}
-	else if (reason_code==4){
-		return REASON_XMAS_PACKET;
-	}
-	else {
-		return REASON_ILLEGAL_VALUE;
-	}
-}
-
 //create log_row_t element for table by combined data from the rule and from the packet
 log_row_t log_by_protocol(__u8 protocol, struct sk_buff *skb, int reason, unsigned char action){
 	log_row_t log;
@@ -185,9 +170,8 @@ log_row_t log_by_protocol(__u8 protocol, struct sk_buff *skb, int reason, unsign
 
 //main log function- called from hook
 //special_reason>0 iff there is a special reason for drop verdict in this log
-void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reason){
+void log(rule_t *rule, struct sk_buff *skb, int reason){
 	log_row_t *log = (log_row_t*)kmalloc(sizeof(log_row_t), GFP_KERNEL);
-	int reason = rule_table_idx;
 	unsigned char action;
 	struct net_device *dev = skb->dev;
 	if (strcmp(dev->name, "lo")==0){
@@ -195,8 +179,7 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 		return;
 	}
 	//handle special cases of dropping packets (empty table, no rule found, wrong direction, xmas packet):
-	if (special_reason>0){
-		reason = find_special_reason(special_reason);
+	if (reason<0){
 		action = NF_DROP;
 	}
 	else {
@@ -214,19 +197,36 @@ void log(rule_t *rule, struct sk_buff *skb, int rule_table_idx, int special_reas
 
 /*
 find match rules function
+in case the verdict is ACCEPT- return the reason (the index of the rule that accepted)
+else- retrurn -1
 */
 int search_match_rule_and_log(struct sk_buff *skb){
 	int rule_table_idx;
 	for (rule_table_idx = 0; rule_table_idx<*rule_table_size; rule_table_idx++){
 		rule_t curr_rule= rule_table[rule_table_idx];
 		if (check_direction(skb, curr_rule)&&check_ip(skb, curr_rule)&&check_protocol_and_port(skb,curr_rule)&&check_ack(skb, curr_rule)){
-			log(&curr_rule, skb, rule_table_idx, 0);
-			return curr_rule.action;
+			log(&curr_rule, skb, rule_table_idx);
+			if (curr_rule.action==NF_ACCEPT){
+				return rule_table_idx;
+			}
+			else{
+				return -1;
+			}
 		}
 	}
 	//no matching rule found:
-	log(NULL, skb, 0, 2);
-	return NF_DROP; 
+	log(NULL, skb, REASON_NO_MATCHING_RULE);
+	return -1; 
+}
+
+//treanslates the output of search_match_rule_and_log to accept/drop
+unsigned int search_result_to_verdict(int search_decison){
+	if (search_decison==-1){
+		return NF_DROP;
+	}
+	else{
+		return NF_ACCEPT;
+	}
 }
 
 /*
@@ -295,23 +295,21 @@ state_t decide_next_state(state_t curr_state, struct sk_buff *skb, client_server
 	return tcp_states_table[curr_state][create_flags_int(tcp_header->syn, tcp_header->ack, tcp_header->fin, client_server)];
 }
 
-conn_row_t *buff_to_conn(struct sk_buff *skb, state_t next_state){
+conn_row_t *buff_to_conn(struct sk_buff *skb, state_t next_state, unsigned int reason){
 	conn_row_t *conn = (conn_row_t*)kmalloc(sizeof(conn_row_t), GFP_KERNEL);
-	*conn = (conn_row_t){ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source, tcp_hdr(skb)->dest, next_state, CLIENT_TO_SERVER};
+	*conn = (conn_row_t){ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source, tcp_hdr(skb)->dest, next_state, CLIENT_TO_SERVER, reason};
 	return conn;
 }
 
-conn_row_t *buff_to_conn_reverse(struct sk_buff *skb, state_t next_state){
+conn_row_t *buff_to_conn_reverse(struct sk_buff *skb, state_t next_state, unsigned int reason){
 	conn_row_t *conn = (conn_row_t*)kmalloc(sizeof(conn_row_t), GFP_KERNEL);
-	*conn = (conn_row_t){ip_hdr(skb)->daddr, ip_hdr(skb)->saddr, tcp_hdr(skb)->dest, tcp_hdr(skb)->source, next_state, SERVER_TO_CLIENT};
+	*conn = (conn_row_t){ip_hdr(skb)->daddr, ip_hdr(skb)->saddr, tcp_hdr(skb)->dest, tcp_hdr(skb)->source, next_state, SERVER_TO_CLIENT, reason};
 	return conn;
 }
 
-void add_to_conn_table(struct sk_buff *skb, unsigned int rule_decision, state_t next_state){
-	if (rule_decision==NF_ACCEPT){ //ack==0 and reason is rule
-		add_to_conn_list(buff_to_conn(skb, next_state));
-		add_to_conn_list(buff_to_conn_reverse(skb, next_state));
-	}
+void add_to_conn_table(struct sk_buff *skb, state_t next_state, unsigned int reason){
+	add_to_conn_list(buff_to_conn(skb, next_state, reason));
+	add_to_conn_list(buff_to_conn_reverse(skb, next_state, reason));
 }
 
 int check_match(conn_row_t *row_for_check_match, conn_row_t *current_row_check){
@@ -342,6 +340,7 @@ void set_state_time_wait(state_t next_state, conn_row_t *match_row_found, conn_r
 }
 
 //update the state of the connection in the connection table and return the decision which enforce the tcp state machine rules
+//in case of invalid packet: return -1, else: return the reason of the match to the packet from the table
 int update_state_and_decide(conn_row_t *match_row_found, conn_row_t *match_row_found_reverse, struct sk_buff *skb){
 	state_t curr_state = match_row_found->state;
 	state_t next_state;
@@ -355,10 +354,11 @@ int update_state_and_decide(conn_row_t *match_row_found, conn_row_t *match_row_f
 	set_state_time_wait(next_state, match_row_found, match_row_found_reverse);
 	match_row_found->state = next_state;
 	match_row_found_reverse->state = next_state;
-	return NF_ACCEPT;
+	return 0; //match_row_found->reason;
 }
 
-//search the connection table for matching connection rows for the packet and the opposite direction connection
+//search the connection table for matching connection rows for the packet and the opposite direction connection- return the verdict
+//in case of invalid packet: return -1, else: return the reason of the match found
 int search_conn_table(struct sk_buff *skb){
 	conn_row_t *match_row_found; //the connection row in table the matches the packets' data
 	conn_row_t *match_row_found_reverse; //the connection row in table that matches the packets' data in the opposite direction
@@ -379,15 +379,13 @@ int search_conn_table(struct sk_buff *skb){
 
 // when ack=1 there should be a connection row relevant to the table- decide drop/forward based on the match from the table
 unsigned int handle_packet_ack_1(struct sk_buff *skb){
-	int search_conn_table_result = search_conn_table(skb);
-	if (search_conn_table_result==-1){ //in case no existing connection match found
-		log(NULL, skb, 0, 1);
+	int reason = search_conn_table(skb);
+	if (reason==-1){ //in case no existing connection match found
+		log(NULL, skb, REASON_ILLEGAL_VALUE);
 		return NF_DROP;
 	}
-	//normal log, but with no rule base on:
-	//rule_table_indx=-1 means accept cause of connection table decision
-	log(NULL, skb, -1, 0); 
-	return search_conn_table_result;
+	log(NULL, skb, reason); 
+	return NF_ACCEPT;
 }
 
 // when ack=0 this packet should be the first packet sent in this connection
@@ -395,7 +393,7 @@ unsigned int handle_packet_ack_1(struct sk_buff *skb){
 unsigned int handle_packet_ack_0(struct sk_buff *skb){
 	int search_conn_table_result = search_conn_table(skb);
 	int next_state;
-	unsigned int decision_by_rules;
+	int search_result;
 	//in case there is a connection with the packet's data and it is closed (the tcp state transition table enforce this):
 	if (search_conn_table_result!=-1){
 		return search_conn_table_result;
@@ -403,15 +401,16 @@ unsigned int handle_packet_ack_0(struct sk_buff *skb){
 	//find the first state- initialize with STATE_CLOSED
 	next_state = decide_next_state(STATE_CLOSED, skb, CLIENT_TO_SERVER); 
 	if (next_state==-1){
-		log(NULL, skb, 0, 1);
+		log(NULL, skb, REASON_ILLEGAL_VALUE);
 		return NF_DROP;
 	}
 	//this is the first packet- so decide based on the rule table (and log)
-	decision_by_rules = search_match_rule_and_log(skb);
-	if (decision_by_rules==NF_ACCEPT){
-		add_to_conn_table(skb, decision_by_rules, next_state);
+	search_result = search_match_rule_and_log(skb);
+	//in case of accept verdict- the result is the reason (the index of the rule that had match in the table)
+	if (search_result!=-1){
+		add_to_conn_table(skb, next_state, (unsigned int)search_result); //use the reason for create the connection table row
 	}
-	return decision_by_rules;
+	return search_result_to_verdict(search_result);
 }
 
 //decide forward/drop the packet based on the connection table and log
@@ -427,31 +426,30 @@ unsigned int handle_tcp_by_conn(struct sk_buff *skb){
 	}
 }
 
-
 /*
 The hook function of the firewall:
 */
 unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
 	if (skb==NULL){
-		log(NULL, skb, 0, 1);
+		log(NULL, skb, REASON_ILLEGAL_VALUE);
 		return NF_DROP;
 	}
 	if (check_xmas_tree_packet(skb)){
-		log(NULL, skb, 0, 4);
+		log(NULL, skb, REASON_XMAS_PACKET);
 		return NF_DROP;
 	}
 	if (is_tcp_packet(skb)){
 		return handle_tcp_by_conn(skb);
 	}
 	if (*rule_table_size==0){
-		printk(KERN_INFO "writing reason 3 log\n");
-		log(NULL, skb, 0, 3);
+		log(NULL, skb, REASON_FW_INACTIVE);
 	}
-	return search_match_rule_and_log(skb);
+	return search_result_to_verdict(search_match_rule_and_log(skb));
 }
 
 int register_hook(rule_t *input_rule_table, int *input_rule_table_size){
 	init_log_list();
+	init_conn_list();
 	initialize_tcp_states_table();
 	rule_table = input_rule_table;
 	rule_table_size = input_rule_table_size;

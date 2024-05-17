@@ -133,6 +133,7 @@ typedef struct {
 	//client_server=CLIENT_TO_SERVER if this line represents packets sent from client to server, 
 	//client_server=SERVER_TO_CLIENT if this line represents packets sent from server to client
 	unsigned long  	timestamp;
+	int				reason;
 } conn_row_t;
 
 #endif // _FW_H_
