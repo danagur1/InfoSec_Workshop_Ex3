@@ -16,22 +16,17 @@ void init_conn_list(void) {
 }
 
 int add_to_conn_list(conn_row_t *conn) {
+    if (!conn){
+        printk("failed cause of conn=NULL");
+        return 0;
+    }
     struct conn_in_list *entry;
-    printk(KERN_INFO "add_to_conn_list: conn->src_ip %d\n", conn->src_ip);
-    printk(KERN_INFO "add_to_conn_list: conn->dst_ip %d\n", conn->dst_ip);
-    printk(KERN_INFO "add_to_conn_list: conn->src_port %d\n", conn->src_port);
-    printk(KERN_INFO "add_to_conn_list: conn->dst_port %d\n", conn->dst_port);
-    printk(KERN_INFO "add_to_conn_list: conn->state %d\n", conn->state);
-    printk(KERN_INFO "add_to_conn_list: conn->client_server %d\n", conn->client_server);
-    printk(KERN_INFO "add_to_conn_list: conn->timestamp %lu\n", conn->timestamp);
-    printk(KERN_INFO "add_to_conn_list: conn_list_length %d\n", conn_list_length);
     entry = kmalloc(sizeof(*entry), GFP_KERNEL);
     if (!entry)
         return -ENOMEM;
     entry->data = conn;
     INIT_LIST_HEAD(&entry->conn_list_element);
     list_add_tail(&entry->conn_list_element, &conn_list);
-    return 0;
     conn_list_length++;
     return 0;
 }
