@@ -319,7 +319,7 @@ conn_row_t *buff_to_conn(struct sk_buff *skb, state_t next_state, unsigned int r
 	tcp_hdr(skb)->dest, tcp_hdr(skb)->source);
 	printk(KERN_INFO "in buff_to_conn sizeof(ip_hdr(skb)->daddr)=%d\n in buff_to_conn sizeof(ip_hdr(skb)->saddr)=%d\n in buff_to_conn sizeof(tcp_hdr(skb)->dest)=%d\n in buff_to_conn sizeof(tcp_hdr(skb)->source)=%d\n", sizeof(ip_hdr(skb)->daddr), sizeof(ip_hdr(skb)->saddr),
 	sizeof(tcp_hdr(skb)->dest), sizeof(tcp_hdr(skb)->source));
-	*conn = (conn_row_t){ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source, tcp_hdr(skb)->dest, STATE_CLOSED, CLIENT_TO_SERVER, 0, reason};
+	*conn = (conn_row_t){ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source, tcp_hdr(skb)->dest, STATE_CLOSED, CLIENT_TO_SERVER, 0, reason, 0, 0};
 	printk(KERN_INFO "in buff_to_conn. conn=%d, %d, %d, %d\n", conn->src_ip, conn->dst_ip, conn->src_port, conn->dst_port);
 	printk(KERN_INFO "in buff_to_conn. conn=%d, %d, %d, %d\n", sizeof(conn->src_ip), sizeof(conn->dst_ip), sizeof(conn->src_port), sizeof(conn->dst_port));
 	return conn;
@@ -330,7 +330,7 @@ conn_row_t *buff_to_conn_reverse(struct sk_buff *skb, state_t next_state, unsign
 	if (!conn){
 		return NULL;
 	}
-	*conn = (conn_row_t){ip_hdr(skb)->daddr, ip_hdr(skb)->saddr, tcp_hdr(skb)->dest, tcp_hdr(skb)->source, STATE_CLOSED, SERVER_TO_CLIENT, 0, reason};
+	*conn = (conn_row_t){ip_hdr(skb)->daddr, ip_hdr(skb)->saddr, tcp_hdr(skb)->dest, tcp_hdr(skb)->source, STATE_CLOSED, SERVER_TO_CLIENT, 0, reason, 0, 0};
 	printk(KERN_INFO "in buff_to_conn_reverse. conn=%d, %d, %d, %d\n", conn->src_ip, conn->dst_ip, conn->src_port, conn->dst_port);
 	return conn;
 }
@@ -420,12 +420,12 @@ int search_conn_table(struct sk_buff *skb){
 		return -2;
 	}
 	//find the match and reverse match rows by a comparing function on the relevant data:
-	*row_for_check_match = (conn_row_t){ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source, tcp_hdr(skb)->dest, STATE_CLOSED, CLIENT_TO_SERVER, 0, 0};
+	*row_for_check_match = (conn_row_t){ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, tcp_hdr(skb)->source, tcp_hdr(skb)->dest, STATE_CLOSED, CLIENT_TO_SERVER, 0, 0, 0, 0};
 	match_row_found = find_identical_conn(row_for_check_match, check_match);
 	if (match_row_found==NULL){
 		return -1;
 	}
-	*row_for_check_match_reverse = (conn_row_t){ip_hdr(skb)->daddr, ip_hdr(skb)->saddr, tcp_hdr(skb)->dest, tcp_hdr(skb)->source, STATE_CLOSED, CLIENT_TO_SERVER, 0, 0};
+	*row_for_check_match_reverse = (conn_row_t){ip_hdr(skb)->daddr, ip_hdr(skb)->saddr, tcp_hdr(skb)->dest, tcp_hdr(skb)->source, STATE_CLOSED, CLIENT_TO_SERVER, 0, 0, 0, 0};
 	match_row_found_reverse = find_identical_conn(row_for_check_match_reverse, check_match);
 	kfree(row_for_check_match);
 	kfree(row_for_check_match_reverse);

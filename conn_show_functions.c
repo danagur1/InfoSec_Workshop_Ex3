@@ -11,7 +11,7 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Dana Gur");
 MODULE_DESCRIPTION("Stateless firewall");
 
-int ROW_OUTPUT_SIZE = 14;
+int ROW_OUTPUT_SIZE = 19;
 
 static int major_number;					// Major of the char device
 static struct class* devices_class = NULL;	// The device's class
@@ -48,6 +48,13 @@ static void put_validation_conn(char valid_conn){
 	position_in_conn_output++;
 }
 
+static void reverse_parse_client_server(client_server_t src){
+	char *curr_conn_position = conn_output+position_in_conn_output;
+	unsigned char client_server_byte = (unsigned char)src;
+    memcpy(curr_conn_position, &client_server_byte, 1);
+    position_in_conn_output += 1;
+}
+
 static int print_conn(conn_row_t conn){
 	count_conn++;
 	put_validation_conn(1);
@@ -56,6 +63,9 @@ static int print_conn(conn_row_t conn){
     reverse_parse_port(&(conn.src_port));
     reverse_parse_port(&(conn.dst_port));
     reverse_parse_state(conn.state);
+	reverse_parse_client_server(conn.client_server);
+	reverse_parse_port(&(conn.proxy_port_http));
+	reverse_parse_port(&(conn.proxy_port_ftp));
 	return 0;
 }
 

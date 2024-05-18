@@ -136,6 +136,8 @@ typedef struct {
 	//client_server=SERVER_TO_CLIENT if this line represents packets sent from server to client
 	unsigned long  	timestamp;
 	int				reason;
+	__be16			proxy_port_http;
+	__be16			proxy_port_ftp;
 } conn_row_t;
 
 #endif // _FW_H_
