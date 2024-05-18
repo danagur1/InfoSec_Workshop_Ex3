@@ -28,16 +28,18 @@ def direction(direction_code):
         return "any"
 
 def protocol(protocol_code):
+    if type(protocol_code)==bytes:
+        protocol_code = int(protocol_code.decode('utf-8'))
     print("in reverse parse fields protocol got "+str(protocol_code))
-    if protocol_code == b'1':
+    if protocol_code == 1:
         return "ICMP"
-    elif protocol_code == b'2':
+    elif protocol_code == 2:
         return "TCP"
-    elif protocol_code == b'3':
+    elif protocol_code == 3:
         return "UDP"
-    elif protocol_code == b'4':
+    elif protocol_code == 4:
         return "any"
-    elif protocol_code == b'0':
+    elif protocol_code == 0:
         return "OTHER"
 
 def port(port_code):
@@ -55,10 +57,12 @@ def ack(ack_code):
         return "any"
 
 def action(action_code):
+    if type(action_code)==bytes:
+        action_code = int(action_code.decode('utf-8'))
     print("in reverse parse fields action got "+str(action_code))
-    if action_code==b'1':
+    if action_code==1:
         return "accept"
-    elif action_code==b'0':
+    elif action_code==0:
         return "drop"
 
 def ip(bytes_ip):

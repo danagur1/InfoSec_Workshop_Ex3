@@ -6,7 +6,7 @@ ROW_OUTPUT_SIZE = 19
 def load():
     try:
         print("src_ip\t\tdst_ip\t\tsrc_port\t\tdst_port\t\tstate")
-        with open(CONN_SHOW_FILEPATH, "rb") as conn_show_file:
+        with open(CONN_FILEPATH, "rb") as conn_show_file:
             validation_bit = conn_show_file.read(1)[0]
             while validation_bit==1:
                 conn = conn_show_file.read(ROW_OUTPUT_SIZE-1)

@@ -31,19 +31,19 @@ static void reverse_parse_protocol(unsigned char src){
 	switch (src)
 	{
 	case 255:
-		*curr_log_position = '0';
+		*curr_log_position = 0;
 		break;
 	case 1:
-		*curr_log_position = '1';
+		*curr_log_position = 1;
 		break;
 	case 6:
-		*curr_log_position = '2';
+		*curr_log_position = 2;
 		break;
 	case 17:
-		*curr_log_position = '3';
+		*curr_log_position = 3;
 		break;
 	default:
-		*curr_log_position = '4';
+		*curr_log_position = 4;
 		break;
 	}
 	position_in_log_output += 1;
@@ -52,11 +52,11 @@ static void reverse_parse_protocol(unsigned char src){
 static void reverse_parse_action(unsigned char src){
 	char *curr_log_position = log_output+position_in_log_output;
 	if (src==NF_DROP){
-		*curr_log_position='0';
+		*curr_log_position=0;
 	}
 	else
 	{
-		*curr_log_position='1';
+		*curr_log_position=1;
 	}
 	position_in_log_output += 1;
 }
