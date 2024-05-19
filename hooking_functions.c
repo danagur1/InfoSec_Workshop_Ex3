@@ -323,7 +323,9 @@ conn_row_t *buff_to_conn(struct sk_buff *skb, state_t next_state, unsigned int r
 	if (!conn){
 		return NULL;
 	}
-	*conn = (conn_row_t){ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, ntohs(tcp_hdr(skb)->source), ntohs(tcp_hdr(skb)->dest), next_state, CLIENT_TO_SERVER, 0, reason, 0, 0};
+	*conn = (conn_row_t){ip_hdr(skb)->saddr, ip_hdr(skb)->daddr, ntohs(tcp_hdr(skb)->source), ntohs(tcp_hdr(skb)->dest), next_state, 
+	CLIENT_TO_SERVER, 0, reason, 0, 0};
+	printk("in buff_to_conn dst port %d, client_to_server %d\n", conn->dst_port, CLIENT_TO_SERVER);
 	return conn;
 }
 
@@ -333,7 +335,7 @@ conn_row_t *buff_to_conn_reverse(struct sk_buff *skb, state_t next_state, unsign
 		return NULL;
 	}
 	*conn = (conn_row_t){ip_hdr(skb)->daddr, ip_hdr(skb)->saddr, ntohs(tcp_hdr(skb)->dest), ntohs(tcp_hdr(skb)->source), next_state, SERVER_TO_CLIENT, 0, reason, 0, 0};
-	printk(KERN_INFO "in buff_to_conn_reverse. conn=%d, %d, %d, %d\n", conn->src_ip, conn->dst_ip, conn->src_port, conn->dst_port);
+	printk("in buff_to_conn dst port %d, client_to_server %d\n", conn->dst_port, SERVER_TO_CLIENT);
 	return conn;
 }
 
@@ -358,8 +360,17 @@ int add_to_conn_table(struct sk_buff *skb, state_t next_state, unsigned int reas
 }
 
 int check_match(conn_row_t *row_for_check_match, conn_row_t *current_row_check){
-	return ((row_for_check_match->src_ip==current_row_check->src_ip)&&(row_for_check_match->dst_ip==current_row_check->dst_ip)&&
+	int result = ((row_for_check_match->src_ip==current_row_check->src_ip)&&(row_for_check_match->dst_ip==current_row_check->dst_ip)&&
 			(row_for_check_match->src_port==current_row_check->src_port)&&(row_for_check_match->dst_port==current_row_check->dst_port));
+	if (result==1){
+		printk(KERN_INFO "in check_match from table src ip %d, dst ip %d src port %d, dst port %d and found client server %d\n", 
+		row_for_check_match->src_ip, row_for_check_match->dst_ip, row_for_check_match->src_port, row_for_check_match->dst_port,
+		row_for_check_match->client_server);
+		printk(KERN_INFO "in check_match my element src ip %d, dst ip %d src port %d, dst port %d and found client server %d\n", 
+		current_row_check->src_ip, current_row_check->dst_ip, current_row_check->src_port, current_row_check->dst_port,
+		current_row_check->client_server);
+	}
+	return result;
 }
 
 //in case of receiving a packet from a connection is state STATE_TIME_WAIT- update state if needed (decide by timeout)
@@ -392,7 +403,6 @@ int update_state_and_decide(conn_row_t *match_row_found, conn_row_t *match_row_f
 	//in case of receiving a packet from a connection is state STATE_TIME_WAIT- update state if needed:
 	exit_state_time_wait(curr_state, match_row_found, match_row_found_reverse);
 	next_state = decide_next_state(curr_state, skb, match_row_found->client_server);
-	printk("in update_state_and_decide- decide_next_state returned %d\n", next_state);
 	if (next_state==-1){
 		return -1;
 	}
@@ -400,7 +410,6 @@ int update_state_and_decide(conn_row_t *match_row_found, conn_row_t *match_row_f
 	set_state_time_wait(next_state, match_row_found, match_row_found_reverse);
 	match_row_found->state = next_state;
 	match_row_found_reverse->state = next_state;
-	printk("in update_state_and_decide just set %d\n", match_row_found->state);
 	return 0; //match_row_found->reason;
 }
 
@@ -424,8 +433,6 @@ int search_conn_table_logic(struct sk_buff *skb, conn_row_t **match_row_found, c
 	}
 	*row_for_check_match_reverse = (conn_row_t){ip_hdr(skb)->daddr, ip_hdr(skb)->saddr, ntohs(tcp_hdr(skb)->dest), ntohs(tcp_hdr(skb)->source), STATE_CLOSED, CLIENT_TO_SERVER, 0, 0, 0, 0};
 	*match_row_found_reverse = find_identical_conn(row_for_check_match_reverse, check_match);
-	printk("in search_conn_table_logic found src ip=%d, dst ip=%d src port=%d, dst port=%d, state=%d\n", (*match_row_found)->src_ip, 
-	(*match_row_found)->dst_ip, (*match_row_found)->src_port, (*match_row_found)->dst_port, (*match_row_found)->state);
 	kfree(row_for_check_match);
 	kfree(row_for_check_match_reverse);
 	return 0;
@@ -445,22 +452,22 @@ int search_conn_table(struct sk_buff *skb){
 }
 
 //same function as search_conn_table but also saves the client_server value in the input pointer
-int search_conn_table_match(struct sk_buff *skb, conn_row_t **match_row_found_pointer){
+int search_conn_table_save(struct sk_buff *skb, client_server_t *save_client_server, state_t *save_state){
 	conn_row_t *match_row_found; //the connection row in table the matches the packets' data
 	conn_row_t *match_row_found_reverse; //the connection row in table that matches the packets' data in the opposite direction
 	int logic_result = search_conn_table_logic(skb, &match_row_found, &match_row_found_reverse);
 	if (logic_result<0){
 		return logic_result;
 	}
-	*match_row_found_pointer = match_row_found;
-	printk("in search_conn_table_match with dst port %d and client_server %d\n", htons(tcp_hdr(skb)->source), 
-		(match_row_found)->client_server);
+	//pass the values of match client server and state (berfore changing it) for decision making related to proxy
+	*save_client_server = match_row_found->client_server;
+	*save_state = match_row_found->state;
 	return update_state_and_decide(match_row_found, match_row_found_reverse, skb);
 }
 
 // when ack=1 there should be a connection row relevant to the table- decide drop/forward based on the match from the table
-unsigned int handle_packet_ack_1(struct sk_buff *skb, conn_row_t **match_row_found_pointer){
-	int reason = search_conn_table_match(skb, match_row_found_pointer);
+unsigned int handle_packet_ack_1(struct sk_buff *skb, client_server_t *save_client_server, state_t *save_state){
+	int reason = search_conn_table_save(skb, save_client_server, save_state);
 	printk(KERN_INFO "in handle_packet_ack_1\n");
 	if (reason==-2){ //error check
 		return NF_DROP;
@@ -472,8 +479,6 @@ unsigned int handle_packet_ack_1(struct sk_buff *skb, conn_row_t **match_row_fou
 	if (log(NULL, skb, reason)==-2){ //error check
 		return NF_DROP;
 	};
-	printk("in handle_packet_ack_1 with dst port %d and client_server %d\n", htons(tcp_hdr(skb)->source), 
-		(*match_row_found_pointer)->client_server);
 	return NF_ACCEPT;
 }
 
@@ -526,26 +531,29 @@ unsigned int handle_packet_ack_0(struct sk_buff *skb){
 //decide forward/drop the packet based on the connection table and log
 unsigned int handle_tcp_by_conn(struct sk_buff *skb){
 	unsigned int verdict;
-	conn_row_t *match_row_found;
+	client_server_t client_server;
+	state_t state;
+	int first_packet = 0;
 	printk(KERN_INFO "in handle_tcp_by_conn");
 	//printk("in handle_tcp_by_conn- received a packet with src ip= %d\n", (ip_hdr(skb)->saddr));
 	// when ack=1 there should be a connection row relevant to the table- decide drop/forward based on the match from the table
 	if (tcp_hdr(skb)->ack){
-		verdict = handle_packet_ack_1(skb, &match_row_found);
-		printk(KERN_INFO "in handle_tcp_by_conn with verdict==NF_ACCEPT=%d, match_row_found->state=%d\n", verdict==NF_ACCEPT,
-		match_row_found->state);
-		printk("in handle_tcp_by_conn with dst port %d and client_server %d\n", htons(tcp_hdr(skb)->source), 
-		match_row_found->client_server);
-		if ((verdict==NF_ACCEPT)&&
-		(((match_row_found->state)==STATE_ESTABLISHED)||((match_row_found->state)==STATE_ESTABLISHED_TO_CLOSE_WAIT))){
-			proxy_pre(skb, match_row_found->client_server);
-		}
+		verdict = handle_packet_ack_1(skb, &client_server, &state);
 	}
 	// when ack=0 this packet should be the first packet sent in this connection
 	// decide and add add it to the table in case of accept verdict
 	else{
 		verdict = handle_packet_ack_0(skb);
+		client_server = CLIENT_TO_SERVER;
 		printk("after handle_packet_ack_0 and verdict==NF_ACCEPT=%d\n", verdict==NF_ACCEPT);
+		first_packet = 1;
+	}
+	printk(KERN_INFO "in handle_tcp_by_conn and verdict==NF_ACCEPT%d\n", verdict==NF_ACCEPT);
+	if ((verdict==NF_ACCEPT)){
+		printk(KERN_INFO "calling proxy_pre with first_packet=%d\n", first_packet);
+		if (proxy_pre(skb, client_server)==-1){ //error check
+			return NF_DROP;
+		}
 	}
 	return verdict;
 }
@@ -555,8 +563,7 @@ The hook function of the firewall:
 */
 unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct nf_hook_state *state){
 	int search_result;
-	printk(KERN_INFO "in hookfn_by_rule_table src IP= %pI4, dst IP=%pI4 src port=%d, dest port=%d\n", &(ip_hdr(skb)->saddr),
-	&(ip_hdr(skb)->daddr), ntohs(tcp_hdr(skb)->source), ntohs(tcp_hdr(skb)->dest));
+	int return_result;
 	if (skb==NULL){
 		log(NULL, skb, REASON_ILLEGAL_VALUE); //in case of error still return error drop
 		return NF_DROP;
@@ -566,7 +573,12 @@ unsigned int hookfn_by_rule_table(void *priv, struct sk_buff *skb, const struct 
 		return NF_DROP;
 	}
 	if (is_tcp_packet(skb)){
-		return handle_tcp_by_conn(skb);
+		printk(KERN_INFO "in hookfn_by_rule_table tcp src IP= %pI4, dst IP=%pI4 src port=%d, dest port=%d, syn=%d, ack=%d\n", &(ip_hdr(skb)->saddr),
+		&(ip_hdr(skb)->daddr), ntohs(tcp_hdr(skb)->source), ntohs(tcp_hdr(skb)->dest), tcp_hdr(skb)->syn, tcp_hdr(skb)->ack);
+		return_result = handle_tcp_by_conn(skb);
+		printk(KERN_INFO "a tcp packet is leaving- src IP %pI4 dst IP %pI4 src port %d dst port %d and accept=%d, drop=%d\n", &(ip_hdr(skb)->saddr), &(ip_hdr(skb)->daddr), 
+        ntohs(tcp_hdr(skb)->source), ntohs(tcp_hdr(skb)->dest),return_result==NF_ACCEPT, return_result==NF_DROP);
+		return return_result;
 	}
 	return NF_ACCEPT;
 	if (*rule_table_size==0){
