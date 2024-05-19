@@ -18,7 +18,7 @@ def load():
         print(e)
         return False
 
-def get_dst_ip(src_port, src_ip):
+def get_dst_ip(src_ip, src_port):
     # used for client to server packets
     # return the destination IP of the connection with src_port, src_ip
     try:
@@ -26,8 +26,8 @@ def get_dst_ip(src_port, src_ip):
             validation_bit = conn_show_file.read(1)[0]
             while validation_bit==1:
                 conn = conn_show_file.read(ROW_OUTPUT_SIZE-1)
-                if (src_port==reverse_parse_fields.ip(conn[:4]) and src_port==reverse_parse_fields.port(conn[8:10]) and reverse_parse_fields.client_server([13])==0 and 
-                    reverse_parse_fields.port(conn[15:17])=="any"):
+                if (src_ip==reverse_parse_fields.ip(conn[:4]) and src_port==reverse_parse_fields.port(conn[8:10]) and 
+                reverse_parse_fields.client_server([13])==0 and reverse_parse_fields.port(conn[15:17])=="any"):
                     #reverse_parse_fields.parse_port([15:17])==any means no port is set yet
                     return reverse_parse_fields.ip(conn[4:8]), reverse_parse_fields.port(conn[10:12])
                 validation_bit = conn_show_file.read(1)[0]
@@ -36,7 +36,56 @@ def get_dst_ip(src_port, src_ip):
         print(e)
         return False
 
-def set_proxy_port_http(src_port, src_ip, dst_port, dst_ip, proxy_port):
-    with open(CONN_FILEPATH, "wb") as conn_set_file:
-        conn_set_file.write("".join(parse_fields.ip(src_ip), parse_fields.ip(dst_ip), parse_fields.port_code(src_port), 
-        parse_fields.port_code(dst_port), parse_fields.port_code(proxy_port)))
+def get_proxy_port_http(src_ip, src_port):
+    # used for client to server packets
+    # return the destination IP of the connection with src_port, src_ip
+    try:
+        with open(CONN_FILEPATH, "rb") as conn_show_file:
+            validation_bit = conn_show_file.read(1)[0]
+            while validation_bit==1:
+                conn = conn_show_file.read(ROW_OUTPUT_SIZE-1)
+                if (src_ip==reverse_parse_fields.ip(conn[:4]) and src_port==reverse_parse_fields.port(conn[8:10]) and 
+                    dst_ip==reverse_parse_fields.ip(conn[4:8]) and src_port==reverse_parse_fields.port(conn[10:12])):
+                    #reverse_parse_fields.parse_port([15:17])==any means no port is set yet
+                    return reverse_parse_fields.port(conn[14:16])
+                validation_bit = conn_show_file.read(1)[0]
+        return False
+    except Exception as e:
+        print(e)
+        return False
+
+def get_proxy_port_http(src_ip, src_port):
+    # used for client to server packets
+    # return the destination IP of the connection with src_port, src_ip
+    try:
+        with open(CONN_FILEPATH, "rb") as conn_show_file:
+            validation_bit = conn_show_file.read(1)[0]
+            while validation_bit==1:
+                conn = conn_show_file.read(ROW_OUTPUT_SIZE-1)
+                if (src_ip==reverse_parse_fields.ip(conn[:4]) and src_port==reverse_parse_fields.port(conn[8:10]) and 
+                    dst_ip==reverse_parse_fields.ip(conn[4:8]) and src_port==reverse_parse_fields.port(conn[10:12])):
+                    #reverse_parse_fields.parse_port([15:17])==any means no port is set yet
+                    return reverse_parse_fields.port(conn[17:19])
+                validation_bit = conn_show_file.read(1)[0]
+        return False
+    except Exception as e:
+        print(e)
+        return False
+
+def set_proxy_port_http(src_ip, dst_ip, src_port, dst_port, proxy_port):
+    try:
+        with open(CONN_FILEPATH, "wb") as conn_set_file:
+            conn_set_file.write(b"".join(parse_fields.ip(src_ip), parse_fields.ip(dst_ip), parse_fields.port_code(src_port), 
+            parse_fields.port_code(dst_port), parse_fields.port_code(proxy_port), b"0"))
+    except Exception as e:
+        print(e)
+        return False
+
+def set_proxy_port_ftp(src_ip, dst_ip, src_port, dst_port, proxy_port):
+    try:
+        with open(CONN_FILEPATH, "wb") as conn_set_file:
+            conn_set_file.write(b"".join(parse_fields.ip(src_ip), parse_fields.ip(dst_ip), parse_fields.port_code(src_port), 
+            parse_fields.port_code(dst_port), parse_fields.port_code(proxy_port), b"1"))
+    except Exception as e:
+        print(e)
+        return False

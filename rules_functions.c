@@ -22,8 +22,8 @@ static struct device* rules = NULL;
 static rule_t *rule_table;
 static int *rule_table_size;
 
-const char *input_buf_pointer;
-int input_buf_index;
+const char *rules_input_buf_pointer;
+int rules_input_buf_index;
 
 static char *not_parsed_input = NULL;
 int not_parsed_input_len = 0;
@@ -69,16 +69,16 @@ Parse rule values from written to the driver:
 
 static int parse_rule_name(rule_t *curr_rule){
 	char *dst = curr_rule->rule_name;
-	if ((input_buf_pointer+input_buf_index)[20]!='\0'){
+	if ((rules_input_buf_pointer+rules_input_buf_index)[20]!='\0'){
 		return -1; //error code
 	}
-    memcpy(dst, input_buf_pointer+input_buf_index, 21*sizeof(char));
+    memcpy(dst, rules_input_buf_pointer+rules_input_buf_index, 21*sizeof(char));
 	return 21*sizeof(char); //return the length of the parsed element 
 }
 
 static int parse_direction(rule_t *curr_rule){
 	direction_t *dst = &(curr_rule->direction);
-	*dst = (input_buf_pointer+input_buf_index)[0];
+	*dst = (rules_input_buf_pointer+rules_input_buf_index)[0];
 	if ((0<=*dst)&&(*dst<=3)){
 		return 1; //return the length of the parsed element 
 	}
@@ -86,7 +86,7 @@ static int parse_direction(rule_t *curr_rule){
 }
 
 static int parse_ip(__be32 *dst){
-	memcpy(dst, input_buf_pointer+input_buf_index, sizeof(__be32));
+	memcpy(dst, rules_input_buf_pointer+rules_input_buf_index, sizeof(__be32));
 	return sizeof(__be32); //return the length of the parsed element
 }
 
@@ -107,7 +107,7 @@ static int parse_dst_prefix_mask(rule_t *curr_rule){
 }
 
 static int parse_prefix_size(__u8 *dst){
-	memcpy(dst, input_buf_pointer+input_buf_index, sizeof(__u8));
+	memcpy(dst, rules_input_buf_pointer+rules_input_buf_index, sizeof(__u8));
 	*dst = *dst+1;
 	return sizeof(__u8); //return the length of the parsed element
 }
@@ -122,7 +122,7 @@ static int parse_dst_prefix_size(rule_t *curr_rule){
 
 static int parse_protocol(rule_t *curr_rule){
 	__u8 *dst = &(curr_rule->protocol);
-	switch ((input_buf_pointer+input_buf_index)[0])
+	switch ((rules_input_buf_pointer+rules_input_buf_index)[0])
 	{
 	case '0':
 		*dst = 255;
@@ -146,7 +146,7 @@ static int parse_protocol(rule_t *curr_rule){
 }
 
 static int parse_port(__be16 *dst){
-	memcpy(dst, (input_buf_pointer+input_buf_index), sizeof(__le16));
+	memcpy(dst, (rules_input_buf_pointer+rules_input_buf_index), sizeof(__le16));
 	return sizeof(__le16); //return the length of the parsed element
 }
 
@@ -160,7 +160,7 @@ static int parse_dst_port(rule_t *curr_rule){
 
 static int parse_ack(rule_t *curr_rule){
 	ack_t *dst = &(curr_rule->ack);
-	*dst = (input_buf_pointer+input_buf_index)[0]-'0';
+	*dst = (rules_input_buf_pointer+rules_input_buf_index)[0]-'0';
 	if ((1<=*dst)&&(*dst<=3)){
 		return 1; //return the length of the parsed element 
 	}
@@ -169,10 +169,10 @@ static int parse_ack(rule_t *curr_rule){
 
 static int parse_action(rule_t *curr_rule){
 	__u8 *dst = &(curr_rule->action);
-	if ((input_buf_pointer+input_buf_index)[0]=='0'){
+	if ((rules_input_buf_pointer+rules_input_buf_index)[0]=='0'){
 		*dst=NF_DROP;
 	}
-	else if ((input_buf_pointer+input_buf_index)[0]=='1')
+	else if ((rules_input_buf_pointer+rules_input_buf_index)[0]=='1')
 	{
 		*dst=NF_ACCEPT;
 	}
@@ -193,7 +193,7 @@ int parse_rule(ParseFieldFuncPointer funcs[], rule_t *curr_rule){
 			return -1;
 		}
 		else{
-			input_buf_index += element_size+1;
+			rules_input_buf_index += element_size+1;
 		}
 	}
 	return 0;
@@ -204,9 +204,9 @@ int parse_rule(ParseFieldFuncPointer funcs[], rule_t *curr_rule){
 ssize_t modify(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
 	int rule_table_index = 0;
-	input_buf_index = 0;
-	input_buf_pointer = buf;
-	while (input_buf_index<count)
+	rules_input_buf_index = 0;
+	rules_input_buf_pointer = buf;
+	while (rules_input_buf_index<count)
 	{
 		rule_t *curr_rule = rule_table+rule_table_index;
 		ParseFieldFuncPointer parse_funcs[] = {parse_rule_name, parse_direction, parse_src_ip, parse_src_prefix_mask, \

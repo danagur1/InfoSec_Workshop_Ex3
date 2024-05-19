@@ -30,7 +30,6 @@ def direction(direction_code):
 def protocol(protocol_code):
     if type(protocol_code)==bytes:
         protocol_code = int(protocol_code.decode('utf-8'))
-    print("in reverse parse fields protocol got "+str(protocol_code))
     if protocol_code == 1:
         return "ICMP"
     elif protocol_code == 2:
@@ -59,7 +58,6 @@ def ack(ack_code):
 def action(action_code):
     if type(action_code)==bytes:
         action_code = int(action_code.decode('utf-8'))
-    print("in reverse parse fields action got "+str(action_code))
     if action_code==1:
         return "accept"
     elif action_code==0:

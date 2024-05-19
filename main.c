@@ -9,6 +9,7 @@
 #include "conn_show_functions.h"
 #include "manage_log_list.h"
 #include "manage_conn_list.h"
+#include "proxy.h"
 #include "fw.h"
 
 MODULE_LICENSE("GPL");
@@ -34,7 +35,10 @@ static int __init my_module_init_function(void) {
 	if (conn_show_create_dev(devices_class)<0){
 		return -1;
 	}
-	if (register_hook(first_rule_table, &first_rule_table_size)<0){
+	if (register_hook_pre(first_rule_table, &first_rule_table_size)<0){
+		return -1;
+	}
+	if (register_hook_lout()<0){
 		return -1;
 	}
 	return 0; //all the functions 
@@ -43,7 +47,8 @@ static int __init my_module_init_function(void) {
 static void __exit my_module_exit_function(void) {
 	kfree(first_rule_table);
 	rules_remove_dev();
-	unregister_hook();
+	unregister_hook_pre();
+	unregister_hook_lout();
 	log_clear_remove_dev();
 	log_show_remove_dev();
 	conn_show_remove_dev();

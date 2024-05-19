@@ -10,7 +10,6 @@ def load():
             validation_bit = log_show_file.read(1)[0]
             while validation_bit==1:
                 log = log_show_file.read(23)
-                print("got log "+str(log[4]))
                 print(reverse_parse_fields.timestamp(log[:4]), reverse_parse_fields.ip(log[6:10]), reverse_parse_fields.ip(log[10:14]), 
                 reverse_parse_fields.port(log[14:16]), reverse_parse_fields.port(log[16:18]), reverse_parse_fields.protocol(log[4]), 
                 reverse_parse_fields.action(log[5]), reverse_parse_fields.reason(log[18]), reverse_parse_fields.count(log[19:23]), 
