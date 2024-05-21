@@ -42,7 +42,7 @@ def protocol(protocol_code):
         return "OTHER"
 
 def port(port_code):
-    port = str(struct.unpack(">H", port_code)[0])
+    port = str(struct.unpack("<H", port_code)[0])
     if port=="0":
         return "any" 
     return port
@@ -76,7 +76,7 @@ def state(byte_state):
 
 def client_server(byte_client_server):
     #0=client to server, 1=server to client
-    return struct.unpack("<B", byte_state)[0]
+    return str(struct.unpack("<B", byte_client_server)[0])
 
 def timestamp(bytes_timestamp):
     timestamp = struct.unpack("<I", bytes_timestamp)[0]

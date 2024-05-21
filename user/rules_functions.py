@@ -51,7 +51,6 @@ def load(rules_file_path):
                     rule = rules_file.readline()
         return True
     except Exception as e:
-        print(e)
         return False
 
 
@@ -66,5 +65,4 @@ def show():
                 print(write_rule(rule))
         return True
     except Exception as e:
-        print(e)
         return False

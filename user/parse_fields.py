@@ -71,7 +71,7 @@ def port_code(port):
         port = 1023
     elif port == "any":
         port =0
-    elif not (is_int(port) and 1 <= int(port) and int(port) <= 1023):
+    elif not (is_int(port) and 1 <= int(port) and int(port) <= 65535):
         return False
     return struct.pack(">H", int(port))
 
