@@ -1,10 +1,10 @@
 # Linux kernel module
 This project implements a Linux kernel module that acts as a stateful firewall.
 Features:
-•	Stateful Packet Inspection: Tracks TCP connection states to ensure correct communication
-•	Data Stream Inspection: Blocks HTTP responses of type "text/csv" or "application/zip" 
+•	Stateful Packet Inspection: Tracks TCP connection states to ensure correct communication  
+•	Data Stream Inspection: Blocks HTTP responses of type "text/csv" or "application/zip"  
 •	Intrusion Prevention System (IPS): Protects against CVE-2023-26876 SQL injection vulnerability  
-•	Data Leak Prevention (DLP): Blocks outgoing C code over SMTP and HTTP 
+•	Data Leak Prevention (DLP): Blocks outgoing C code over SMTP and HTTP  
 ## Installation and Running
 ### Kernel-side
 ```Shell
