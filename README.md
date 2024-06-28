@@ -1,33 +1,64 @@
 # Linux kernel module
-Kernel level firewall with statful packet inspection  
-•	Tracking the state of TCP connections and enforce its correctness  
-•	Inspection the DATA as a stream- blocking HTTP response of type “text/csv” or “application/zip”  
-•	IPS- protection against CVE-2023-26876 SQL injection vulnerability  
-•	Data Leak Prevention- block outgoing C code over SMTP and HTTP  
-## kernel-side
-### compiling and running
+This project implements a Linux kernel module that acts as a stateful firewall.
+Features:
+•	Stateful Packet Inspection: Tracks TCP connection states to ensure correct communication
+•	Data Stream Inspection: Blocks HTTP responses of type "text/csv" or "application/zip" 
+•	Intrusion Prevention System (IPS): Protects against CVE-2023-26876 SQL injection vulnerability  
+•	Data Leak Prevention (DLP): Blocks outgoing C code over SMTP and HTTP 
+## Installation and Running
+### Kernel-side
+```Shell
 make; insmod firewall.ko
-### files
-including 6 .c files and 5 .h files
-1. main.c: contain the basic init and exit funciton of the kernel module
-2. hooking_functions.c: contain the registration, unregistration and hook function
-3. log_show_functions.c: contain all the functions related to the driver responsible for showing log
-4. log_clear_functions.c: contain all the functions related to the driver responsible for clearing log
-5. rules_functions.c: contain all the functions related to the driver responsible for loading and showing rules
-6. manage_log_list.c: contain the log list data structure and the functions related to it
-7. fw.h: include useful structures and constants
-8. conn_show_functions.c: contain all the functions related to the driver responsible for showing the connection table
-9. proxy.c: contain the proxy stuff that pass packets to user-level and from user-level
-## user-side
-### running
+```
+### User-side
+```Shell
 python3 main.py  
 python3 http_proxy.py  
 python3 ftp_proxy.py
-### files
-1. main.py: main program that check the arguments to the program and call the relevant function
-2. log_functions.py: contain all the functions related to show and clear the log including parsing and using drivers
-3. rules_functions.py: contain all the functions related to the load and show of the rule table and using drivers
-4. conn_function.py: contain all the functions related to the connection table including parsing and using drivers
-5. parse_fields.py and reverse_parse_fields.py: contain parsing function used by functions related to communication with kernel-side
-6. dlp.py: contain functions related to Data Leak Prevention
-7. http_proxy and ftp_proxy.py: servers that listen to packets sent by the kernel-level, decides their verdict, then if accept send them to destination
+```
+### Command-line Arguments
+•	`show_rules`: Display the current firewall rules
+•	`load_rules <file>`: Load rules from a specified file
+•	`show_log`: Display the current log
+•	`clear_log`: Clear the current log
+•	`show_conns`: Display the current connection table
+### Example Rule File
+The firewall rules can be configured by providing an input file. An example file is `rules example.txt`:
+```plaintext
+loopback any 127.0.0.1/8 127.0.0.1/8 any any any any accept
+GW_attack any any 10.0.2.15/32 any any any any drop
+spoof1 in 10.0.1.1/24 any any any any any drop
+spoof2 out 10.0.2.2/24 any any any any any drop
+telnet1 out 10.0.1.1/24 any TCP >1023 23 any accept
+telnet2 in any 10.0.1.1/24 TCP 23 >1023 yes accept
+default any any any any any any any drop
+```
+## Projectt Files
+### Kernel-side
+•	main.c: Contain the basic init and exit funciton of the kernel module
+•	hooking_functions.c: Contain the registration, unregistration and hook function
+•	log_show_functions.c: Contain all the functions related to the driver responsible for showing log
+•	log_clear_functions.c: Contain all the functions related to the driver responsible for clearing log
+•	rules_functions.c: Contain all the functions related to the driver responsible for loading and showing rules
+•	manage_log_list.c: Contain the log list data structure and the functions related to it
+•	fw.h: Include useful structures and constants
+•	conn_show_functions.c: Contain all the functions related to the driver responsible for showing the connection table
+•	proxy.c: Contain the proxy stuff that pass packets to user-level and from user-level
+### User-side
+•	main.py: Main program that check the arguments to the program and call the relevant function
+•	log_functions.py: Contain all the functions related to show and clear the log including parsing and using drivers
+•	rules_functions.py: Contain all the functions related to the load and show of the rule table and using drivers
+•	conn_function.py: Contain all the functions related to the connection table including parsing and using drivers
+•	parse_fields.py and reverse_parse_fields.py: Contain parsing function used by functions related to communication with kernel-side
+•	dlp.py: Contain functions related to Data Leak Prevention
+•	http_proxy and ftp_proxy.py: Servers that listen to packets sent by the kernel-level, decides their verdict, then if accept send them to destination
+## Usage Example
+```Shell
+make  
+sudo insmod firewall.ko  
+python3 main.py load_rules "rules example.txt"
+python3 http_proxy.py
+python3 main.py show_rules
+python3 main.py show_conns
+python3 main.py show_log
+```
