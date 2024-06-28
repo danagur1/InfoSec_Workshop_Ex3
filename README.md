@@ -1,9 +1,9 @@
 # Linux kernel module
-Kernel level firewall with statful packet inspection.
-•	Tracking the state of TCP connections and enforce its correctness
-•	Inspection the DATA as a stream- blocking HTTP response of type “text/csv” or “application/zip”
-•	IPS- protection against CVE-2023-26876 SQL injection vulnerability
-•	Data Leak Prevention- block outgoing C code over SMTP and HTTP
+Kernel level firewall with statful packet inspection  
+•	Tracking the state of TCP connections and enforce its correctness  
+•	Inspection the DATA as a stream- blocking HTTP response of type “text/csv” or “application/zip”  
+•	IPS- protection against CVE-2023-26876 SQL injection vulnerability  
+•	Data Leak Prevention- block outgoing C code over SMTP and HTTP  
 ## kernel-side
 ### compiling and running
 make; insmod firewall.ko
@@ -20,8 +20,8 @@ including 6 .c files and 5 .h files
 9. proxy.c: contain the proxy stuff that pass packets to user-level and from user-level
 ## user-side
 ### running
-python3 main.py;
-python3 http_proxy.py;
+python3 main.py  
+python3 http_proxy.py  
 python3 ftp_proxy.py
 ### files
 1. main.py: main program that check the arguments to the program and call the relevant function
