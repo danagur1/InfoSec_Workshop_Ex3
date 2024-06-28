@@ -1,4 +1,4 @@
-# Linux kernel module
+# Linux Firewall Kernel Module
 This project implements a Linux kernel module that acts as a stateful firewall.
 Features:  
 •	Stateful Packet Inspection: Tracks TCP connection states to ensure correct communication  
